@@ -53,18 +53,18 @@ export class CargoService {
       let clausula = this.filtersService.fabricarClausula(filtros);
       let limitRows = parseInt(cantidad_max) || 999;
 
-      const canalesDistribucion = await this.prisma.cargo.findMany({
+      const cargos = await this.prisma.cargo.findMany({
         where: clausula,
         take: limitRows,
         // select: this.customOut,
       });
 
-      if (canalesDistribucion) {
+      if (cargos) {
         this.message.setMessage(
           0,
           'Cargo - Registros encontrados',
         );
-        return { message: this.message, registro: canalesDistribucion };
+        return { message: this.message, registro: cargos };
       } else {
         this.message.setMessage(
           1,
