@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle de Cotización</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            border: 1px solid #333;
+        }
+
+        .header {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-weight: bold;
+            margin-top: 30px;
+            background-color: #d9d9d9;
+            padding: 3px 10px;
+        }
+
+        .car-image {
+            width: 80%;
+            text-align: center;
+            margin: 10px auto;
+        }
+
+        .car-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+
+
+        .footer {
+            margin-top: 10px;
+            font-size: 12px;
+            text-align: justify;
+        }
+
+        .p10 {
+            padding: 10px;
+        }
+
+        .text--black {
+            color: #000;
+        }
+
+        .child {
+            box-sizing: border-box;
+            width: 50%;
+            padding: 10px;
+        }
+
+        .child:first-child {
+            border: 1px solid #333;
+            border-left-width: 0px;
+        }
+
+        .child:nth-child(2) {
+            border: 1px solid #333;
+            border-left-width: 0px;
+            border-right-width: 0px;
+        }
+
+        .child:nth-child(3) {
+            border: 1px solid #333;
+            border-left-width: 0px;
+            border-top-width: 0px;
+        }
+
+        .child:nth-child(4) {
+            border: 1px solid #333;
+            border-left-width: 0px;
+            border-right-width: 0px;
+            border-top-width: 0px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container" style="width: 80%;margin: 0 auto;border: 1px solid #333;">
+
+        <div class="info-table">
+
+            <div class="header p10 text--black" style="color: #000;">
+                Estimado(a) Sr./Sra. {{Nombres}} {{ApellidoPaterno}} {{ApellidoMaterno}}
+            </div>
+
+            <div class="p10 text--black" style="color: #000;">
+                Nos complace saludarle y a la vez informarle que revisaremos la disponibilidad de nuestros vehículos, en
+                breve un asesor de atención al cliente se comunicará con Usted.
+            </div>
+
+            <div class="section-title">Detalle de la Cotización:</div>
+
+            <div class="p10 text--black" style="color: #000;">
+                <div>Número de Cotización: <strong>{{IdReserva}}</strong></div>
+                <div>Nombre del Cliente: <strong>{{Nombres}} {{ApellidoPaterno}} {{ApellidoMaterno}}</strong></div>
+                <div>Celular: <strong>{{Celular}}</strong></div>
+                <div>Fecha de Nacimiento: <strong>{{FechaNacimiento}}</strong></div>
+            </div>
+
+            <div class="p10" style="border-top: 1px solid #333;">
+                <div class="text--black" style="color: #000;"><strong>Vehículo:</strong></div>
+                <div class="text--black" style="color: #000;">Descripción: {{carModel}}</div>
+            </div>
+
+            <div class="car-image" style="width: 80%;text-align: center;margin: 10px auto;">
+                <img style="max-width: 100%;height: auto;border-radius: 10px;" src={{UrlImagen}} alt={{carModel}}>
+            </div>
+
+            <div>
+                <table width="100%" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td style="width: 50%; padding: 10px; border: 1px solid #333; border-left-width: 0;">
+                            <strong class="text--black" style="color: #000;">📅Fecha/Hora de Entrega:</strong><br>
+                            {{FechaEntrega}}
+                        </td>
+                        <td
+                            style="width: 50%; padding: 10px; border: 1px solid #333; border-left-width: 0; border-right-width: 0;">
+                            <strong class="text--black" style="color: #000;">📌Lugar de Entrega:</strong><br>
+                            {{localesEntrega}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="width: 50%; padding: 10px; border: 1px solid #333; border-left-width: 0; border-top-width: 0;">
+                            <strong class="text--black" style="color: #000;">📅Fecha/Hora de Devolución:</strong><br>
+                            {{FechaDevolucion}}
+                        </td>
+                        <td
+                            style="width: 50%; padding: 10px; border: 1px solid #333; border-left-width: 0; border-right-width: 0; border-top-width: 0;">
+                            <strong class="text--black" style="color: #000;">📌Lugar de Devolución:</strong><br>
+                            {{localesDevolucion}}
+                        </td>
+                    </tr>
+                </table>
+
+
+            </div>
+
+            <div class="footer p10 text--black" style="color: #000;">
+                Si necesita realizar alguna modificación o consulta adicional, no dude en ponerse en contacto con
+                nosotros a través de reservas@northpiurarentacar.com o llamando al 986 991 760.<br><br>
+                Estamos a su disposición para asistirle y asegurarnos de que su experiencia con nosotros sea la
+                mejor.<br><br>
+                ¡Gracias por cotizar con {{OrgVentas}}!
+            </div>
+
+        </div>
+    </div>
+</body>
+
+</html>
