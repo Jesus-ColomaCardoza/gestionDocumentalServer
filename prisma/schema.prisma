@@ -171,7 +171,7 @@ model TipoDocumento {
   Activo          Boolean
   CreadoEl        DateTime    @default(now()) @db.Timestamp(6)
   CreadoPor       String?     @db.VarChar(50)
-  ModificadoEl    DateTime    @default(now()) @db.Timestamp(6)
+  ModificadoEl    DateTime?   @db.Timestamp(6)
   ModificadoPor   String?     @db.VarChar(50)
   Documento       Documento[]
 }

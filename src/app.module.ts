@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import configuration from 'config/configuration';
 import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { TipoDocumentoModule } from './tipo-documento/tipo-documento.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
     }),
     CargoModule,
     AuthModule,
+    TipoDocumentoModule,
   ],
   controllers: [AppController],
   providers: [AppService],
