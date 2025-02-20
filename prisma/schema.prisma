@@ -13,7 +13,7 @@ model Area {
   Activo                                    Boolean?
   CreadoEl                                  DateTime     @default(now()) @db.Timestamp(6)
   CreadoPor                                 String?      @db.VarChar(50)
-  ModificadoEl                              DateTime     @default(now()) @db.Timestamp(6)
+  ModificadoEl                              DateTime?    @db.Timestamp(6)
   ModificadoPor                             String?      @db.VarChar(50)
   Movimiento_Movimiento_IdAreaDestinoToArea Movimiento[] @relation("Movimiento_IdAreaDestinoToArea")
   Movimiento_Movimiento_IdAreaOrigenToArea  Movimiento[] @relation("Movimiento_IdAreaOrigenToArea")
@@ -39,7 +39,7 @@ model Carpeta {
   Activo         Boolean
   CreadoEl       DateTime    @default(now()) @db.Timestamp(6)
   CreadoPor      String?     @db.VarChar(50)
-  ModificadoEl   DateTime    @default(now()) @db.Timestamp(6)
+  ModificadoEl   DateTime?   @db.Timestamp(6)
   ModificadoPor  String?     @db.VarChar(50)
   Carpeta        Carpeta?    @relation("CarpetaToCarpeta", fields: [IdCarpetaPadre], references: [IdCarpeta], onDelete: NoAction, onUpdate: NoAction, map: "fk_carpeta_padre")
   other_Carpeta  Carpeta[]   @relation("CarpetaToCarpeta")
@@ -48,17 +48,17 @@ model Carpeta {
 }
 
 model Compartido {
-  IdCompartido           Int      @id(map: "compartido_pkey") @default(autoincrement())
-  TipoElementoCompartido String?  @db.VarChar(50)
+  IdCompartido           Int       @id(map: "compartido_pkey") @default(autoincrement())
+  TipoElementoCompartido String?   @db.VarChar(50)
   IdElementoCompartido   Int
   IdUsuarioCompartido    Int
-  Permisos               String?  @db.VarChar(50)
+  Permisos               String?   @db.VarChar(50)
   Activo                 Boolean
-  CreadoEl               DateTime @default(now()) @db.Timestamp(6)
-  CreadoPor              String?  @db.VarChar(50)
-  ModificadoEl           DateTime @default(now()) @db.Timestamp(6)
-  ModificadoPor          String?  @db.VarChar(50)
-  Usuario                Usuario  @relation(fields: [IdUsuarioCompartido], references: [IdUsuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_compartido_usuario")
+  CreadoEl               DateTime  @default(now()) @db.Timestamp(6)
+  CreadoPor              String?   @db.VarChar(50)
+  ModificadoEl           DateTime? @db.Timestamp(6)
+  ModificadoPor          String?   @db.VarChar(50)
+  Usuario                Usuario   @relation(fields: [IdUsuarioCompartido], references: [IdUsuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_compartido_usuario")
 }
 
 model Documento {
@@ -78,7 +78,7 @@ model Documento {
   Activo           Boolean?
   CreadoEl         DateTime        @default(now()) @db.Timestamp(6)
   CreadoPor        String?         @db.VarChar(50)
-  ModificadoEl     DateTime        @default(now()) @db.Timestamp(6)
+  ModificadoEl     DateTime?       @db.Timestamp(6)
   ModificadoPor    String?         @db.VarChar(50)
   Carpeta          Carpeta         @relation(fields: [IdCarpeta], references: [IdCarpeta], onDelete: NoAction, onUpdate: NoAction, map: "documento_idcarpeta_fkey")
   TipoDocumento    TipoDocumento   @relation(fields: [IdTipoDocumento], references: [IdTipoDocumento], onDelete: NoAction, onUpdate: NoAction, map: "documento_idtipodocumento_fkey")
@@ -88,27 +88,27 @@ model Documento {
 }
 
 model Empresa {
-  IdEmpresa         Int      @id(map: "empresa_pkey") @default(autoincrement())
-  Descripcion       String?  @db.VarChar(100)
-  NroIdentificacion String?  @db.VarChar(50)
-  Email             String?  @db.VarChar(100)
-  Celular           String?  @db.VarChar(15)
+  IdEmpresa         Int       @id(map: "empresa_pkey") @default(autoincrement())
+  Descripcion       String?   @db.VarChar(100)
+  NroIdentificacion String?   @db.VarChar(50)
+  Email             String?   @db.VarChar(100)
+  Celular           String?   @db.VarChar(15)
   Logo              Bytes?
   Activo            Boolean
-  CreadoEl          DateTime @default(now()) @db.Timestamp(6)
-  CreadoPor         String?  @db.VarChar(50)
-  ModificadoEl      DateTime @default(now()) @db.Timestamp(6)
-  ModificadoPor     String?  @db.VarChar(50)
+  CreadoEl          DateTime  @default(now()) @db.Timestamp(6)
+  CreadoPor         String?   @db.VarChar(50)
+  ModificadoEl      DateTime? @db.Timestamp(6)
+  ModificadoPor     String?   @db.VarChar(50)
 }
 
 model EsquemaEstado {
-  IdEsquemaEstado Int      @id(map: "esquemaestado_pkey") @default(autoincrement())
-  Descripcion     String?  @db.VarChar(100)
+  IdEsquemaEstado Int       @id(map: "esquemaestado_pkey") @default(autoincrement())
+  Descripcion     String?   @db.VarChar(100)
   Activo          Boolean
-  CreadoEl        DateTime @default(now()) @db.Timestamp(6)
-  CreadoPor       String?  @db.VarChar(50)
-  ModificadoEl    DateTime @default(now()) @db.Timestamp(6)
-  ModificadoPor   String?  @db.VarChar(50)
+  CreadoEl        DateTime  @default(now()) @db.Timestamp(6)
+  CreadoPor       String?   @db.VarChar(50)
+  ModificadoEl    DateTime? @db.Timestamp(6)
+  ModificadoPor   String?   @db.VarChar(50)
   Estado          Estado[]
 }
 
@@ -119,26 +119,26 @@ model Estado {
   Activo                         Boolean
   CreadoEl                       DateTime      @default(now()) @db.Timestamp(6)
   CreadoPor                      String?       @db.VarChar(50)
-  ModificadoEl                   DateTime      @default(now()) @db.Timestamp(6)
+  ModificadoEl                   DateTime?     @db.Timestamp(6)
   ModificadoPor                  String?       @db.VarChar(50)
   EsquemaEstado                  EsquemaEstado @relation(fields: [IdEsquemaEstado], references: [IdEsquemaEstado], onDelete: NoAction, onUpdate: NoAction, map: "fk_estado_esquema")
   Tramite_Tramite_EstadoToEstado Tramite[]     @relation("Tramite_EstadoToEstado")
 }
 
 model Movimiento {
-  IdMovimiento                        Int      @id(map: "movimiento_pkey") @default(autoincrement())
+  IdMovimiento                        Int       @id(map: "movimiento_pkey") @default(autoincrement())
   IdTramite                           Int
   IdAreaOrigen                        Int
   IdAreaDestino                       Int
-  FechaMovimiento                     DateTime @default(now()) @db.Timestamp(6)
+  FechaMovimiento                     DateTime  @default(now()) @db.Timestamp(6)
   Activo                              Boolean
-  CreadoEl                            DateTime @default(now()) @db.Timestamp(6)
-  CreadoPor                           String?  @db.VarChar(50)
-  ModificadoEl                        DateTime @default(now()) @db.Timestamp(6)
-  ModificadoPor                       String?  @db.VarChar(50)
-  Area_Movimiento_IdAreaDestinoToArea Area     @relation("Movimiento_IdAreaDestinoToArea", fields: [IdAreaDestino], references: [IdArea], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimiento_destino")
-  Area_Movimiento_IdAreaOrigenToArea  Area     @relation("Movimiento_IdAreaOrigenToArea", fields: [IdAreaOrigen], references: [IdArea], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimiento_origen")
-  Tramite                             Tramite  @relation(fields: [IdTramite], references: [IdTramite], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimiento_tramite")
+  CreadoEl                            DateTime  @default(now()) @db.Timestamp(6)
+  CreadoPor                           String?   @db.VarChar(50)
+  ModificadoEl                        DateTime? @db.Timestamp(6)
+  ModificadoPor                       String?   @db.VarChar(50)
+  Area_Movimiento_IdAreaDestinoToArea Area      @relation("Movimiento_IdAreaDestinoToArea", fields: [IdAreaDestino], references: [IdArea], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimiento_destino")
+  Area_Movimiento_IdAreaOrigenToArea  Area      @relation("Movimiento_IdAreaOrigenToArea", fields: [IdAreaOrigen], references: [IdArea], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimiento_origen")
+  Tramite                             Tramite   @relation(fields: [IdTramite], references: [IdTramite], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimiento_tramite")
 }
 
 model RegistroFirma {
@@ -148,7 +148,7 @@ model RegistroFirma {
   Activo          Boolean
   CreadoEl        DateTime  @default(now()) @db.Timestamp(6)
   CreadoPor       String?   @db.VarChar(50)
-  ModificadoEl    DateTime  @default(now()) @db.Timestamp(6)
+  ModificadoEl    DateTime? @db.Timestamp(6)
   ModificadoPor   String?   @db.VarChar(50)
   Documento       Documento @relation(fields: [IdDocumento], references: [IdDocumento], onDelete: NoAction, onUpdate: NoAction, map: "fk_firma_documento")
   Usuario         Usuario   @relation(fields: [IdUsuario], references: [IdUsuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_firma_usuario")
@@ -160,7 +160,7 @@ model Rol {
   Activo        Boolean?
   CreadoEl      DateTime  @default(now()) @db.Timestamp(6)
   CreadoPor     String?   @db.VarChar(50)
-  ModificadoEl  DateTime  @default(now()) @db.Timestamp(6)
+  ModificadoEl  DateTime? @db.Timestamp(6)
   ModificadoPor String?   @db.VarChar(50)
   Usuario       Usuario[]
 }
@@ -182,7 +182,7 @@ model TipoIdentificacion {
   Activo               Boolean?
   CreadoEl             DateTime  @default(now()) @db.Timestamp(6)
   CreadoPor            String?   @db.VarChar(50)
-  ModificadoEl         DateTime  @default(now()) @db.Timestamp(6)
+  ModificadoEl         DateTime? @db.Timestamp(6)
   ModificadoPor        String?   @db.VarChar(50)
   Usuario              Usuario[]
 }
@@ -193,7 +193,7 @@ model TipoTramite {
   Activo        Boolean
   CreadoEl      DateTime  @default(now()) @db.Timestamp(6)
   CreadoPor     String?   @db.VarChar(50)
-  ModificadoEl  DateTime  @default(now()) @db.Timestamp(6)
+  ModificadoEl  DateTime? @db.Timestamp(6)
   ModificadoPor String?   @db.VarChar(50)
   Tramite       Tramite[]
 }
@@ -204,7 +204,7 @@ model TipoUsuario {
   Activo        Boolean?
   CreadoEl      DateTime  @default(now()) @db.Timestamp(6)
   CreadoPor     String?   @db.VarChar(50)
-  ModificadoEl  DateTime  @default(now()) @db.Timestamp(6)
+  ModificadoEl  DateTime? @db.Timestamp(6)
   ModificadoPor String?   @db.VarChar(50)
   Usuario       Usuario[]
 }
@@ -222,7 +222,7 @@ model Tramite {
   Activo                        Boolean
   CreadoEl                      DateTime     @default(now()) @db.Timestamp(6)
   CreadoPor                     String?      @db.VarChar(50)
-  ModificadoEl                  DateTime     @default(now()) @db.Timestamp(6)
+  ModificadoEl                  DateTime?    @db.Timestamp(6)
   ModificadoPor                 String?      @db.VarChar(50)
   Documento                     Documento[]
   Movimiento                    Movimiento[]
@@ -251,7 +251,7 @@ model Usuario {
   Activo               Boolean?
   CreadoEl             DateTime           @default(now()) @db.Timestamp(6)
   CreadoPor            String?            @db.VarChar(50)
-  ModificadoEl         DateTime           @default(now()) @db.Timestamp(6)
+  ModificadoEl         DateTime?          @db.Timestamp(6)
   ModificadoPor        String?            @db.VarChar(50)
   Carpeta              Carpeta[]
   Compartido           Compartido[]
