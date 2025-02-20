@@ -8,6 +8,7 @@ import configuration from 'config/configuration';
 import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { TipoDocumentoModule } from './tipo-documento/tipo-documento.module';
+import { RolModule } from './rol/rol.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { TipoDocumentoModule } from './tipo-documento/tipo-documento.module';
     CargoModule,
     AuthModule,
     TipoDocumentoModule,
+    RolModule,
   ],
   controllers: [AppController],
   providers: [AppService],
