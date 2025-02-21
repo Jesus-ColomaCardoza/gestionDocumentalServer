@@ -9,6 +9,7 @@ import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { TipoDocumentoModule } from './tipo-documento/tipo-documento.module';
 import { RolModule } from './rol/rol.module';
+import { TipoUsuarioModule } from './tipo-usuario/tipo-usuario.module';
 import { EstadoModule } from './estado/estado.module';
 import { EsquemaEstadoModule } from './esquema-estado/esquema-estado.module';
 import { FiltersService } from './filters/filters.service';
@@ -30,6 +31,7 @@ import { PrismaModule } from './connection/prisma.module';
     AuthModule,
     TipoDocumentoModule,
     RolModule,
+    TipoUsuarioModule,
     EstadoModule,
     EsquemaEstadoModule,
     FiltersModule,
