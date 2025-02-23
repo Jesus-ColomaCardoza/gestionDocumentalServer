@@ -23,7 +23,7 @@ export class CargoController {
   }
 
   @Post('find_all')
-  findAll(@Body() combinationsFiltersDto: CombinationsFiltersDto): Promise<Cargo> {
+  findAll(@Body() combinationsFiltersDto: CombinationsFiltersDto):Promise<Cargo> {
     return this.cargoService.findAll(combinationsFiltersDto);
   }
 

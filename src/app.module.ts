@@ -16,6 +16,8 @@ import { FiltersService } from './filters/filters.service';
 import { FiltersModule } from './filters/filters.module';
 import { PrismaService } from './connection/prisma.service';
 import { PrismaModule } from './connection/prisma.module';
+import { TipoTramiteModule } from './tipo-tramite/tipo-tramite.module';
+import { TipoIdentificacionModule } from './tipo-identificacion/tipo-identificacion.module';
 
 @Module({
   imports: [
@@ -35,7 +37,9 @@ import { PrismaModule } from './connection/prisma.module';
     EstadoModule,
     EsquemaEstadoModule,
     FiltersModule,
-    PrismaModule
+    PrismaModule,
+    TipoTramiteModule,
+    TipoIdentificacionModule
   ],
   controllers: [AppController],
   providers: [AppService,FiltersService,PrismaService],
