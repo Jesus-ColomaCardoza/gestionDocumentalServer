@@ -8,7 +8,8 @@ export type FilterOperator =
   | 'LT'
   | 'GE'
   | 'LE'
-  | 'Contains';
+  | 'Contains'
+  | 'IN';
 export type FilterType =
   | 'date'
   | 'numeric2'
@@ -22,7 +23,7 @@ export class CreateFilterDto {
   @IsString()
   campo: string;
 
-  @ApiProperty({ example: 'EQ | BT | GT  | LT  | GE  | LE  | Contains' })
+  @ApiProperty({ example: 'EQ | BT | GT  | LT  | GE  | LE  | Contains | IN' })
   @IsString()
   operador: FilterOperator;
   
@@ -32,10 +33,4 @@ export class CreateFilterDto {
   
   @ApiProperty({ example: 'date  | numeric2 | string | comboPlataforma | other | boolean' })
   tipo: FilterType;
-
-  // @ApiProperty({ example: 'Optional value - remove if you don\'t use it' })
-  // tablaReferencia?: string; // Nueva propiedad
-
-  // @ApiProperty({ example: 'Optional value - remove if you don\'t use it' })
-  // campoReferencia?: string; // Nueva propiedad
 }

@@ -16,6 +16,10 @@ import { FiltersService } from './filters/filters.service';
 import { FiltersModule } from './filters/filters.module';
 import { PrismaService } from './connection/prisma.service';
 import { PrismaModule } from './connection/prisma.module';
+import { AreaModule } from './area/area.module';
+import { MovimientoModule } from './movimiento/movimiento.module';
+import { TramiteModule } from './tramite/tramite.module';
+import { UsuarioModule } from './usuario/usuario.module';
 import { TipoTramiteModule } from './tipo-tramite/tipo-tramite.module';
 import { TipoIdentificacionModule } from './tipo-identificacion/tipo-identificacion.module';
 
@@ -39,7 +43,11 @@ import { TipoIdentificacionModule } from './tipo-identificacion/tipo-identificac
     FiltersModule,
     PrismaModule,
     TipoTramiteModule,
-    TipoIdentificacionModule
+    TipoIdentificacionModule,
+    AreaModule,
+    MovimientoModule,
+    TramiteModule,
+    UsuarioModule
   ],
   controllers: [AppController],
   providers: [AppService,FiltersService,PrismaService],

@@ -12,8 +12,6 @@ export class FiltersService {
   valor1: string;
   valor2?: string;
   tipo: FilterType;
-  // tablaReferencia?: string; // Nueva propiedad
-  // campoReferencia?: string; // Nueva propiedad
 
   constructor(
     campo?: string,
@@ -21,16 +19,12 @@ export class FiltersService {
     operador?: FilterOperator,
     valor1?: string,
     valor2?: string,
-    // tablaReferencia?: string, // Nuevo parámetro
-    // campoReferencia?: string, // Nuevo parámetro
   ) {
     this.campo = campo || '';
     this.tipo = tipo || 'other';
     this.operador = operador || 'EQ';
     this.valor1 = valor1 || '';
     this.valor2 = valor2 || '';
-    // this.tablaReferencia = tablaReferencia || ''; // Inicialización
-    // this.campoReferencia = campoReferencia || ''; // Inicialización
 
     if (
       !['numeric2', 'comboPlataforma', 'date', 'boolean'].includes(this.tipo)
@@ -43,36 +37,24 @@ export class FiltersService {
   getCadena(): any {
     let clausula: any = {};
 
-    // // Verificar si hay una tabla de referencia
-    // if (this.tablaReferencia && this.campoReferencia) {
-    //   clausula[this.campo] = {
-    //     [this.operador.toLowerCase()]: {
-    //       [this.tablaReferencia]: {
-    //         [this.campoReferencia]: this.valor1.replace(/"/g, ''),
-    //       },
-    //     },
-    //   };
-    //   return clausula;
-    // }
-
     switch (this.tipo) {
       case 'date':
         const lv_inicio = new Date(this.valor1);
-        const lv_fin = this.valor2 ? new Date(this.valor2) : null;
+        let lv_fin = this.valor2 ? new Date(this.valor2) : null;
 
         switch (this.operador) {
           case 'EQ':
-            let d_inicio=new Date(this.valor1);
-            let d_fin=new Date(this.valor1);
+            let d_inicio = new Date(this.valor1);
+            let d_fin = new Date(this.valor1);
             d_fin.setUTCHours(23, 59, 59, 0);
-          
+
             clausula[this.campo] = {
               gte: d_inicio,
               lte: d_fin,
             };
             break;
           case 'BT':
-            let d_finn=new Date(this.valor2);
+            let d_finn = new Date(this.valor2);
             d_finn.setUTCHours(23, 59, 59, 0);
 
             clausula[this.campo] = {
@@ -117,6 +99,10 @@ export class FiltersService {
             break;
           case 'LE':
             clausula[this.campo] = { lte: Number(this.valor1) };
+          case 'IN':
+            const array = this.valor1.split(',');
+            const arrayNumber = array.map((a) => parseInt(a));
+            clausula[this.campo] = { in: arrayNumber };
             break;
         }
         break;
@@ -126,10 +112,17 @@ export class FiltersService {
           clausula[this.campo] = this.valor1.replace(/"/g, '');
         } else if (this.operador === 'Contains') {
           clausula[this.campo] = { contains: this.valor1.replace(/"/g, '') };
+        } else if (this.operador === 'IN') {
+          const array = this.valor1
+            .substring(1, this.valor1.length - 1)
+            .split(',');
+          const arrayString = array.map((a) => a);
+          clausula[this.campo] = { in: arrayString };
         }
         break;
 
       case 'boolean':
+        // Manejo de tipo booleano
         clausula[this.campo] =
           this.operador === 'EQ'
             ? this.valor1 === 'true'
@@ -139,9 +132,7 @@ export class FiltersService {
       case 'comboPlataforma':
       case 'other':
         if (this.operador === 'EQ') {
-          clausula[this.campo] = this.valor1.replace(/"/g, '');
-          clausula[this.campo] =
-            clausula[this.campo] == 'null' ? null : clausula[this.campo];
+          clausula[this.campo] = this.valor1.replace(/"/g, '') || null;
         } else {
           clausula[this.campo] = {
             [this.operador.toLowerCase()]: this.valor1.replace(/"/g, ''),
@@ -168,8 +159,6 @@ export class FiltersService {
           filtro.operador,
           filtro.valor1,
           filtro.valor2,
-          // filtro.tablaReferencia,  // Pasar nueva propiedad
-          // filtro.campoReferencia,  // Pasar nueva propiedad
         ).getCadena();
 
         if (dict[filtro.campo]) {

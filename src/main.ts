@@ -4,6 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { json, urlencoded } from 'express';
 import { ConfigService } from '@nestjs/config';
+import compression from 'compression';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -33,8 +34,16 @@ async function bootstrap() {
     }),
   );
 
+  //middlewares
   app.use(json({ limit: '10mb' }));
   app.use(urlencoded({ limit: '10mb', extended: true }));
+  // enable compression Gzip y Brotli
+  app.use(
+    compression({
+      threshold: 1024, // it compress responses greater than 1KB
+      brotli: { enabled: true }, // enable Brotli (optional)
+    }),
+  );
 
   //to enable cors
   app.enableCors({
