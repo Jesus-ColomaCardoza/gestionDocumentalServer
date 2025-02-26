@@ -1,47 +1,43 @@
 import { Injectable, Req } from '@nestjs/common';
-import { CreateMovimientoDto } from './dto/create-movimiento.dto';
-import { UpdateMovimientoDto } from './dto/update-movimiento.dto';
+import { CreateRegistroFirmaDto } from './dto/create-registro-firma.dto';
+import { UpdateRegistroFirmaDto } from './dto/update-registro-firma.dto';
 import { Menssage } from 'src/menssage/menssage.entity';
 import { PrismaService } from 'src/connection/prisma.service';
 import { FiltersService } from 'src/filters/filters.service';
 import { Prisma } from '@prisma/client';
 import { Request } from 'express';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
-import { TramiteService } from 'src/tramite/tramite.service';
-import { AreaService } from 'src/area/area.service';
+import { DocumentoService } from 'src/documento/documento.service';
+import { UsuarioService } from 'src/usuario/usuario.service';
 
 @Injectable()
-export class MovimientoService {
+export class RegistroFirmaService {
   private message = new Menssage();
 
   constructor(
     private prisma: PrismaService,
     private filtersService: FiltersService,
-    private area: AreaService,
-    private tramite: TramiteService,
+    private documento: DocumentoService,
+    private usuario: UsuarioService,
   ) {}
 
   private readonly customOut = {
-    IdMovimiento: true,
-    FechaMovimiento: true,
-    AreaDestino: {
+    IdRegistroFirma: true,
+    Usuario: {
       select: {
-        IdArea: true,
-        Descripcion: true,
+        IdUsuario: true,
+        Nombres: true,
+        ApellidoPaterno: true,
+        ApellidoMaterno: true,
       },
     },
-    AreaOrigen: {
+    Documento: {
       select: {
-        IdArea: true,
-        Descripcion: true,
+        IdDocumento: true,
+        Titulo: true,
       },
     },
-    Tramite: {
-      select: {
-        IdTramite: true,
-        Asunto: true,
-      },
-    },
+    Activo: true,
     CreadoEl: true,
     CreadoPor: true,
     ModificadoEl: true,
@@ -49,36 +45,33 @@ export class MovimientoService {
   };
 
   async create(
-    createMovimientoDto: CreateMovimientoDto,
+    createRegistroFirmaDto: CreateRegistroFirmaDto,
     @Req() request: Request,
   ): Promise<any> {
     try {
       //we validate FKs
 
-      const idAreaOrigenFound = await this.area.findOne(
-        createMovimientoDto.IdAreaOrigen,
+      const idDocumentoFound = await this.documento.findOne(
+        createRegistroFirmaDto.IdDocumento,
       );
-      if (idAreaOrigenFound.message.msgId === 1) return idAreaOrigenFound;
+      if (idDocumentoFound.message.msgId === 1) return idDocumentoFound;
 
-      const idAreaDestinoFound = await this.area.findOne(
-        createMovimientoDto.IdAreaDestino,
+      const idUsuarioFound = await this.usuario.findOne(
+        createRegistroFirmaDto.IdUsuario,
       );
-      if (idAreaDestinoFound.message.msgId === 1) return idAreaDestinoFound;
-
-      const idTramiteFound = await this.tramite.findOne(createMovimientoDto.IdTramite);
-      if (idTramiteFound.message.msgId === 1) return idTramiteFound;
+      if (idUsuarioFound.message.msgId === 1) return idUsuarioFound;
 
       //we create new register
-      const movimiento = await this.prisma.movimiento.create({
+      const registroFirma = await this.prisma.registroFirma.create({
         data: {
-          ...createMovimientoDto,
+          ...createRegistroFirmaDto,
           CreadoPor: `${request?.user?.id ?? 'test user'}`,
         },
       });
 
-      if (movimiento) {
-        this.message.setMessage(0, 'Movimiento - Registro creado');
-        return { message: this.message, registro: movimiento };
+      if (registroFirma) {
+        this.message.setMessage(0, 'Registro de Firma - Registro creado');
+        return { message: this.message, registro: registroFirma };
       } else {
         this.message.setMessage(1, 'Error: Error interno en el servidor');
         return { message: this.message };
@@ -97,19 +90,19 @@ export class MovimientoService {
       let clausula = this.filtersService.fabricarClausula(filtros);
       let limitRows = parseInt(cantidad_max) || 999;
 
-      const movimientos = await this.prisma.movimiento.findMany({
+      const registroFirmas = await this.prisma.registroFirma.findMany({
         where: clausula,
         take: limitRows,
         select: this.customOut,
       });
 
-      if (movimientos) {
-        this.message.setMessage(0, 'Movimiento - Registros encontrados');
-        return { message: this.message, registro: movimientos };
+      if (registroFirmas) {
+        this.message.setMessage(0, 'Registro de Firma - Registros encontrados');
+        return { message: this.message, registro: registroFirmas };
       } else {
         this.message.setMessage(
           1,
-          'Error: Movimiento - Registros no encontrados',
+          'Error: Registro de Firma - Registros no encontrados',
         );
         return { message: this.message };
       }
@@ -122,18 +115,18 @@ export class MovimientoService {
 
   async findOne(id: number): Promise<any> {
     try {
-      const movimiento = await this.prisma.movimiento.findUnique({
-        where: { IdMovimiento: id },
+      const registroFirma = await this.prisma.registroFirma.findUnique({
+        where: { IdRegistroFirma: id },
         select: this.customOut,
       });
 
-      if (movimiento) {
-        this.message.setMessage(0, 'Movimiento - Registro encontrado');
-        return { message: this.message, registro: movimiento };
+      if (registroFirma) {
+        this.message.setMessage(0, 'Registro de Firma - Registro encontrado');
+        return { message: this.message, registro: registroFirma };
       } else {
         this.message.setMessage(
           1,
-          'Error: Movimiento - Registro no encontrado',
+          'Error: Registro de Firma - Registro no encontrado',
         );
         return { message: this.message };
       }
@@ -146,42 +139,36 @@ export class MovimientoService {
 
   async update(
     id: number,
-    updateMovimientoDto: UpdateMovimientoDto,
+    updateRegistroFirmaDto: UpdateRegistroFirmaDto,
     @Req() request: Request,
   ): Promise<any> {
     try {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;
 
-      const idAreaOrigen = updateMovimientoDto.IdAreaOrigen;
-      if (idAreaOrigen) {
-        const idAreaOrigenFound = await this.area.findOne(idAreaOrigen);
-        if (idAreaOrigenFound.message.msgId === 1) return idAreaOrigenFound;
+      const idDocumento = updateRegistroFirmaDto.IdDocumento;
+      if (idDocumento) {
+        const idDocumentoFound = await this.documento.findOne(idDocumento);
+        if (idDocumentoFound.message.msgId === 1) return idDocumentoFound;
       }
 
-      const idAreaDestino = updateMovimientoDto.IdAreaDestino;
-      if (idAreaDestino) {
-        const idAreaDestinoFound = await this.area.findOne(idAreaDestino);
-        if (idAreaDestinoFound.message.msgId === 1) return idAreaDestinoFound;
+      const idUsuario = updateRegistroFirmaDto.IdUsuario;
+      if (idUsuario) {
+        const idUsuarioFound = await this.usuario.findOne(idUsuario);
+        if (idUsuarioFound.message.msgId === 1) return idUsuarioFound;
       }
 
-      const idTramite = updateMovimientoDto.IdTramite;
-      if (idTramite) {
-        const idTramiteFound = await this.tramite.findOne(idTramite);
-        if (idTramiteFound.message.msgId === 1) return idTramiteFound;
-      }
-
-      const movimiento = await this.prisma.movimiento.update({
-        where: { IdMovimiento: id },
+      const registroFirma = await this.prisma.registroFirma.update({
+        where: { IdRegistroFirma: id },
         data: {
-          ...updateMovimientoDto,
+          ...updateRegistroFirmaDto,
           ModificadoPor: `${request?.user?.id ?? 'test user'}`,
         },
       });
 
-      if (movimiento) {
-        this.message.setMessage(0, 'Movimiento - Registro actualizado');
-        return { message: this.message, registro: movimiento };
+      if (registroFirma) {
+        this.message.setMessage(0, 'Registro de Firma - Registro actualizado');
+        return { message: this.message, registro: registroFirma };
       } else {
         this.message.setMessage(1, 'Error: Error interno en el servidor');
         return { message: this.message };
@@ -198,13 +185,13 @@ export class MovimientoService {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;
 
-      const movimiento = await this.prisma.movimiento.delete({
-        where: { IdMovimiento: id },
+      const registroFirma = await this.prisma.registroFirma.delete({
+        where: { IdRegistroFirma: id },
       });
 
-      if (movimiento) {
-        this.message.setMessage(0, 'Movimiento - Registro eliminado');
-        return { message: this.message, registro: movimiento };
+      if (registroFirma) {
+        this.message.setMessage(0, 'Registro de Firma - Registro eliminado');
+        return { message: this.message, registro: registroFirma };
       } else {
         this.message.setMessage(1, 'Error: Error interno en el servidor');
         return { message: this.message };

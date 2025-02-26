@@ -91,7 +91,7 @@ export class Usuario {
   //   @IsOptional()
   //   FotoPerfilNombre: string;
 
-  @ApiProperty({ example: 'FotoPerfilNombreNombre' })
+  @ApiProperty({ example: 'FotoPerfilNombre' })
   @IsString()
   @IsOptional()
   FotoPerfilNombre: string;
