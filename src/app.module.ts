@@ -22,9 +22,11 @@ import { TramiteModule } from './tramite/tramite.module';
 import { UsuarioModule } from './usuario/usuario.module';
 import { TipoTramiteModule } from './tipo-tramite/tipo-tramite.module';
 import { TipoIdentificacionModule } from './tipo-identificacion/tipo-identificacion.module';
+import { CompartidoModule } from './compartido/compartido.module';
 import { DocumentoModule } from './documento/documento.module';
 import { RegistroFirmaModule } from './registro-firma/registro-firma.module';
 import { EmpresaModule } from './empresa/empresa.module';
+import { CarpetaModule } from './carpeta/carpeta.module';
 
 @Module({
   imports: [
@@ -51,9 +53,11 @@ import { EmpresaModule } from './empresa/empresa.module';
     MovimientoModule,
     TramiteModule,
     UsuarioModule,
+    CompartidoModule,
     DocumentoModule,
     RegistroFirmaModule,
-    EmpresaModule
+    EmpresaModule,
+    CarpetaModule
   ],
   controllers: [AppController],
   providers: [AppService,FiltersService,PrismaService],

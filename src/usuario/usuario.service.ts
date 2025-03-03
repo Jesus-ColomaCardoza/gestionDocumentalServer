@@ -145,6 +145,8 @@ export class UsuarioService {
       */
 
       //we create new register
+      delete createUsuarioDto.FotoPerfilBase64
+      delete createUsuarioDto.FotoPerfilNombre
       const usuario = await this.prisma.usuario.create({
         data: {
           ...createUsuarioDto,

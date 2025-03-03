@@ -41,7 +41,7 @@ model Carpeta {
   CreadoPor      String?     @db.VarChar(50)
   ModificadoEl   DateTime?   @db.Timestamp(6)
   ModificadoPor  String?     @db.VarChar(50)
-  Carpeta        Carpeta?    @relation("CarpetaToCarpeta", fields: [IdCarpetaPadre], references: [IdCarpeta], onDelete: NoAction, onUpdate: NoAction, map: "fk_carpeta_padre")
+  CarpetaPadre   Carpeta?    @relation("CarpetaToCarpeta", fields: [IdCarpetaPadre], references: [IdCarpeta], onDelete: NoAction, onUpdate: NoAction, map: "fk_carpeta_padre")
   other_Carpeta  Carpeta[]   @relation("CarpetaToCarpeta")
   Usuario        Usuario?    @relation(fields: [IdUsuario], references: [IdUsuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_carpeta_usuario")
   Documento      Documento[]

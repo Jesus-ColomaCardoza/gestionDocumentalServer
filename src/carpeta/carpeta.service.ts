@@ -1,48 +1,42 @@
 import { Injectable, Req } from '@nestjs/common';
-import { CreateMovimientoDto } from './dto/create-movimiento.dto';
-import { UpdateMovimientoDto } from './dto/update-movimiento.dto';
-import { Menssage } from 'src/menssage/menssage.entity';
+import { CreateCarpetaDto } from './dto/create-carpeta.dto';
+import { UpdateCarpetaDto } from './dto/update-carpeta.dto';
+import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
+import { Request } from 'express';
 import { PrismaService } from 'src/connection/prisma.service';
 import { FiltersService } from 'src/filters/filters.service';
-import { Prisma } from '@prisma/client';
-import { Request } from 'express';
-import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
-import { TramiteService } from 'src/tramite/tramite.service';
-import { AreaService } from 'src/area/area.service';
+import { Prisma} from '@prisma/client';
+import { Menssage } from 'src/menssage/menssage.entity';
+import { UsuarioService } from 'src/usuario/usuario.service';
 
 @Injectable()
-export class MovimientoService {
+export class CarpetaService {
   private message = new Menssage();
 
   constructor(
     private prisma: PrismaService,
     private filtersService: FiltersService,
-    private area: AreaService,
-    private tramite: TramiteService,
+    private usuario: UsuarioService,
   ) {}
 
   private readonly customOut = {
-    IdMovimiento: true,
-    FechaMovimiento: true,
-    
-    AreaDestino: {
+    IdCarpeta: true,
+    Descripcion: true,
+    CarpetaPadre: {
       select: {
-        IdArea: true,
+        IdCarpeta: true,
         Descripcion: true,
       },
     },
-    AreaOrigen: {
+    Usuario: {
       select: {
-        IdArea: true,
-        Descripcion: true,
+        IdUsuario: true,
+        Nombres: true,
+        ApellidoPaterno: true,
+        ApellidoMaterno: true,
       },
     },
-    Tramite: {
-      select: {
-        IdTramite: true,
-        Asunto: true,
-      },
-    },
+    Activo: true,
     CreadoEl: true,
     CreadoPor: true,
     ModificadoEl: true,
@@ -50,36 +44,34 @@ export class MovimientoService {
   };
 
   async create(
-    createMovimientoDto: CreateMovimientoDto,
+    createCarpetaDto: CreateCarpetaDto,
     @Req() request: Request,
   ): Promise<any> {
     try {
       //we validate FKs
 
-      const idAreaOrigenFound = await this.area.findOne(
-        createMovimientoDto.IdAreaOrigen,
-      );
-      if (idAreaOrigenFound.message.msgId === 1) return idAreaOrigenFound;
+      const idCarpetaPadre = createCarpetaDto.IdCarpetaPadre;
+      if (idCarpetaPadre) {
+        const idCarpetaPadreFound = await this.findOne(idCarpetaPadre);
+        if (idCarpetaPadreFound.message.msgId === 1) return idCarpetaPadreFound;
+      }
 
-      const idAreaDestinoFound = await this.area.findOne(
-        createMovimientoDto.IdAreaDestino,
+      const idUsuarioFound = await this.usuario.findOne(
+        createCarpetaDto.IdUsuario,
       );
-      if (idAreaDestinoFound.message.msgId === 1) return idAreaDestinoFound;
-
-      const idTramiteFound = await this.tramite.findOne(createMovimientoDto.IdTramite);
-      if (idTramiteFound.message.msgId === 1) return idTramiteFound;
+      if (idUsuarioFound.message.msgId === 1) return idUsuarioFound;
 
       //we create new register
-      const movimiento = await this.prisma.movimiento.create({
+      const carpeta = await this.prisma.carpeta.create({
         data: {
-          ...createMovimientoDto,
+          ...createCarpetaDto,
           CreadoPor: `${request?.user?.id ?? 'test user'}`,
         },
       });
 
-      if (movimiento) {
-        this.message.setMessage(0, 'Movimiento - Registro creado');
-        return { message: this.message, registro: movimiento };
+      if (carpeta) {
+        this.message.setMessage(0, 'Carpeta - Registro creado');
+        return { message: this.message, registro: carpeta };
       } else {
         this.message.setMessage(1, 'Error: Error interno en el servidor');
         return { message: this.message };
@@ -98,19 +90,19 @@ export class MovimientoService {
       let clausula = this.filtersService.fabricarClausula(filtros);
       let limitRows = parseInt(cantidad_max) || 999;
 
-      const movimientos = await this.prisma.movimiento.findMany({
+      const carpetas = await this.prisma.carpeta.findMany({
         where: clausula,
         take: limitRows,
         select: this.customOut,
       });
 
-      if (movimientos) {
-        this.message.setMessage(0, 'Movimiento - Registros encontrados');
-        return { message: this.message, registro: movimientos };
+      if (carpetas) {
+        this.message.setMessage(0, 'Carpeta - Registros encontrados');
+        return { message: this.message, registro: carpetas };
       } else {
         this.message.setMessage(
           1,
-          'Error: Movimiento - Registros no encontrados',
+          'Error: Carpeta - Registros no encontrados',
         );
         return { message: this.message };
       }
@@ -123,18 +115,18 @@ export class MovimientoService {
 
   async findOne(id: number): Promise<any> {
     try {
-      const movimiento = await this.prisma.movimiento.findUnique({
-        where: { IdMovimiento: id },
+      const carpeta = await this.prisma.carpeta.findUnique({
+        where: { IdCarpeta: id },
         select: this.customOut,
       });
 
-      if (movimiento) {
-        this.message.setMessage(0, 'Movimiento - Registro encontrado');
-        return { message: this.message, registro: movimiento };
+      if (carpeta) {
+        this.message.setMessage(0, 'Carpeta - Registro encontrado');
+        return { message: this.message, registro: carpeta };
       } else {
         this.message.setMessage(
           1,
-          'Error: Movimiento - Registro no encontrado',
+          'Error: Carpeta - Registro no encontrado',
         );
         return { message: this.message };
       }
@@ -147,42 +139,36 @@ export class MovimientoService {
 
   async update(
     id: number,
-    updateMovimientoDto: UpdateMovimientoDto,
+    updateCarpetaDto: UpdateCarpetaDto,
     @Req() request: Request,
   ): Promise<any> {
     try {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;
 
-      const idAreaOrigen = updateMovimientoDto.IdAreaOrigen;
-      if (idAreaOrigen) {
-        const idAreaOrigenFound = await this.area.findOne(idAreaOrigen);
-        if (idAreaOrigenFound.message.msgId === 1) return idAreaOrigenFound;
+      const idCarpetaPadre = updateCarpetaDto.IdCarpetaPadre;
+      if (idCarpetaPadre) {
+        const idCarpetaPadreFound = await this.findOne(idCarpetaPadre);
+        if (idCarpetaPadreFound.message.msgId === 1) return idCarpetaPadreFound;
       }
 
-      const idAreaDestino = updateMovimientoDto.IdAreaDestino;
-      if (idAreaDestino) {
-        const idAreaDestinoFound = await this.area.findOne(idAreaDestino);
-        if (idAreaDestinoFound.message.msgId === 1) return idAreaDestinoFound;
+      const idUsuario = updateCarpetaDto.IdUsuario;
+      if (idUsuario) {
+        const idUsuarioFound = await this.usuario.findOne(idUsuario);
+        if (idUsuarioFound.message.msgId === 1) return idUsuarioFound;
       }
 
-      const idTramite = updateMovimientoDto.IdTramite;
-      if (idTramite) {
-        const idTramiteFound = await this.tramite.findOne(idTramite);
-        if (idTramiteFound.message.msgId === 1) return idTramiteFound;
-      }
-
-      const movimiento = await this.prisma.movimiento.update({
-        where: { IdMovimiento: id },
+      const carpeta = await this.prisma.carpeta.update({
+        where: { IdCarpeta: id },
         data: {
-          ...updateMovimientoDto,
+          ...updateCarpetaDto,
           ModificadoPor: `${request?.user?.id ?? 'test user'}`,
         },
       });
 
-      if (movimiento) {
-        this.message.setMessage(0, 'Movimiento - Registro actualizado');
-        return { message: this.message, registro: movimiento };
+      if (carpeta) {
+        this.message.setMessage(0, 'Carpeta - Registro actualizado');
+        return { message: this.message, registro: carpeta };
       } else {
         this.message.setMessage(1, 'Error: Error interno en el servidor');
         return { message: this.message };
@@ -199,13 +185,13 @@ export class MovimientoService {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;
 
-      const movimiento = await this.prisma.movimiento.delete({
-        where: { IdMovimiento: id },
+      const carpeta = await this.prisma.carpeta.delete({
+        where: { IdCarpeta: id },
       });
 
-      if (movimiento) {
-        this.message.setMessage(0, 'Movimiento - Registro eliminado');
-        return { message: this.message, registro: movimiento };
+      if (carpeta) {
+        this.message.setMessage(0, 'Carpeta - Registro eliminado');
+        return { message: this.message, registro: carpeta };
       } else {
         this.message.setMessage(1, 'Error: Error interno en el servidor');
         return { message: this.message };
