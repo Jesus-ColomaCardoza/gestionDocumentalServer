@@ -7,6 +7,7 @@ import { FiltersService } from 'src/filters/filters.service';
 import { Request } from 'express';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { Prisma } from '@prisma/client';
+import { OutCargoDto, OutCargosDto } from './dto/out-cargo.dto';
 
 @Injectable()
 export class CargoService {
@@ -20,7 +21,7 @@ export class CargoService {
   async create(
     createCargoDto: CreateCargoDto,
     @Req() request: Request,
-  ): Promise<any> {
+  ): Promise<OutCargoDto> {
     try {
       //we validate FKs
 
@@ -46,7 +47,9 @@ export class CargoService {
     }
   }
 
-  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<any> {
+  async findAll(
+    combinationsFiltersDto: CombinationsFiltersDto,
+  ): Promise<OutCargosDto> {
     try {
       let filtros = combinationsFiltersDto.filters;
       let cantidad_max = combinationsFiltersDto.cantidad_max;
@@ -60,16 +63,10 @@ export class CargoService {
       });
 
       if (cargos) {
-        this.message.setMessage(
-          0,
-          'Cargo - Registros encontrados',
-        );
+        this.message.setMessage(0, 'Cargo - Registros encontrados');
         return { message: this.message, registro: cargos };
       } else {
-        this.message.setMessage(
-          1,
-          'Error: Cargo - Registros no encontrados',
-        );
+        this.message.setMessage(1, 'Error: Cargo - Registros no encontrados');
         return { message: this.message };
       }
     } catch (error: any) {
@@ -79,7 +76,7 @@ export class CargoService {
     }
   }
 
-  async findOne(id: number): Promise<any> {
+  async findOne(id: number): Promise<OutCargoDto> {
     try {
       const cargo = await this.prisma.cargo.findUnique({
         where: { IdCargo: id },
@@ -90,10 +87,7 @@ export class CargoService {
         this.message.setMessage(0, 'Cargo - Registro encontrado');
         return { message: this.message, registro: cargo };
       } else {
-        this.message.setMessage(
-          1,
-          'Error: Cargo - Registro no encontrado',
-        );
+        this.message.setMessage(1, 'Error: Cargo - Registro no encontrado');
         return { message: this.message };
       }
     } catch (error: any) {
@@ -107,7 +101,7 @@ export class CargoService {
     id: number,
     updateCargoDto: UpdateCargoDto,
     @Req() request: Request,
-  ): Promise<any> {
+  ): Promise<OutCargoDto> {
     try {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;
@@ -134,7 +128,7 @@ export class CargoService {
     }
   }
 
-  async remove(id: number): Promise<any> {
+  async remove(id: number): Promise<OutCargoDto> {
     try {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;
