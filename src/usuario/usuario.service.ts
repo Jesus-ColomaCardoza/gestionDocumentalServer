@@ -12,10 +12,13 @@ import { RolService } from 'src/rol/rol.service';
 import { CargoService } from 'src/cargo/cargo.service';
 import { AreaService } from 'src/area/area.service';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
+import { FileService } from 'src/file/file.service';
+import { printLog } from 'src/utils/utils';
 
 @Injectable()
 export class UsuarioService {
   private message = new Menssage();
+  private subPath = 'usuarios';
 
   constructor(
     private prisma: PrismaService,
@@ -25,6 +28,7 @@ export class UsuarioService {
     private rol: RolService,
     private cargo: CargoService,
     private area: AreaService,
+    private file: FileService,
   ) {}
 
   private readonly customOut = {
@@ -34,6 +38,7 @@ export class UsuarioService {
     ApellidoMaterno: true,
     FotoPerfilNombre: true,
     FotoPerfilUrl: true,
+    UrlBase: true,
     FechaNacimiento: true,
     CodigoConfirmacion: true,
     Email: true,
@@ -82,8 +87,14 @@ export class UsuarioService {
     @Req() request: Request,
   ): Promise<any> {
     try {
-      //we validate FKs
+      let file = null;
 
+      // FileBase64 and NombreImagen always they will send like '', they'll never sends null or undefined
+      const fileUpdate =
+        (createUsuarioDto.FotoPerfilBase64 || '') != '' &&
+        (createUsuarioDto.FotoPerfilNombre || '') != '';
+
+      //we validate FKs
       const idTipoIdentificacion = createUsuarioDto.IdTipoIdentificacion;
       if (idTipoIdentificacion) {
         const idTipoIdentificacionFound =
@@ -117,6 +128,21 @@ export class UsuarioService {
         if (idCargoFound.message.msgId === 1) return idCargoFound;
       }
 
+      if (fileUpdate) {
+        const pathOrgSaas = this.subPath + '/' + createUsuarioDto.Email;
+
+        file = await this.file.guardarDocumento(
+          createUsuarioDto.FotoPerfilBase64,
+          pathOrgSaas,
+          createUsuarioDto.FotoPerfilNombre,
+        );
+        // printLog(file);
+      }
+
+      // we create new register
+      delete createUsuarioDto.FotoPerfilBase64;
+      delete createUsuarioDto.FotoPerfilNombre;
+
       /*
       const idTipoIdentificacionFound = await this.tipoIdentificacion.findOne(
         createUsuarioDto.IdTipoIdentificacion,
@@ -143,15 +169,19 @@ export class UsuarioService {
       );
       if (idCargoFound.message.msgId === 1) return idCargoFound;      
       */
-
-      //we create new register
-      delete createUsuarioDto.FotoPerfilBase64
-      delete createUsuarioDto.FotoPerfilNombre
       const usuario = await this.prisma.usuario.create({
-        data: {
-          ...createUsuarioDto,
-          CreadoPor: `${request?.user?.id ?? 'test user'}`,
-        },
+        data: fileUpdate
+          ? {
+              ...createUsuarioDto,
+              CreadoPor: `${request?.user?.id ?? 'test user'}`,
+              UrlBase: file.UrlBase,
+              FotoPerfilUrl: file.Url,
+              FotoPerfilNombre: file.Nombre,
+            }
+          : {
+              ...createUsuarioDto,
+              CreadoPor: `${request?.user?.id ?? 'test user'}`,
+            },
       });
 
       if (usuario) {
@@ -222,6 +252,37 @@ export class UsuarioService {
     @Req() request: Request,
   ): Promise<any> {
     try {
+      let file = null;
+      let fileUpdate = '';
+      const fileUpdateValues = ['R', 'NU', 'U'];
+      // FileBase64 and NombreImagen always they will send like '', they'll never sends null or undefined
+      const fileB64 = updateUsuarioDto.FotoPerfilBase64;
+      const nomImagen = updateUsuarioDto.FotoPerfilNombre;
+
+      if (fileB64 == null && nomImagen == null) {
+        // remove image
+        fileUpdate = fileUpdateValues[0];
+      } else if (fileB64 == '' && nomImagen == '') {
+        // not update image
+        fileUpdate = fileUpdateValues[1];
+      } else if (fileB64.length > 0 && nomImagen.length > 0) {
+        // update image
+        fileUpdate = fileUpdateValues[2];
+        if (!(updateUsuarioDto.Email && updateUsuarioDto.Email.length > 0)) {
+          this.message.setMessage(
+            1,
+            'Error: Incorrect parameters, you have to enter Email',
+          );
+          return { message: this.message };
+        }
+      } else {
+        this.message.setMessage(
+          1,
+          'Error: Incorrect parameters FotoPerfilBase64 y FotoPerfilNombre',
+        );
+        return { message: this.message };
+      }
+
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;
 
@@ -258,15 +319,50 @@ export class UsuarioService {
         if (idCargoFound.message.msgId === 1) return idCargoFound;
       }
 
+      if (fileUpdate == fileUpdateValues[2]) {
+        const pathOrgSaas = this.subPath + '/' + updateUsuarioDto.Email;
+
+        file = await this.file.guardarDocumento(
+          updateUsuarioDto.FotoPerfilBase64,
+          pathOrgSaas,
+          updateUsuarioDto.FotoPerfilNombre,
+        );
+        // printLog(file);
+      }
+
+      delete updateUsuarioDto.FotoPerfilBase64;
+      delete updateUsuarioDto.FotoPerfilNombre;
+
       const usuario = await this.prisma.usuario.update({
         where: { IdUsuario: id },
-        data: {
-          ...updateUsuarioDto,
-          ModificadoPor: `${request?.user?.id ?? 'test user'}`,
-        },
+        data:
+          fileUpdate == fileUpdateValues[0] || fileUpdate == fileUpdateValues[2]
+            ? {
+                ...updateUsuarioDto,
+                ModificadoPor: `${request?.user?.id ?? 'test user'}`,
+                UrlBase:
+                  fileUpdate == fileUpdateValues[0] ? null : file.UrlBase,
+                FotoPerfilUrl:
+                  fileUpdate == fileUpdateValues[0] ? null : file.Url,
+                FotoPerfilNombre:
+                  fileUpdate == fileUpdateValues[0] ? null : file.Nombre,
+              }
+            : {
+                ...updateUsuarioDto,
+                ModificadoPor: `${request?.user?.id ?? 'test user'}`,
+              },
       });
 
       if (usuario) {
+        if (
+          fileUpdate == fileUpdateValues[0] ||
+          fileUpdate == fileUpdateValues[2]
+        ) {
+          await this.file.eliminarDocumento(
+            idFound.registro.UrlBase + '/' + idFound.registro.FotoPerfilNombre,
+          );
+        }
+
         this.message.setMessage(0, 'Usuario - Registro actualizado');
         return { message: this.message, registro: usuario };
       } else {
@@ -290,6 +386,10 @@ export class UsuarioService {
       });
 
       if (usuario) {
+        this.file.eliminarDocumento(
+          usuario.UrlBase + '/' + usuario.FotoPerfilNombre,
+        );
+
         this.message.setMessage(0, 'Usuario - Registro eliminado');
         return { message: this.message, registro: usuario };
       } else {

@@ -27,6 +27,7 @@ import { DocumentoModule } from './documento/documento.module';
 import { RegistroFirmaModule } from './registro-firma/registro-firma.module';
 import { EmpresaModule } from './empresa/empresa.module';
 import { CarpetaModule } from './carpeta/carpeta.module';
+import { FileModule } from './file/file.module';
 
 @Module({
   imports: [
@@ -57,7 +58,8 @@ import { CarpetaModule } from './carpeta/carpeta.module';
     DocumentoModule,
     RegistroFirmaModule,
     EmpresaModule,
-    CarpetaModule
+    CarpetaModule,
+    FileModule
   ],
   controllers: [AppController],
   providers: [AppService,FiltersService,PrismaService],

@@ -18,8 +18,8 @@ export default registerAs('config', () => ({
   // keySinchToken:process.env.SINCH_AUTH_TOKEN,
   // keySinchId:process.env.SINCH_ACCOUNT_ID,
   
-  // filesOnboardingPath:process.env.FILES_ONBOARDING_PATH,
-  // filesOnboardingUrl:process.env.FILES_ONBOARDING_URL,
+  filesOnboardingPath:process.env.FILES_ONBOARDING_PATH,
+  filesOnboardingUrl:process.env.FILES_ONBOARDING_URL,
 
   // imagekitUrl: process.env.IMAGE_KIT_URL_ENDPOINT,
   // imagekitPublicKey: process.env.IMAGE_KIT_PUBLIC_KEY,
