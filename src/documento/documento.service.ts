@@ -69,7 +69,7 @@ export class DocumentoService {
 
   async create(
     createDocumentoDto: CreateDocumentoDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<any> {
     try {
       //we validate FKs
@@ -170,7 +170,7 @@ export class DocumentoService {
   async update(
     id: number,
     updateDocumentoDto: UpdateDocumentoDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<any> {
     try {
       const idFound = await this.findOne(id);

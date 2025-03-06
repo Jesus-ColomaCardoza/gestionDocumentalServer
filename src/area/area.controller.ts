@@ -17,7 +17,7 @@ export class AreaController {
 
   @Post('create')
   create(@Body() createAreaDto: CreateAreaDto,
-  @Req() request: Request,
+  @Req() request?: Request,
 ) :Promise<Area>{
     return this.areaService.create(createAreaDto,request);
   }
@@ -34,7 +34,7 @@ export class AreaController {
 
   @Patch('update/:id')
   update(@Param('id') id: string, @Body() updateAreaDto: UpdateAreaDto,
-  @Req() request: Request,
+  @Req() request?: Request,
 ):Promise<Area> {
     return this.areaService.update(+id, updateAreaDto,request);
   }

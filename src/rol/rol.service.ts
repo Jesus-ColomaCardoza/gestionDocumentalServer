@@ -18,7 +18,7 @@ export class RolService {
   ) { }
 
   async create(createRolDto: CreateRolDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<any> {
     try {
       //we validate FKs
@@ -103,7 +103,7 @@ export class RolService {
   }
 
   async update(id: string, updateRolDto: UpdateRolDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<any> {
     try {
       const idFound = await this.findOne(id);

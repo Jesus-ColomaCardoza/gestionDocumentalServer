@@ -16,7 +16,7 @@ export class TipoIdentificacionController {
 
   @Post('create')
   create(@Body() createTipoIdentificacionDto: CreateTipoIdentificacionDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<TipoIdentificacion> {
     return this.tipoIdentificacionService.create(createTipoIdentificacionDto, request);
   }
@@ -33,7 +33,7 @@ export class TipoIdentificacionController {
 
   @Patch('update/:id')
   update(@Param('id') id: string, @Body() updateTipoIdentificacionDto: UpdateTipoIdentificacionDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<TipoIdentificacion> {
     return this.tipoIdentificacionService.update(+id, updateTipoIdentificacionDto, request);
   }

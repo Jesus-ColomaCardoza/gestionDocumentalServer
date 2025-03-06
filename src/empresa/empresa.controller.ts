@@ -27,7 +27,7 @@ export class EmpresaController {
   @Post('create')
   create(
     @Body() createEmpresaDto: CreateEmpresaDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<Empresa> {
     return this.empresaService.create(createEmpresaDto, request);
   }
@@ -48,7 +48,7 @@ export class EmpresaController {
   update(
     @Param('id') id: string,
     @Body() updateEmpresaDto: UpdateEmpresaDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<Empresa> {
     return this.empresaService.update(+id, updateEmpresaDto, request);
   }

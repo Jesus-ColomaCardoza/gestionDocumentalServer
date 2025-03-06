@@ -20,7 +20,7 @@ export class CargoService {
 
   async create(
     createCargoDto: CreateCargoDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<OutCargoDto> {
     try {
       //we validate FKs
@@ -100,7 +100,7 @@ export class CargoService {
   async update(
     id: number,
     updateCargoDto: UpdateCargoDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<OutCargoDto> {
     try {
       const idFound = await this.findOne(id);

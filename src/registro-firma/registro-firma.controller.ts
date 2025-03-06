@@ -27,7 +27,7 @@ export class RegistroFirmaController {
   @Post('create')
   create(
     @Body() createRegistroFirmaDto: CreateRegistroFirmaDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ) :Promise<RegistroFirma>{
     return this.registroFirmaService.create(createRegistroFirmaDto, request);
   }
@@ -46,7 +46,7 @@ export class RegistroFirmaController {
   update(
     @Param('id') id: string,
     @Body() updateRegistroFirmaDto: UpdateRegistroFirmaDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ):Promise<RegistroFirma> {
     return this.registroFirmaService.update(
       +id,

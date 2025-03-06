@@ -27,7 +27,7 @@ export class DocumentoController {
   @Post('create')
   create(
     @Body() createDocumentoDto: CreateDocumentoDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<Documento> {
     return this.documentoService.create(createDocumentoDto, request);
   }
@@ -48,7 +48,7 @@ export class DocumentoController {
   update(
     @Param('id') id: string,
     @Body() updateDocumentoDto: UpdateDocumentoDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<Documento> {
     return this.documentoService.update(+id, updateDocumentoDto, request);
   }

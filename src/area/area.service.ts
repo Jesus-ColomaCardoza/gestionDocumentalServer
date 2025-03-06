@@ -19,7 +19,7 @@ export class AreaService {
 
   async create(
     createAreaDto: CreateAreaDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<any> {
     try {
       //we validate FKs
@@ -97,7 +97,7 @@ export class AreaService {
   async update(
     id: number,
     updateAreaDto: UpdateAreaDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<any> {
     try {
       const idFound = await this.findOne(id);

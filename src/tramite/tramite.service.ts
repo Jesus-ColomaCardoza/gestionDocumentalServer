@@ -27,7 +27,7 @@ export class TramiteService {
 
   async create(
     createTramiteDto: CreateTramiteDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<any> {
     try {
       //we validate FKs
@@ -120,7 +120,7 @@ export class TramiteService {
   async update(
     id: number,
     updateTramiteDto: UpdateTramiteDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<any> {
     try {
       const idFound = await this.findOne(id);

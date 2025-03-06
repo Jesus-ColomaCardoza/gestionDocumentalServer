@@ -27,7 +27,7 @@ export class MovimientoController {
   @Post('create')
   create(
     @Body() createMovimientoDto: CreateMovimientoDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<Movimiento> {
     return this.movimientoService.create(createMovimientoDto, request);
   }
@@ -48,7 +48,7 @@ export class MovimientoController {
   update(
     @Param('id') id: string,
     @Body() updateMovimientoDto: UpdateMovimientoDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<Movimiento> {
     return this.movimientoService.update(+id, updateMovimientoDto, request);
   }

@@ -45,7 +45,7 @@ export class CarpetaService {
 
   async create(
     createCarpetaDto: CreateCarpetaDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<any> {
     try {
       //we validate FKs
@@ -140,7 +140,7 @@ export class CarpetaService {
   async update(
     id: number,
     updateCarpetaDto: UpdateCarpetaDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<any> {
     try {
       const idFound = await this.findOne(id);

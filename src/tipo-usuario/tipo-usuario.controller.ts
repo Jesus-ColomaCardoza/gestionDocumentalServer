@@ -16,7 +16,7 @@ export class TipoUsuarioController {
 
   @Post('create')
   create(@Body() createTipoUsuarioDto: CreateTipoUsuarioDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<TipoUsuario> {
     return this.tipoUsuarioService.create(createTipoUsuarioDto, request);
   }
@@ -33,7 +33,7 @@ export class TipoUsuarioController {
 
   @Patch('update/:id')
   update(@Param('id') id: string, @Body() updateTipoUsuarioDto: UpdateTipoUsuarioDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<TipoUsuario> {
     return this.tipoUsuarioService.update(+id, updateTipoUsuarioDto, request);
   }

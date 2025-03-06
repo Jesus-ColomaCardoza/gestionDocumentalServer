@@ -18,7 +18,7 @@ export class TipoIdentificacionService {
   ) { }
 
   async create(createTipoIdentificacionDto: CreateTipoIdentificacionDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<any> {
     try {
       //we validate FKs
@@ -103,7 +103,7 @@ export class TipoIdentificacionService {
   }
 
   async update(id: number, updateTipoIdentificacionDto: UpdateTipoIdentificacionDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<any> {
     try {
       const idFound = await this.findOne(id);

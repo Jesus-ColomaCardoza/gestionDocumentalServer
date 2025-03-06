@@ -51,7 +51,7 @@ export class MovimientoService {
 
   async create(
     createMovimientoDto: CreateMovimientoDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<any> {
     try {
       //we validate FKs
@@ -148,7 +148,7 @@ export class MovimientoService {
   async update(
     id: number,
     updateMovimientoDto: UpdateMovimientoDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<any> {
     try {
       const idFound = await this.findOne(id);

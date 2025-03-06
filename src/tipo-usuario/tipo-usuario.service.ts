@@ -19,7 +19,7 @@ export class TipoUsuarioService {
 
   async create(
     createTipoUsuarioDto: CreateTipoUsuarioDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<any> {
     try {
       //we validate FKs
@@ -103,7 +103,7 @@ export class TipoUsuarioService {
   }
 
   async update(id: number, updateTipoUsuarioDto: UpdateTipoUsuarioDto,
-    @Req() request: Request,): Promise<any> {
+    @Req() request?: Request,): Promise<any> {
     try {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;

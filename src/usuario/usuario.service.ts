@@ -84,7 +84,7 @@ export class UsuarioService {
 
   async create(
     createUsuarioDto: CreateUsuarioDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<any> {
     try {
       let file = null;
@@ -249,7 +249,7 @@ export class UsuarioService {
   async update(
     id: number,
     updateUsuarioDto: UpdateUsuarioDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<any> {
     try {
       let file = null;

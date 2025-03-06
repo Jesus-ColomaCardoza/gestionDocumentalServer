@@ -16,7 +16,7 @@ export class TipoTramiteController {
 
   @Post('create')
   create(@Body() createTipoTramiteDto: CreateTipoTramiteDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<TipoTramite> {
     return this.tipoTramiteService.create(createTipoTramiteDto, request);
   }
@@ -33,7 +33,7 @@ export class TipoTramiteController {
 
   @Patch('update/:id')
   update(@Param('id') id: string, @Body() updateTipoTramiteDto: UpdateTipoTramiteDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<TipoTramite> {
     return this.tipoTramiteService.update(+id, updateTipoTramiteDto, request);
   }

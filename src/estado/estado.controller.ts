@@ -26,7 +26,7 @@ export class EstadoController {
 
   @Post('create')
   create(@Body() createEstadoDto: CreateEstadoDto,
-  @Req() request: Request,
+  @Req() request?: Request,
 ): Promise<Estado> {
     return this.estadoService.create(createEstadoDto,request);
   }
@@ -47,7 +47,7 @@ export class EstadoController {
   update(
     @Param('id') id: string,
     @Body() updateEstadoDto: UpdateEstadoDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<Estado> {
     return this.estadoService.update(+id, updateEstadoDto, request);
   }

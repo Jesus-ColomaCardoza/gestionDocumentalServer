@@ -26,7 +26,7 @@ export class TramiteController {
   @Post('create')
   create(
     @Body() createTramiteDto: CreateTramiteDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<Tramite> {
     return this.tramiteService.create(createTramiteDto, request);
   }
@@ -47,7 +47,7 @@ export class TramiteController {
   update(
     @Param('id') id: string,
     @Body() updateTramiteDto: UpdateTramiteDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<Tramite> {
     return this.tramiteService.update(+id, updateTramiteDto, request);
   }

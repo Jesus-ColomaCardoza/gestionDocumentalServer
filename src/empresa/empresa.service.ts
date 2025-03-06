@@ -22,7 +22,7 @@ export class EmpresaService {
 
   async create(
     createEmpresaDto: CreateEmpresaDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<any> {
     try {
       let file = null;
@@ -130,7 +130,7 @@ export class EmpresaService {
   async update(
     id: number,
     updateEmpresaDto: UpdateEmpresaDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<any> {
     try {
       let file = null;

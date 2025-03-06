@@ -26,7 +26,7 @@ export class CarpetaController {
   @Post('create')
   create(
     @Body() createCarpetaDto: CreateCarpetaDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<Carpeta> {
     return this.carpetaService.create(createCarpetaDto, request);
   }
@@ -47,7 +47,7 @@ export class CarpetaController {
   update(
     @Param('id') id: string,
     @Body() updateCarpetaDto: UpdateCarpetaDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<Carpeta> {
     return this.carpetaService.update(+id, updateCarpetaDto, request);
   }

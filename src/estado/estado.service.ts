@@ -27,7 +27,7 @@ export class EstadoService {
 
   async create(
     createEstadoDto: CreateEstadoDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<any> {
     try {
       const idEsquemaEstadoFound = await this.esquemaEstado.findOne(
@@ -107,7 +107,7 @@ export class EstadoService {
   async update(
     id: number,
     updateEstadoDto: UpdateEstadoDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<any> {
     try {
       const idFound = await this.findOne(id);

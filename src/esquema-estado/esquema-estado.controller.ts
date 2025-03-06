@@ -27,7 +27,7 @@ export class EsquemaEstadoController {
   @Post('create')
   create(
     @Body() createEsquemaEstadoDto: CreateEsquemaEstadoDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<EsquemaEstado> {
     return this.esquemaEstadoService.create(createEsquemaEstadoDto, request);
   }
@@ -48,7 +48,7 @@ export class EsquemaEstadoController {
   update(
     @Param('id') id: string,
     @Body() updateEsquemaEstadoDto: UpdateEsquemaEstadoDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<EsquemaEstado> {
     return this.esquemaEstadoService.update(
       +id,

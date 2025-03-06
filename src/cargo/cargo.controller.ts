@@ -29,7 +29,7 @@ export class CargoController {
   @Post('create')
   create(
     @Body() createCargoDto: CreateCargoDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<OutCargoDto> {
     return this.cargoService.create(createCargoDto, request);
   }
@@ -50,7 +50,7 @@ export class CargoController {
   update(
     @Param('id') id: string,
     @Body() updateCargoDto: UpdateCargoDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<OutCargoDto> {
     return this.cargoService.update(+id, updateCargoDto, request);
   }

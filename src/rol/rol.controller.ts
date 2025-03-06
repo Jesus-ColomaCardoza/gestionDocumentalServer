@@ -17,7 +17,7 @@ export class RolController {
 
   @Post('create')
   create(@Body() createRolDto: CreateRolDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<Rol> {
     return this.rolService.create(createRolDto, request);
   }
@@ -34,7 +34,7 @@ export class RolController {
 
   @Patch('update/:id')
   update(@Param('id') id: string, @Body() updateRolDto: UpdateRolDto,
-    @Req() request: Request,): Promise<Rol> {
+    @Req() request?: Request,): Promise<Rol> {
     return this.rolService.update(id, updateRolDto, request);
   }
 

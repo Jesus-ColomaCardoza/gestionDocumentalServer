@@ -26,7 +26,7 @@ export class CompartidoController {
   @Post('create')
   create(
     @Body() createCompartidoDto: CreateCompartidoDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<Compartido> {
     return this.compartidoService.create(createCompartidoDto, request);
   }
@@ -47,7 +47,7 @@ export class CompartidoController {
   update(
     @Param('id') id: string,
     @Body() updateCompartidoDto: UpdateCompartidoDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<Compartido> {
     return this.compartidoService.update(+id, updateCompartidoDto, request);
   }

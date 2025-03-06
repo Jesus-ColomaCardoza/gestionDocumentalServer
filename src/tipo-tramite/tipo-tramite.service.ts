@@ -20,7 +20,7 @@ export class TipoTramiteService {
 
   async create(
     createTipoTramiteDto: CreateTipoTramiteDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<any> {
     try {
       //we validate FKs
@@ -106,7 +106,7 @@ export class TipoTramiteService {
 
   async update(id: number,
     updateTipoTramiteDto: UpdateTipoTramiteDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<any> {
     try {
       const idFound = await this.findOne(id);

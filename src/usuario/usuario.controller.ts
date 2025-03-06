@@ -27,7 +27,7 @@ export class UsuarioController {
   @Post('create')
   create(
     @Body() createUsuarioDto: CreateUsuarioDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<Usuario> {
     return this.usuarioService.create(createUsuarioDto, request);
   }
@@ -48,7 +48,7 @@ export class UsuarioController {
   update(
     @Param('id') id: string,
     @Body() updateUsuarioDto: UpdateUsuarioDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<Usuario> {
     return this.usuarioService.update(+id, updateUsuarioDto, request);
   }

@@ -46,7 +46,7 @@ export class RegistroFirmaService {
 
   async create(
     createRegistroFirmaDto: CreateRegistroFirmaDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<any> {
     try {
       //we validate FKs
@@ -140,7 +140,7 @@ export class RegistroFirmaService {
   async update(
     id: number,
     updateRegistroFirmaDto: UpdateRegistroFirmaDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<any> {
     try {
       const idFound = await this.findOne(id);

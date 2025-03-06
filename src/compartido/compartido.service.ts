@@ -48,7 +48,7 @@ export class CompartidoService {
 
   async create(
     createCompartidoDto: CreateCompartidoDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<any> {
     try {
       //we validate FKs
@@ -166,7 +166,7 @@ export class CompartidoService {
   async update(
     id: number,
     updateCompartidoDto: UpdateCompartidoDto,
-    @Req() request: Request,
+    @Req() request?: Request,
   ): Promise<any> {
     try {
       const tipoElementoCompartido = updateCompartidoDto.TipoElementoCompartido;
