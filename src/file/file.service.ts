@@ -12,6 +12,23 @@ export class FileService {
 
   constructor(private configEnv: ConfigService) {}
 
+  async create(file: Express.Multer.File) {
+    try {
+      if (file.filename && file.path) {
+        this.message.setMessage(0, 'File - Registro creado');
+        return { message: this.message, registro: file};
+      } else {
+        this.message.setMessage(1, 'Error: Error interno en el servidor');
+        return { message: this.message };
+      }
+      
+    } catch (error: any) {
+      console.log(error);
+      this.message.setMessage(1, error.message);
+      return { message: this.message };
+    }
+  }
+
   async guardarDocumento(
     base64: string,
     nombreCarpeta: string,
