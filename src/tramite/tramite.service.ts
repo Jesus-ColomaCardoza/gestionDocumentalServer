@@ -23,7 +23,45 @@ export class TramiteService {
     private remitente: UsuarioService,
   ) {}
 
-  private readonly customOut = {};
+  private readonly customOut = {
+    IdTramite: true,
+    Asunto: true,
+    Descripcion: true,
+    FechaInicio: true,
+    FechaFin: true,
+    Folios: true,
+    Remitente: {
+      select: {
+        IdUsuario: true,
+        Nombres: true,
+        ApellidoPaterno: true,
+        ApellidoMaterno: true,
+      },
+    },
+    TipoTramite: {
+      select: {
+        IdTipoTramite: true,
+        Descripcion: true,
+      },
+    },
+    Estado: {
+      select: {
+        IdEstado: true,
+        Descripcion: true,
+        EsquemaEstado: {
+          select: {
+            IdEsquemaEstado: true,
+            Descripcion: true,
+          },
+        },
+      },
+    },
+    Activo: true,
+    CreadoEl: true,
+    CreadoPor: true,
+    ModificadoEl: true,
+    ModificadoPor: true,
+  };
 
   async create(
     createTramiteDto: CreateTramiteDto,

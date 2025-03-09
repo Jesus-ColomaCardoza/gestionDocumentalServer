@@ -38,6 +38,7 @@ import { FileModule } from './file/file.module';
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '../../', 'public'),
+      // serveRoot:'/files'
     }),
     CargoModule,
     AuthModule,

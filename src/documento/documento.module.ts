@@ -12,6 +12,7 @@ import { RolService } from 'src/rol/rol.service';
 import { CargoService } from 'src/cargo/cargo.service';
 import { AreaService } from 'src/area/area.service';
 import { EsquemaEstadoService } from 'src/esquema-estado/esquema-estado.service';
+import { CarpetaService } from 'src/carpeta/carpeta.service';
 
 @Module({
   controllers: [DocumentoController],
@@ -28,6 +29,7 @@ import { EsquemaEstadoService } from 'src/esquema-estado/esquema-estado.service'
     CargoService,
     EsquemaEstadoService,
     AreaService,
+    CarpetaService
   ],
 })
 export class DocumentoModule {}

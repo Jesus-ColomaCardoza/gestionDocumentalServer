@@ -87,6 +87,10 @@ export class UsuarioService {
     @Req() request?: Request,
   ): Promise<any> {
     try {
+      // validate If user already is registed
+      const repeatedUser = await this.findOneByEmail(createUsuarioDto.Email);
+      if (repeatedUser.message.msgId !== 2) return repeatedUser;
+
       let file = null;
 
       // FileBase64 and NombreImagen always they will send like '', they'll never sends null or undefined
@@ -238,6 +242,48 @@ export class UsuarioService {
       } else {
         this.message.setMessage(1, 'Error: Usuario - Registro no encontrado');
         return { message: this.message };
+      }
+    } catch (error: any) {
+      console.log(error);
+      this.message.setMessage(1, error.message);
+      return { message: this.message };
+    }
+  }
+
+  async findOneValidate(id: number): Promise<any> {
+    try {
+      const usuario = await this.prisma.usuario.findUnique({
+        where: { IdUsuario: id },
+        select: { IdUsuario: true },
+      });
+
+      if (usuario) {
+        this.message.setMessage(0, 'Usuario - Registro encontrado');
+        return { message: this.message, registro: usuario };
+      } else {
+        this.message.setMessage(1, 'Error: Usuario - Registro no encontrado');
+        return { message: this.message };
+      }
+    } catch (error: any) {
+      console.log(error);
+      this.message.setMessage(1, error.message);
+      return { message: this.message };
+    }
+  }
+
+  async findOneByEmail(email: string): Promise<any> {
+    try {
+      const usuario = await this.prisma.usuario.findFirst({
+        where: { Email: email },
+        select: this.customOut,
+      });
+
+      if (usuario) {
+        this.message.setMessage(0, 'Usuario ya registrado');
+        return { message: this.message, registro: usuario };
+      } else {
+        this.message.setMessage(2, 'Usuario no registrado');
+        return { message: this.message, registro: null };
       }
     } catch (error: any) {
       console.log(error);

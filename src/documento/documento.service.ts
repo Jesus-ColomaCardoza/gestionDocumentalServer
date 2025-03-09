@@ -10,6 +10,7 @@ import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto
 import { TipoDocumentoService } from 'src/tipo-documento/tipo-documento.service';
 import { TramiteService } from 'src/tramite/tramite.service';
 import { UsuarioService } from 'src/usuario/usuario.service';
+import { CarpetaService } from 'src/carpeta/carpeta.service';
 
 @Injectable()
 export class DocumentoService {
@@ -21,7 +22,7 @@ export class DocumentoService {
     private tipoDocumento: TipoDocumentoService,
     private tramite: TramiteService,
     private usuario: UsuarioService,
-    // private carpeta: CarpetaService,
+    private carpeta: CarpetaService,
   ) {}
 
   private readonly customOut = {
@@ -33,6 +34,7 @@ export class DocumentoService {
     FechaEmision: true,
     UrlDocumento: true,
     FormatoDocumento: true,
+    NombreDocumento: true,
     TipoDocumento: {
       select: {
         IdTipoDocumento: true,
@@ -69,7 +71,7 @@ export class DocumentoService {
 
   async create(
     createDocumentoDto: CreateDocumentoDto,
-    @Req() request?: Request,
+    request?: Request,
   ): Promise<any> {
     try {
       //we validate FKs
@@ -84,15 +86,17 @@ export class DocumentoService {
       );
       if (idUsuarioFound.message.msgId === 1) return idUsuarioFound;
 
-      const idTramiteFound = await this.tramite.findOne(
-        createDocumentoDto.IdTramite,
-      );
-      if (idTramiteFound.message.msgId === 1) return idTramiteFound;
+      const idTramite = createDocumentoDto.IdTramite;
+      if (idTramite) {
+        const idTramiteFound = await this.tramite.findOne(idTramite);
+        if (idTramiteFound.message.msgId === 1) return idTramiteFound;
+      }
 
-      // const idCarpetaFound = await this.carpeta.findOne(
-      //   createDocumentoDto.IdCarpeta,
-      // );
-      // if (idCarpetaFound.message.msgId === 1) return idCarpetaFound;
+      const idCarpeta = createDocumentoDto.IdCarpeta;
+      if (idCarpeta) {
+        const idCarpetaFound = await this.carpeta.findOne(idCarpeta);
+        if (idCarpetaFound.message.msgId === 1) return idCarpetaFound;
+      }
 
       //we create new register
       const documento = await this.prisma.documento.create({
@@ -104,7 +108,7 @@ export class DocumentoService {
 
       if (documento) {
         this.message.setMessage(0, 'Documento - Registro creado');
-        return { message: this.message, registro: documento };
+        return { message: this.message, registro: documento};
       } else {
         this.message.setMessage(1, 'Error: Error interno en el servidor');
         return { message: this.message };
@@ -196,11 +200,11 @@ export class DocumentoService {
         if (idTramiteFound.message.msgId === 1) return idTramiteFound;
       }
 
-      // const idCarpeta = updateDocumentoDto.IdCarpeta;
-      // if (idCarpeta) {
-      //   const idCarpetaFound = await this.carpeta.findOne(idCarpeta);
-      //   if (idCarpetaFound.message.msgId === 1) return idCarpetaFound;
-      // }
+      const idCarpeta = updateDocumentoDto.IdCarpeta;
+      if (idCarpeta) {
+        const idCarpetaFound = await this.carpeta.findOne(idCarpeta);
+        if (idCarpetaFound.message.msgId === 1) return idCarpetaFound;
+      }
 
       const documento = await this.prisma.documento.update({
         where: { IdDocumento: id },

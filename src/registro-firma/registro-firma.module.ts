@@ -13,6 +13,7 @@ import { AreaService } from 'src/area/area.service';
 import { TipoTramiteService } from 'src/tipo-tramite/tipo-tramite.service';
 import { EstadoService } from 'src/estado/estado.service';
 import { EsquemaEstadoService } from 'src/esquema-estado/esquema-estado.service';
+import { CarpetaService } from 'src/carpeta/carpeta.service';
 
 @Module({
   controllers: [RegistroFirmaController],
@@ -30,6 +31,7 @@ import { EsquemaEstadoService } from 'src/esquema-estado/esquema-estado.service'
     AreaService,
     EstadoService,
     EsquemaEstadoService,
+    CarpetaService
   ],
 })
 export class RegistroFirmaModule {}

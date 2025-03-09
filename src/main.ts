@@ -5,10 +5,11 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { json, urlencoded } from 'express';
 import { ConfigService } from '@nestjs/config';
 import compression from 'compression';
+import { existsSync, mkdirSync } from 'fs';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
+  
   //to access to the enviroment variables
   // const configEnv = app.get(ConfigService);
 

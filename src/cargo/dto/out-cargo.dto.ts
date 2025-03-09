@@ -9,7 +9,6 @@ export class OutCargoDto {
   @Expose()
   registro?: Cargo;
 }
-
 export class OutCargosDto {
   @Expose()
   message: Menssage;

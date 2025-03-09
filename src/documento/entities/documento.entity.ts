@@ -9,23 +9,23 @@ import {
 
 export class Documento {
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   CodigoReferencia: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   Titulo: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   Descripcion: string;
 
   @IsInt()
-  @IsNotEmpty()
+  @IsOptional()
   Folios: number;
 
   @IsDateString()
-  @IsNotEmpty()
+  @IsOptional()
   FechaEmision: string;
 
   @IsString()
@@ -35,13 +35,17 @@ export class Documento {
   @IsString()
   @IsOptional()
   FormatoDocumento: string;
+  
+  @IsString()
+  @IsOptional()
+  NombreDocumento: string;
 
   @IsInt()
   @IsNotEmpty()
   IdTipoDocumento: number;
 
   @IsInt()
-  @IsNotEmpty()
+  @IsOptional()
   IdTramite: number;
 
   @IsInt()
@@ -53,7 +57,7 @@ export class Documento {
   FirmaDigital: boolean = false;
 
   @IsInt()
-  @IsNotEmpty()
+  @IsOptional()
   IdCarpeta: number;
 
   @IsBoolean()
