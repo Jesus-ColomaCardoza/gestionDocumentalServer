@@ -16,6 +16,7 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { Request } from 'express';
 import { EsquemaEstado } from '@prisma/client';
+import { OutEsquemaEstadoDto, OutEsquemaEstadosDto } from './dto/out-esquema-estado.dto';
 
 @Controller('esquema_estado')
 @ApiTags('esquema_estado')
@@ -28,19 +29,19 @@ export class EsquemaEstadoController {
   create(
     @Body() createEsquemaEstadoDto: CreateEsquemaEstadoDto,
     @Req() request?: Request,
-  ): Promise<EsquemaEstado> {
+  ): Promise<OutEsquemaEstadoDto> {
     return this.esquemaEstadoService.create(createEsquemaEstadoDto, request);
   }
 
   @Post('find_all')
   findAll(
     @Body() combinationsFiltersDto: CombinationsFiltersDto,
-  ): Promise<EsquemaEstado> {
+  ): Promise<OutEsquemaEstadosDto> {
     return this.esquemaEstadoService.findAll(combinationsFiltersDto);
   }
 
   @Get('find_one/:id')
-  findOne(@Param('id') id: string): Promise<EsquemaEstado> {
+  findOne(@Param('id') id: string): Promise<OutEsquemaEstadoDto> {
     return this.esquemaEstadoService.findOne(+id);
   }
 
@@ -49,7 +50,7 @@ export class EsquemaEstadoController {
     @Param('id') id: string,
     @Body() updateEsquemaEstadoDto: UpdateEsquemaEstadoDto,
     @Req() request?: Request,
-  ): Promise<EsquemaEstado> {
+  ): Promise<OutEsquemaEstadoDto> {
     return this.esquemaEstadoService.update(
       +id,
       updateEsquemaEstadoDto,
@@ -58,7 +59,7 @@ export class EsquemaEstadoController {
   }
 
   @Post('remove/:id')
-  remove(@Param('id') id: string): Promise<EsquemaEstado> {
+  remove(@Param('id') id: string): Promise<OutEsquemaEstadoDto> {
     return this.esquemaEstadoService.remove(+id);
   }
 }

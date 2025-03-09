@@ -14,8 +14,8 @@ import { UpdateMovimientoDto } from './dto/update-movimiento.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Request } from 'express';
-import { Movimiento } from '@prisma/client';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
+import { OutMovimientoDto, OutMovimientosDto } from './dto/out-movimiento.dto';
 
 @Controller('movimiento')
 @ApiTags('movimiento')
@@ -28,19 +28,19 @@ export class MovimientoController {
   create(
     @Body() createMovimientoDto: CreateMovimientoDto,
     @Req() request?: Request,
-  ): Promise<Movimiento> {
+  ): Promise<OutMovimientoDto> {
     return this.movimientoService.create(createMovimientoDto, request);
   }
 
   @Post('find_all')
   findAll(
     @Body() combinationsFiltersDto: CombinationsFiltersDto,
-  ): Promise<Movimiento> {
+  ): Promise<OutMovimientosDto> {
     return this.movimientoService.findAll(combinationsFiltersDto);
   }
 
   @Get('find_one/:id')
-  findOne(@Param('id') id: string): Promise<Movimiento> {
+  findOne(@Param('id') id: string): Promise<OutMovimientoDto> {
     return this.movimientoService.findOne(+id);
   }
 
@@ -49,12 +49,12 @@ export class MovimientoController {
     @Param('id') id: string,
     @Body() updateMovimientoDto: UpdateMovimientoDto,
     @Req() request?: Request,
-  ): Promise<Movimiento> {
+  ): Promise<OutMovimientoDto> {
     return this.movimientoService.update(+id, updateMovimientoDto, request);
   }
 
   @Post('remove/:id')
-  remove(@Param('id') id: string): Promise<Movimiento> {
+  remove(@Param('id') id: string): Promise<OutMovimientoDto> {
     return this.movimientoService.remove(+id);
   }
 }

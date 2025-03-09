@@ -7,6 +7,7 @@ import { FiltersService } from 'src/filters/filters.service';
 import { Request } from 'express';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { Prisma } from '@prisma/client';
+import { OutTipoUsuarioDto, OutTipoUsuariosDto } from './dto/out-tipo-usuario.dto';
 
 @Injectable()
 export class TipoUsuarioService {
@@ -20,7 +21,7 @@ export class TipoUsuarioService {
   async create(
     createTipoUsuarioDto: CreateTipoUsuarioDto,
     @Req() request?: Request,
-  ): Promise<any> {
+  ): Promise<OutTipoUsuarioDto> {
     try {
       //we validate FKs
 
@@ -45,7 +46,7 @@ export class TipoUsuarioService {
       return { message: this.message };
     }
   }
-  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<any> {
+  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<OutTipoUsuariosDto> {
     try {
       let filtros = combinationsFiltersDto.filters;
       let cantidad_max = combinationsFiltersDto.cantidad_max;
@@ -78,7 +79,7 @@ export class TipoUsuarioService {
     }
   }
 
-  async findOne(id: number): Promise<any> {
+  async findOne(id: number): Promise<OutTipoUsuarioDto> {
     try {
       const tipoUsuario = await this.prisma.tipoUsuario.findUnique({
         where: { IdTipoUsuario: id },
@@ -103,7 +104,7 @@ export class TipoUsuarioService {
   }
 
   async update(id: number, updateTipoUsuarioDto: UpdateTipoUsuarioDto,
-    @Req() request?: Request,): Promise<any> {
+    @Req() request?: Request,): Promise<OutTipoUsuarioDto> {
     try {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;
@@ -130,7 +131,7 @@ export class TipoUsuarioService {
     }
   }
 
-  async remove(id: number): Promise<any> {
+  async remove(id: number): Promise<OutTipoUsuarioDto> {
     try {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;

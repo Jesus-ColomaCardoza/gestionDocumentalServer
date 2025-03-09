@@ -7,6 +7,7 @@ import { FiltersService } from 'src/filters/filters.service';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { Prisma } from '@prisma/client';
 import { Request } from 'express';
+import { OutRolDto, OutRolesDto } from './dto/out-rol-dto';
 
 @Injectable()
 export class RolService {
@@ -19,7 +20,7 @@ export class RolService {
 
   async create(createRolDto: CreateRolDto,
     @Req() request?: Request,
-  ): Promise<any> {
+  ): Promise<OutRolDto> {
     try {
       //we validate FKs
 
@@ -45,7 +46,7 @@ export class RolService {
     }
   }
 
-  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<any> {
+  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<OutRolesDto> {
     try {
       let filtros = combinationsFiltersDto.filters;
       let cantidad_max = combinationsFiltersDto.cantidad_max;
@@ -78,7 +79,7 @@ export class RolService {
     }
   }
 
-  async findOne(id: string): Promise<any> {
+  async findOne(id: string): Promise<OutRolDto> {
     try {
       const rol = await this.prisma.rol.findUnique({
         where: { IdRol: id },
@@ -104,7 +105,7 @@ export class RolService {
 
   async update(id: string, updateRolDto: UpdateRolDto,
     @Req() request?: Request,
-  ): Promise<any> {
+  ): Promise<OutRolDto> {
     try {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;
@@ -131,7 +132,7 @@ export class RolService {
     }
   }
 
-  async remove(id: string): Promise<any> {
+  async remove(id: string): Promise<OutRolDto> {
     try {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;

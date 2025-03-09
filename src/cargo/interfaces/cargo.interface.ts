@@ -1,5 +1,5 @@
 export interface Cargo {
-  IdCargo: number;
+  IdCargo?: number;
   Descripcion?: string;
   Activo?: boolean;
   CreadoEl?: Date;

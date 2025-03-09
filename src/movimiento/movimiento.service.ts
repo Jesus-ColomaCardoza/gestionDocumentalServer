@@ -9,6 +9,7 @@ import { Request } from 'express';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { TramiteService } from 'src/tramite/tramite.service';
 import { AreaService } from 'src/area/area.service';
+import { OutMovimientoDto, OutMovimientosDto } from './dto/out-movimiento.dto';
 
 @Injectable()
 export class MovimientoService {
@@ -52,7 +53,7 @@ export class MovimientoService {
   async create(
     createMovimientoDto: CreateMovimientoDto,
     @Req() request?: Request,
-  ): Promise<any> {
+  ): Promise<OutMovimientoDto> {
     try {
       //we validate FKs
 
@@ -91,7 +92,7 @@ export class MovimientoService {
     }
   }
 
-  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<any> {
+  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<OutMovimientosDto> {
     try {
       let filtros = combinationsFiltersDto.filters;
       let cantidad_max = combinationsFiltersDto.cantidad_max;
@@ -121,7 +122,7 @@ export class MovimientoService {
     }
   }
 
-  async findOne(id: number): Promise<any> {
+  async findOne(id: number): Promise<OutMovimientoDto> {
     try {
       const movimiento = await this.prisma.movimiento.findUnique({
         where: { IdMovimiento: id },
@@ -149,7 +150,7 @@ export class MovimientoService {
     id: number,
     updateMovimientoDto: UpdateMovimientoDto,
     @Req() request?: Request,
-  ): Promise<any> {
+  ): Promise<OutMovimientoDto> {
     try {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;
@@ -194,7 +195,7 @@ export class MovimientoService {
     }
   }
 
-  async remove(id: number): Promise<any> {
+  async remove(id: number): Promise<OutMovimientoDto> {
     try {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;

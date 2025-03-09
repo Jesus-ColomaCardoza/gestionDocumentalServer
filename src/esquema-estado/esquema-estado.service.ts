@@ -7,6 +7,7 @@ import { PrismaService } from 'src/connection/prisma.service';
 import { FiltersService } from 'src/filters/filters.service';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { Prisma } from '@prisma/client';
+import { OutEsquemaEstadoDto, OutEsquemaEstadosDto } from './dto/out-esquema-estado.dto';
 
 @Injectable()
 export class EsquemaEstadoService {
@@ -20,7 +21,7 @@ export class EsquemaEstadoService {
   async create(
     createEsquemaEstadoDto: CreateEsquemaEstadoDto,
     @Req() request?: Request,
-  ): Promise<any> {
+  ): Promise<OutEsquemaEstadoDto> {
     try {
       //we validate FKs
 
@@ -46,7 +47,7 @@ export class EsquemaEstadoService {
     }
   }
 
-  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<any> {
+  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<OutEsquemaEstadosDto> {
     try {
       let filtros = combinationsFiltersDto.filters;
       let cantidad_max = combinationsFiltersDto.cantidad_max;
@@ -73,7 +74,7 @@ export class EsquemaEstadoService {
     }
   }
 
-  async findOne(id: number): Promise<any> {
+  async findOne(id: number): Promise<OutEsquemaEstadoDto> {
     try {
       const esquemaEstado = await this.prisma.esquemaEstado.findUnique({
         where: { IdEsquemaEstado: id },
@@ -97,7 +98,7 @@ export class EsquemaEstadoService {
     id: number,
     updateEsquemaEstadoDto: UpdateEsquemaEstadoDto,
     @Req() request?: Request,
-  ): Promise<any> {
+  ): Promise<OutEsquemaEstadoDto> {
     try {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;
@@ -123,7 +124,7 @@ export class EsquemaEstadoService {
       return { message: this.message };
     }
   }
-  async remove(id: number): Promise<any> {
+  async remove(id: number): Promise<OutEsquemaEstadoDto> {
     try {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;

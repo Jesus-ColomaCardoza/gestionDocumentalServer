@@ -7,6 +7,7 @@ import { Menssage } from 'src/menssage/menssage.entity';
 import { Prisma } from '@prisma/client';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { Request } from 'express';
+import { OutAreaDto, OutAreasDto } from './dto/out-area.dto';
 
 @Injectable()
 export class AreaService {
@@ -20,7 +21,7 @@ export class AreaService {
   async create(
     createAreaDto: CreateAreaDto,
     @Req() request?: Request,
-  ): Promise<any> {
+  ): Promise<OutAreaDto> {
     try {
       //we validate FKs
 
@@ -46,7 +47,7 @@ export class AreaService {
     }
   }
 
-  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<any> {
+  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<OutAreasDto> {
     try {
       let filtros = combinationsFiltersDto.filters;
       let cantidad_max = combinationsFiltersDto.cantidad_max;
@@ -73,7 +74,7 @@ export class AreaService {
     }
   }
 
-  async findOne(id: number): Promise<any> {
+  async findOne(id: number): Promise<OutAreaDto> {
     try {
       const area = await this.prisma.area.findUnique({
         where: { IdArea: id },
@@ -98,7 +99,7 @@ export class AreaService {
     id: number,
     updateAreaDto: UpdateAreaDto,
     @Req() request?: Request,
-  ): Promise<any> {
+  ): Promise<OutAreaDto> {
     try {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;
@@ -125,7 +126,7 @@ export class AreaService {
     }
   }
 
-  async remove(id: number): Promise<any> {
+  async remove(id: number): Promise<OutAreaDto> {
     try {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;

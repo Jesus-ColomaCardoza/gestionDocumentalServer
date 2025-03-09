@@ -7,6 +7,8 @@ import { FiltersService } from 'src/filters/filters.service';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { Prisma } from '@prisma/client';
 import { Request } from 'express';
+import { OutRolDto, OutRolesDto } from 'src/rol/dto/out-rol-dto';
+import { OutTipoIdentificacionDto, OutTipoIdentificacionesDto } from './dto/out-tipo-identificacion.dto';
 
 @Injectable()
 export class TipoIdentificacionService {
@@ -19,7 +21,7 @@ export class TipoIdentificacionService {
 
   async create(createTipoIdentificacionDto: CreateTipoIdentificacionDto,
     @Req() request?: Request,
-  ): Promise<any> {
+  ): Promise<OutTipoIdentificacionDto> {
     try {
       //we validate FKs
 
@@ -45,7 +47,7 @@ export class TipoIdentificacionService {
     }
   }
 
-  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<any> {
+  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<OutTipoIdentificacionesDto> {
     try {
       let filtros = combinationsFiltersDto.filters;
       let cantidad_max = combinationsFiltersDto.cantidad_max;
@@ -78,7 +80,7 @@ export class TipoIdentificacionService {
     }
   }
 
-  async findOne(id: number): Promise<any> {
+  async findOne(id: number): Promise<OutTipoIdentificacionDto> {
     try {
       const tipoIdentificacion = await this.prisma.tipoIdentificacion.findUnique({
         where: { IdTipoIdentificacion: id },
@@ -104,7 +106,7 @@ export class TipoIdentificacionService {
 
   async update(id: number, updateTipoIdentificacionDto: UpdateTipoIdentificacionDto,
     @Req() request?: Request,
-  ): Promise<any> {
+  ): Promise<OutTipoIdentificacionDto> {
     try {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;
@@ -131,7 +133,7 @@ export class TipoIdentificacionService {
     }
   }
 
-  async remove(id: number): Promise<any> {
+  async remove(id: number): Promise<OutTipoIdentificacionDto> {
     try {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;

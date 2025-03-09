@@ -8,6 +8,7 @@ import { FiltersService } from 'src/filters/filters.service';
 import { EsquemaEstadoService } from 'src/esquema-estado/esquema-estado.service';
 import { Prisma } from '@prisma/client';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
+import { OutEstadoDto, OutEstadosDto } from './dto/out-estado.dto';
 
 @Injectable()
 export class EstadoService {
@@ -21,14 +22,16 @@ export class EstadoService {
 
   private readonly customOut = {
     EsquemaEstado: {
-      select: { IdEsquemaEstado: true, Descripcion: true },
+      select: { 
+        IdEsquemaEstado: true, 
+        Descripcion: true },
     },
   };
 
   async create(
     createEstadoDto: CreateEstadoDto,
     @Req() request?: Request,
-  ): Promise<any> {
+  ): Promise<OutEstadoDto> {
     try {
       const idEsquemaEstadoFound = await this.esquemaEstado.findOne(
         createEstadoDto.IdEsquemaEstado,
@@ -56,7 +59,7 @@ export class EstadoService {
     }
   }
 
-  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<any> {
+  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<OutEstadosDto> {
     try {
       let filtros = combinationsFiltersDto.filters;
       let cantidad_max = combinationsFiltersDto.cantidad_max;
@@ -83,7 +86,7 @@ export class EstadoService {
     }
   }
 
-  async findOne(id: number): Promise<any> {
+  async findOne(id: number): Promise<OutEstadoDto> {
     try {
       const estado = await this.prisma.estado.findUnique({
         where: { IdEstado: id },
@@ -108,7 +111,7 @@ export class EstadoService {
     id: number,
     updateEstadoDto: UpdateEstadoDto,
     @Req() request?: Request,
-  ): Promise<any> {
+  ): Promise<OutEstadoDto> {
     try {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;
@@ -143,7 +146,7 @@ export class EstadoService {
     }
   }
 
-  async remove(id: number): Promise<any> {
+  async remove(id: number): Promise<OutEstadoDto> {
     try {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;

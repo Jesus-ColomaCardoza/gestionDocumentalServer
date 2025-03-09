@@ -7,6 +7,7 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { TipoDocumento } from '@prisma/client';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { Request } from 'express';
+import { OutTipoDocumentoDto, OutTipoDocumentosDto } from './dto/out-tipo-documento.dto';
 
 @Controller('tipo_documento')
 @ApiTags('tipo_documento')
@@ -18,29 +19,29 @@ export class TipoDocumentoController {
   @Post('create')
   create(@Body() createTipoDocumentoDto: CreateTipoDocumentoDto,
     @Req() request?: Request,
-  ): Promise<TipoDocumento> {
+  ): Promise<OutTipoDocumentoDto> {
     return this.tipoDocumentoService.create(createTipoDocumentoDto, request);
   }
 
   @Post('find_all')
-  findAll(@Body() combinationsFiltersDto: CombinationsFiltersDto): Promise<TipoDocumento> {
+  findAll(@Body() combinationsFiltersDto: CombinationsFiltersDto): Promise<OutTipoDocumentosDto> {
     return this.tipoDocumentoService.findAll(combinationsFiltersDto);
   }
 
   @Get('find_one/:id')
-  findOne(@Param('id') id: string): Promise<TipoDocumento> {
+  findOne(@Param('id') id: string): Promise<OutTipoDocumentoDto> {
     return this.tipoDocumentoService.findOne(+id);
   }
 
   @Patch('update/:id')
   update(@Param('id') id: string, @Body() updateTipoDocumentoDto: UpdateTipoDocumentoDto,
     @Req() request?: Request,
-  ): Promise<TipoDocumento> {
+  ): Promise<OutTipoDocumentoDto> {
     return this.tipoDocumentoService.update(+id, updateTipoDocumentoDto, request);
   }
 
   @Post('remove/:id')
-  remove(@Param('id') id: string): Promise<TipoDocumento> {
+  remove(@Param('id') id: string): Promise<OutTipoDocumentoDto> {
     return this.tipoDocumentoService.remove(+id);
   }
 }

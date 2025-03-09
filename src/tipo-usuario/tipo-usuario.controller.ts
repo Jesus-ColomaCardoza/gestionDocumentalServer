@@ -6,6 +6,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { TipoUsuario } from '@prisma/client';
 import { Request } from 'express';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
+import { OutTipoUsuarioDto, OutTipoUsuariosDto } from './dto/out-tipo-usuario.dto';
 
 @Controller('tipo_usuario')
 @ApiTags('tipo_usuario')
@@ -17,29 +18,29 @@ export class TipoUsuarioController {
   @Post('create')
   create(@Body() createTipoUsuarioDto: CreateTipoUsuarioDto,
     @Req() request?: Request,
-  ): Promise<TipoUsuario> {
+  ): Promise<OutTipoUsuarioDto> {
     return this.tipoUsuarioService.create(createTipoUsuarioDto, request);
   }
 
   @Post('find_all')
-  findAll(@Body() combinationsFiltersDto: CombinationsFiltersDto): Promise<TipoUsuario> {
+  findAll(@Body() combinationsFiltersDto: CombinationsFiltersDto): Promise<OutTipoUsuariosDto> {
     return this.tipoUsuarioService.findAll(combinationsFiltersDto);
   }
 
   @Get('find_one/:id')
-  findOne(@Param('id') id: string): Promise<TipoUsuario> {
+  findOne(@Param('id') id: string): Promise<OutTipoUsuarioDto> {
     return this.tipoUsuarioService.findOne(+id);
   }
 
   @Patch('update/:id')
   update(@Param('id') id: string, @Body() updateTipoUsuarioDto: UpdateTipoUsuarioDto,
     @Req() request?: Request,
-  ): Promise<TipoUsuario> {
+  ): Promise<OutTipoUsuarioDto> {
     return this.tipoUsuarioService.update(+id, updateTipoUsuarioDto, request);
   }
 
   @Post('remove/:id')
-  remove(@Param('id') id: string): Promise<TipoUsuario> {
+  remove(@Param('id') id: string): Promise<OutTipoUsuarioDto> {
     return this.tipoUsuarioService.remove(+id);
   }
 }
