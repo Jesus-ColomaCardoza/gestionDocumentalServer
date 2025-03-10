@@ -12,6 +12,7 @@ import { Prisma } from '@prisma/client';
 import { UsuarioService } from 'src/usuario/usuario.service';
 import { DocumentoService } from 'src/documento/documento.service';
 import { CarpetaService } from 'src/carpeta/carpeta.service';
+import { OutCompartidoDto, OutCompartidosDto } from './dto/out-compartido.dto';
 
 @Injectable()
 export class CompartidoService {
@@ -49,7 +50,7 @@ export class CompartidoService {
   async create(
     createCompartidoDto: CreateCompartidoDto,
     @Req() request?: Request,
-  ): Promise<any> {
+  ): Promise<OutCompartidoDto> {
     try {
       //we validate FKs
 
@@ -109,7 +110,7 @@ export class CompartidoService {
     }
   }
 
-  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<any> {
+  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<OutCompartidosDto> {
     try {
       let filtros = combinationsFiltersDto.filters;
       let cantidad_max = combinationsFiltersDto.cantidad_max;
@@ -139,7 +140,7 @@ export class CompartidoService {
     }
   }
 
-  async findOne(id: number): Promise<any> {
+  async findOne(id: number): Promise<OutCompartidoDto> {
     try {
       const compartido = await this.prisma.compartido.findUnique({
         where: { IdCompartido: id },
@@ -167,7 +168,7 @@ export class CompartidoService {
     id: number,
     updateCompartidoDto: UpdateCompartidoDto,
     @Req() request?: Request,
-  ): Promise<any> {
+  ): Promise<OutCompartidoDto> {
     try {
       const tipoElementoCompartido = updateCompartidoDto.TipoElementoCompartido;
       if (tipoElementoCompartido) {
@@ -234,7 +235,7 @@ export class CompartidoService {
     }
   }
 
-  async remove(id: number): Promise<any> {
+  async remove(id: number): Promise<OutCompartidoDto> {
     try {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;

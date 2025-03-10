@@ -9,6 +9,7 @@ import { Request } from 'express';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { DocumentoService } from 'src/documento/documento.service';
 import { UsuarioService } from 'src/usuario/usuario.service';
+import { OutRegistroFirmaDto, OutRegistroFirmasDto } from './dto/out-registro-firma.dto';
 
 @Injectable()
 export class RegistroFirmaService {
@@ -47,7 +48,7 @@ export class RegistroFirmaService {
   async create(
     createRegistroFirmaDto: CreateRegistroFirmaDto,
     @Req() request?: Request,
-  ): Promise<any> {
+  ): Promise<OutRegistroFirmaDto> {
     try {
       //we validate FKs
 
@@ -83,7 +84,7 @@ export class RegistroFirmaService {
     }
   }
 
-  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<any> {
+  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<OutRegistroFirmasDto> {
     try {
       let filtros = combinationsFiltersDto.filters;
       let cantidad_max = combinationsFiltersDto.cantidad_max;
@@ -113,7 +114,7 @@ export class RegistroFirmaService {
     }
   }
 
-  async findOne(id: number): Promise<any> {
+  async findOne(id: number): Promise<OutRegistroFirmaDto> {
     try {
       const registroFirma = await this.prisma.registroFirma.findUnique({
         where: { IdRegistroFirma: id },
@@ -141,7 +142,7 @@ export class RegistroFirmaService {
     id: number,
     updateRegistroFirmaDto: UpdateRegistroFirmaDto,
     @Req() request?: Request,
-  ): Promise<any> {
+  ): Promise<OutRegistroFirmaDto> {
     try {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;
@@ -180,7 +181,7 @@ export class RegistroFirmaService {
     }
   }
 
-  async remove(id: number): Promise<any> {
+  async remove(id: number): Promise<OutRegistroFirmaDto> {
     try {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;

@@ -16,6 +16,7 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Request } from 'express';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { Tramite } from '@prisma/client';
+import { OutTramiteDto, OutTramitesDto } from './dto/out-tramite.dto';
 @Controller('tramite')
 @ApiTags('tramite')
 // @UseGuards(AuthGuard)
@@ -27,19 +28,19 @@ export class TramiteController {
   create(
     @Body() createTramiteDto: CreateTramiteDto,
     @Req() request?: Request,
-  ): Promise<Tramite> {
+  ): Promise<OutTramiteDto> {
     return this.tramiteService.create(createTramiteDto, request);
   }
 
   @Post('find_all')
   findAll(
     @Body() combinationsFiltersDto: CombinationsFiltersDto,
-  ): Promise<Tramite> {
+  ): Promise<OutTramitesDto> {
     return this.tramiteService.findAll(combinationsFiltersDto);
   }
 
   @Get('find_one/:id')
-  findOne(@Param('id') id: string): Promise<Tramite> {
+  findOne(@Param('id') id: string): Promise<OutTramiteDto> {
     return this.tramiteService.findOne(+id);
   }
 
@@ -48,12 +49,12 @@ export class TramiteController {
     @Param('id') id: string,
     @Body() updateTramiteDto: UpdateTramiteDto,
     @Req() request?: Request,
-  ): Promise<Tramite> {
+  ): Promise<OutTramiteDto> {
     return this.tramiteService.update(+id, updateTramiteDto, request);
   }
 
   @Post('remove/:id')
-  remove(@Param('id') id: string): Promise<Tramite> {
+  remove(@Param('id') id: string): Promise<OutTramiteDto> {
     return this.tramiteService.remove(+id);
   }
 }

@@ -16,6 +16,7 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Request } from 'express';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { Empresa } from '@prisma/client';
+import { OutEmpresaDto, OutEmpresasDto } from './dto/out-empresa-dto';
 
 @Controller('empresa')
 @ApiTags('empresa')
@@ -28,19 +29,19 @@ export class EmpresaController {
   create(
     @Body() createEmpresaDto: CreateEmpresaDto,
     @Req() request?: Request,
-  ): Promise<Empresa> {
+  ): Promise<OutEmpresaDto> {
     return this.empresaService.create(createEmpresaDto, request);
   }
 
   @Post('find_all')
   findAll(
     @Body() combinationsFiltersDto: CombinationsFiltersDto,
-  ): Promise<Empresa> {
+  ): Promise<OutEmpresasDto> {
     return this.empresaService.findAll(combinationsFiltersDto);
   }
 
   @Get('find_one/:id')
-  findOne(@Param('id') id: string): Promise<Empresa> {
+  findOne(@Param('id') id: string): Promise<OutEmpresaDto> {
     return this.empresaService.findOne(+id);
   }
 
@@ -49,12 +50,12 @@ export class EmpresaController {
     @Param('id') id: string,
     @Body() updateEmpresaDto: UpdateEmpresaDto,
     @Req() request?: Request,
-  ): Promise<Empresa> {
+  ): Promise<OutEmpresaDto> {
     return this.empresaService.update(+id, updateEmpresaDto, request);
   }
 
   @Post('remove/:id')
-  remove(@Param('id') id: string): Promise<Empresa> {
+  remove(@Param('id') id: string): Promise<OutEmpresaDto> {
     return this.empresaService.remove(+id);
   }
 }

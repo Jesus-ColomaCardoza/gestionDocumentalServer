@@ -16,6 +16,7 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Request } from 'express';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { RegistroFirma } from '@prisma/client';
+import { OutRegistroFirmaDto, OutRegistroFirmasDto } from './dto/out-registro-firma.dto';
 
 @Controller('registro_firma')
 @ApiTags('registro_firma')
@@ -28,17 +29,17 @@ export class RegistroFirmaController {
   create(
     @Body() createRegistroFirmaDto: CreateRegistroFirmaDto,
     @Req() request?: Request,
-  ) :Promise<RegistroFirma>{
+  ) :Promise<OutRegistroFirmaDto>{
     return this.registroFirmaService.create(createRegistroFirmaDto, request);
   }
 
   @Post('find_all')
-  findAll(@Body() combinationsFiltersDto: CombinationsFiltersDto):Promise<RegistroFirma> {
+  findAll(@Body() combinationsFiltersDto: CombinationsFiltersDto):Promise<OutRegistroFirmasDto> {
     return this.registroFirmaService.findAll(combinationsFiltersDto);
   }
 
   @Get('find_one/:id')
-  findOne(@Param('id') id: string):Promise<RegistroFirma> {
+  findOne(@Param('id') id: string):Promise<OutRegistroFirmaDto> {
     return this.registroFirmaService.findOne(+id);
   }
 
@@ -47,7 +48,7 @@ export class RegistroFirmaController {
     @Param('id') id: string,
     @Body() updateRegistroFirmaDto: UpdateRegistroFirmaDto,
     @Req() request?: Request,
-  ):Promise<RegistroFirma> {
+  ):Promise<OutRegistroFirmaDto> {
     return this.registroFirmaService.update(
       +id,
       updateRegistroFirmaDto,
@@ -56,7 +57,7 @@ export class RegistroFirmaController {
   }
 
   @Post('remove/:id')
-  remove(@Param('id') id: string):Promise<RegistroFirma> {
+  remove(@Param('id') id: string):Promise<OutRegistroFirmaDto> {
     return this.registroFirmaService.remove(+id);
   }
 }

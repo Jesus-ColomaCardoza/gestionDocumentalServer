@@ -8,6 +8,7 @@ import { Request } from 'express';
 import { Prisma } from '@prisma/client';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { FileService } from 'src/file/file.service';
+import { OutEmpresaDto, OutEmpresasDto } from './dto/out-empresa-dto';
 
 @Injectable()
 export class EmpresaService {
@@ -23,7 +24,7 @@ export class EmpresaService {
   async create(
     createEmpresaDto: CreateEmpresaDto,
     @Req() request?: Request,
-  ): Promise<any> {
+  ): Promise<OutEmpresaDto> {
     try {
       let file = null;
 
@@ -79,7 +80,7 @@ export class EmpresaService {
     }
   }
 
-  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<any> {
+  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<OutEmpresasDto> {
     try {
       let filtros = combinationsFiltersDto.filters;
       let cantidad_max = combinationsFiltersDto.cantidad_max;
@@ -106,7 +107,7 @@ export class EmpresaService {
     }
   }
 
-  async findOne(id: number): Promise<any> {
+  async findOne(id: number): Promise<OutEmpresaDto> {
     try {
       const empresa = await this.prisma.empresa.findUnique({
         where: { IdEmpresa: id },
@@ -131,7 +132,7 @@ export class EmpresaService {
     id: number,
     updateEmpresaDto: UpdateEmpresaDto,
     @Req() request?: Request,
-  ): Promise<any> {
+  ): Promise<OutEmpresaDto> {
     try {
       let file = null;
       let fileUpdate = '';
@@ -222,7 +223,7 @@ export class EmpresaService {
       return { message: this.message };
     }
   }
-  async remove(id: number): Promise<any> {
+  async remove(id: number): Promise<OutEmpresaDto> {
     try {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;

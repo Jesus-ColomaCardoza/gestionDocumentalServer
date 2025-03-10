@@ -8,6 +8,7 @@ import { FiltersService } from 'src/filters/filters.service';
 import { Prisma} from '@prisma/client';
 import { Menssage } from 'src/menssage/menssage.entity';
 import { UsuarioService } from 'src/usuario/usuario.service';
+import { OutCarpetaDto, OutCarpetasDto } from './dto/out-carpeta.dto';
 
 @Injectable()
 export class CarpetaService {
@@ -46,7 +47,7 @@ export class CarpetaService {
   async create(
     createCarpetaDto: CreateCarpetaDto,
     @Req() request?: Request,
-  ): Promise<any> {
+  ): Promise<OutCarpetaDto> {
     try {
       //we validate FKs
 
@@ -83,7 +84,7 @@ export class CarpetaService {
     }
   }
 
-  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<any> {
+  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<OutCarpetasDto> {
     try {
       let filtros = combinationsFiltersDto.filters;
       let cantidad_max = combinationsFiltersDto.cantidad_max;
@@ -113,7 +114,7 @@ export class CarpetaService {
     }
   }
 
-  async findOne(id: number): Promise<any> {
+  async findOne(id: number): Promise<OutCarpetaDto> {
     try {
       const carpeta = await this.prisma.carpeta.findUnique({
         where: { IdCarpeta: id },
@@ -141,7 +142,7 @@ export class CarpetaService {
     id: number,
     updateCarpetaDto: UpdateCarpetaDto,
     @Req() request?: Request,
-  ): Promise<any> {
+  ): Promise<OutCarpetaDto> {
     try {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;
@@ -180,7 +181,7 @@ export class CarpetaService {
     }
   }
 
-  async remove(id: number): Promise<any> {
+  async remove(id: number): Promise<OutCarpetaDto> {
     try {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;
