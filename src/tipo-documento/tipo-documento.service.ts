@@ -131,7 +131,6 @@ export class TipoDocumentoService {
     }
   }
 
-
   async remove(id: number): Promise<OutTipoDocumentoDto> {
     try {
       const idFound = await this.findOne(id);

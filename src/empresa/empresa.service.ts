@@ -137,8 +137,14 @@ export class EmpresaService {
       let fileUpdate = '';
       const fileUpdateValues = ['R', 'NU', 'U'];
       // FileBase64 and NombreImagen always they will send like '', they'll never sends null or undefined
-      const fileB64 = updateEmpresaDto.LogoBase64;
-      const nomImagen = updateEmpresaDto.LogoNombre;
+      const fileB64 =
+        updateEmpresaDto.LogoBase64 === undefined
+          ? ''
+          : updateEmpresaDto.LogoBase64;
+      const nomImagen =
+        updateEmpresaDto.LogoNombre === undefined
+          ? ''
+          : updateEmpresaDto.LogoNombre;
 
       if (fileB64 == null && nomImagen == null) {
         // remove image

@@ -302,8 +302,14 @@ export class UsuarioService {
       let fileUpdate = '';
       const fileUpdateValues = ['R', 'NU', 'U'];
       // FileBase64 and NombreImagen always they will send like '', they'll never sends null or undefined
-      const fileB64 = updateUsuarioDto.FotoPerfilBase64;
-      const nomImagen = updateUsuarioDto.FotoPerfilNombre;
+      const fileB64 =
+        updateUsuarioDto.FotoPerfilBase64 === undefined
+          ? ''
+          : updateUsuarioDto.FotoPerfilBase64;
+      const nomImagen =
+        updateUsuarioDto.FotoPerfilNombre === undefined
+          ? ''
+          : updateUsuarioDto.FotoPerfilNombre;
 
       if (fileB64 == null && nomImagen == null) {
         // remove image
