@@ -15,6 +15,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { Carpeta } from '@prisma/client';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
+import { OutCarpetaDto, OutCarpetasDto } from './dto/out-carpeta.dto';
 
 @Controller('carpeta')
 @ApiTags('carpeta')
@@ -27,19 +28,19 @@ export class CarpetaController {
   create(
     @Body() createCarpetaDto: CreateCarpetaDto,
     @Req() request?: Request,
-  ): Promise<Carpeta> {
+  ): Promise<OutCarpetaDto> {
     return this.carpetaService.create(createCarpetaDto, request);
   }
 
   @Post('find_all')
   findAll(
     @Body() combinationsFiltersDto: CombinationsFiltersDto,
-  ): Promise<Carpeta> {
+  ): Promise<OutCarpetasDto> {
     return this.carpetaService.findAll(combinationsFiltersDto);
   }
 
   @Get('find_one/:id')
-  findOne(@Param('id') id: string): Promise<Carpeta> {
+  findOne(@Param('id') id: string): Promise<OutCarpetaDto> {
     return this.carpetaService.findOne(+id);
   }
 
@@ -48,12 +49,12 @@ export class CarpetaController {
     @Param('id') id: string,
     @Body() updateCarpetaDto: UpdateCarpetaDto,
     @Req() request?: Request,
-  ): Promise<Carpeta> {
+  ): Promise<OutCarpetaDto> {
     return this.carpetaService.update(+id, updateCarpetaDto, request);
   }
 
   @Post('remove/:id')
-  remove(@Param('id') id: string): Promise<Carpeta> {
+  remove(@Param('id') id: string): Promise<OutCarpetaDto> {
     return this.carpetaService.remove(+id);
   }
 }

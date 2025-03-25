@@ -16,6 +16,7 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Request } from 'express';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { Usuario } from '@prisma/client';
+import { OutUsuarioDto, OutUsuariosDto } from './dto/out-usuario.dto';
 
 @Controller('usuario')
 @ApiTags('usuario')
@@ -28,19 +29,19 @@ export class UsuarioController {
   create(
     @Body() createUsuarioDto: CreateUsuarioDto,
     @Req() request?: Request,
-  ): Promise<Usuario> {
+  ): Promise<OutUsuarioDto> {
     return this.usuarioService.create(createUsuarioDto, request);
   }
 
   @Post('find_all')
   findAll(
     @Body() combinationsFiltersDto: CombinationsFiltersDto,
-  ): Promise<Usuario> {
+  ): Promise<OutUsuariosDto> {
     return this.usuarioService.findAll(combinationsFiltersDto);
   }
 
   @Get('find_one/:id')
-  findOne(@Param('id') id: string): Promise<Usuario> {
+  findOne(@Param('id') id: string): Promise<OutUsuarioDto> {
     return this.usuarioService.findOne(+id);
   }
 
@@ -49,12 +50,12 @@ export class UsuarioController {
     @Param('id') id: string,
     @Body() updateUsuarioDto: UpdateUsuarioDto,
     @Req() request?: Request,
-  ): Promise<Usuario> {
+  ): Promise<OutUsuarioDto> {
     return this.usuarioService.update(+id, updateUsuarioDto, request);
   }
 
   @Post('remove/:id')
-  remove(@Param('id') id: string): Promise<Usuario> {
+  remove(@Param('id') id: string): Promise<OutUsuarioDto> {
     return this.usuarioService.remove(+id);
   }
 }

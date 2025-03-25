@@ -10,6 +10,8 @@ import { TipoTramiteService } from 'src/tipo-tramite/tipo-tramite.service';
 import { EstadoService } from 'src/estado/estado.service';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { UsuarioService } from 'src/usuario/usuario.service';
+import { OutTramiteDto } from './dto/out-tramite.dto';
+import { OutTipoTramitesDto } from 'src/tipo-tramite/dto/out-tipo-tramite.dto';
 
 @Injectable()
 export class TramiteService {
@@ -66,7 +68,7 @@ export class TramiteService {
   async create(
     createTramiteDto: CreateTramiteDto,
     @Req() request?: Request,
-  ): Promise<any> {
+  ): Promise<OutTramiteDto> {
     try {
       //we validate FKs
 
@@ -107,7 +109,7 @@ export class TramiteService {
     }
   }
 
-  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<any> {
+  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<OutTipoTramitesDto> {
     try {
       let filtros = combinationsFiltersDto.filters;
       let cantidad_max = combinationsFiltersDto.cantidad_max;
@@ -134,7 +136,7 @@ export class TramiteService {
     }
   }
 
-  async findOne(id: number): Promise<any> {
+  async findOne(id: number): Promise<OutTramiteDto> {
     try {
       const tramite = await this.prisma.tramite.findUnique({
         where: { IdTramite: id },
@@ -159,7 +161,7 @@ export class TramiteService {
     id: number,
     updateTramiteDto: UpdateTramiteDto,
     @Req() request?: Request,
-  ): Promise<any> {
+  ): Promise<OutTramiteDto> {
     try {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;
@@ -205,7 +207,7 @@ export class TramiteService {
     }
   }
 
-  async remove(id: number): Promise<any> {
+  async remove(id: number): Promise<OutTramiteDto> {
     try {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;

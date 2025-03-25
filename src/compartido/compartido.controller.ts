@@ -15,6 +15,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { Compartido } from '@prisma/client';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
+import { OutCompartidoDto, OutCompartidosDto } from './dto/out-compartido.dto';
 
 @Controller('compartido')
 @ApiTags('compartido')
@@ -27,19 +28,19 @@ export class CompartidoController {
   create(
     @Body() createCompartidoDto: CreateCompartidoDto,
     @Req() request?: Request,
-  ): Promise<Compartido> {
+  ): Promise<OutCompartidoDto> {
     return this.compartidoService.create(createCompartidoDto, request);
   }
 
   @Post('find_all')
   findAll(
     @Body() combinationsFiltersDto: CombinationsFiltersDto,
-  ): Promise<Compartido> {
+  ): Promise<OutCompartidosDto> {
     return this.compartidoService.findAll(combinationsFiltersDto);
   }
 
   @Get('find_one/:id')
-  findOne(@Param('id') id: string): Promise<Compartido> {
+  findOne(@Param('id') id: string): Promise<OutCompartidoDto> {
     return this.compartidoService.findOne(+id);
   }
 
@@ -48,12 +49,12 @@ export class CompartidoController {
     @Param('id') id: string,
     @Body() updateCompartidoDto: UpdateCompartidoDto,
     @Req() request?: Request,
-  ): Promise<Compartido> {
+  ): Promise<OutCompartidoDto> {
     return this.compartidoService.update(+id, updateCompartidoDto, request);
   }
 
   @Post('remove/:id')
-  remove(@Param('id') id: string): Promise<Compartido> {
+  remove(@Param('id') id: string): Promise<OutCompartidoDto> {
     return this.compartidoService.remove(+id);
   }
 }

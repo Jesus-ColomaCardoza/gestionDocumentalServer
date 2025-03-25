@@ -16,6 +16,7 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Request } from 'express';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { Documento } from '@prisma/client';
+import { OutDocumentoDto, OutDocumentosDto } from './dto/out-documento.dto';
 
 @Controller('documento')
 @ApiTags('documento')
@@ -28,19 +29,19 @@ export class DocumentoController {
   create(
     @Body() createDocumentoDto: CreateDocumentoDto,
     @Req() request?: Request,
-  ): Promise<Documento> {
+  ): Promise<OutDocumentoDto> {
     return this.documentoService.create(createDocumentoDto, request);
   }
 
   @Post('find_all')
   findAll(
     @Body() combinationsFiltersDto: CombinationsFiltersDto,
-  ): Promise<Documento> {
+  ): Promise<OutDocumentosDto> {
     return this.documentoService.findAll(combinationsFiltersDto);
   }
 
   @Get('find_one/:id')
-  findOne(@Param('id') id: string): Promise<Documento> {
+  findOne(@Param('id') id: string): Promise<OutDocumentoDto> {
     return this.documentoService.findOne(+id);
   }
 
@@ -49,12 +50,12 @@ export class DocumentoController {
     @Param('id') id: string,
     @Body() updateDocumentoDto: UpdateDocumentoDto,
     @Req() request?: Request,
-  ): Promise<Documento> {
+  ): Promise<OutDocumentoDto> {
     return this.documentoService.update(+id, updateDocumentoDto, request);
   }
 
   @Post('remove/:id')
-  remove(@Param('id') id: string): Promise<Documento> {
+  remove(@Param('id') id: string): Promise<OutDocumentoDto> {
     return this.documentoService.remove(+id);
   }
 }
