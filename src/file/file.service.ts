@@ -2,26 +2,34 @@ import { Injectable } from '@nestjs/common';
 import { Menssage } from 'src/menssage/menssage.entity';
 import { promisify } from 'util';
 import { exec } from 'child_process';
-import path from 'path';
+import path, { extname } from 'path';
 import * as fs from 'fs/promises';
 import { ConfigService } from '@nestjs/config';
+import { OutFileDto } from './dto/out-file.dto';
 
 @Injectable()
 export class FileService {
   private message = new Menssage();
+  private subPath = 'documentos';
 
   constructor(private configEnv: ConfigService) {}
 
-  async create(file: Express.Multer.File) {
+  async create(file: Express.Multer.File) : Promise<OutFileDto>{
     try {
       if (file.filename && file.path) {
         this.message.setMessage(0, 'File - Registro creado');
-        return { message: this.message, registro: file};
+        return {
+          message: this.message,
+          registro: {
+            ...file,
+            parseoriginalname:path.parse(file.originalname).name,
+            url:  await this.traerRuta(file.filename, this.subPath),
+          },
+        };
       } else {
         this.message.setMessage(1, 'Error: Error interno en el servidor');
         return { message: this.message };
       }
-      
     } catch (error: any) {
       console.log(error);
       this.message.setMessage(1, error.message);
@@ -51,7 +59,12 @@ export class FileService {
       let byteArray: Buffer;
       byteArray = Buffer.from(base64, 'base64');
 
-      const basePath = `${this.configEnv.get('config.filesOnboardingPath')}\\${nombreCarpeta}`;
+      const basePath = path.join(
+        __dirname,
+        '../../../',
+        this.configEnv.get('config.filesSgdFolder'),
+        nombreCarpeta,
+      );
       const ruta = path.resolve(basePath);
 
       // Crear directorio si no existe
@@ -70,10 +83,7 @@ export class FileService {
       const { stdout, stderr } = await execAsync(icaclsCommand);
 
       return {
-        UrlBase: path.join(
-          this.configEnv.get('config.filesOnboardingPath'),
-          nombreCarpeta,
-        ),
+        UrlBase: basePath,
         Url: await this.traerRuta(nombreCompletoArchivo, nombreCarpeta),
         Nombre: nombreCompletoArchivo,
       };
@@ -84,7 +94,7 @@ export class FileService {
   }
 
   obtenerAmbiente(): string {
-    return `${this.configEnv.get('config.filesOnboardingUrl')}`;
+    return `${this.configEnv.get('config.filesSgdUrl')}`;
   }
 
   async traerRuta(nombreArchivo: string, carpeta: string): Promise<string> {

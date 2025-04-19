@@ -8,7 +8,7 @@ import { Request } from 'express';
 import { Prisma } from '@prisma/client';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { FileService } from 'src/file/file.service';
-import { OutEmpresaDto, OutEmpresasDto } from './dto/out-empresa-dto';
+import { OutEmpresaDto, OutEmpresasDto } from './dto/out-empresa.dto';
 
 @Injectable()
 export class EmpresaService {
@@ -23,7 +23,7 @@ export class EmpresaService {
 
   async create(
     createEmpresaDto: CreateEmpresaDto,
-    @Req() request?: Request,
+    request?: Request,
   ): Promise<OutEmpresaDto> {
     try {
       let file = null;
@@ -57,8 +57,8 @@ export class EmpresaService {
               ...createEmpresaDto,
               CreadoPor: `${request?.user?.id ?? 'test user'}`,
               UrlBase: file.UrlBase,
-              LogoUrl: file.Url,
-              LogoNombre: file.Nombre,
+              UrlLogo: file.Url,
+              NombreLogo: file.Nombre,
             }
           : {
               ...createEmpresaDto,
@@ -80,7 +80,9 @@ export class EmpresaService {
     }
   }
 
-  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<OutEmpresasDto> {
+  async findAll(
+    combinationsFiltersDto: CombinationsFiltersDto,
+  ): Promise<OutEmpresasDto> {
     try {
       let filtros = combinationsFiltersDto.filters;
       let cantidad_max = combinationsFiltersDto.cantidad_max;
@@ -131,7 +133,7 @@ export class EmpresaService {
   async update(
     id: number,
     updateEmpresaDto: UpdateEmpresaDto,
-    @Req() request?: Request,
+    request?: Request,
   ): Promise<OutEmpresaDto> {
     try {
       let file = null;
@@ -197,8 +199,8 @@ export class EmpresaService {
                 ModificadoPor: `${request?.user?.id ?? 'test user'}`,
                 UrlBase:
                   fileUpdate == fileUpdateValues[0] ? null : file.UrlBase,
-                LogoUrl: fileUpdate == fileUpdateValues[0] ? null : file.Url,
-                LogoNombre:
+                UrlLogo: fileUpdate == fileUpdateValues[0] ? null : file.Url,
+                NombreLogo:
                   fileUpdate == fileUpdateValues[0] ? null : file.Nombre,
               }
             : {
@@ -213,7 +215,7 @@ export class EmpresaService {
           fileUpdate == fileUpdateValues[2]
         ) {
           await this.file.eliminarDocumento(
-            idFound.registro.UrlBase + '/' + idFound.registro.LogoNombre,
+            idFound.registro.UrlBase + '/' + idFound.registro.NombreLogo,
           );
         }
 
@@ -229,6 +231,7 @@ export class EmpresaService {
       return { message: this.message };
     }
   }
+  
   async remove(id: number): Promise<OutEmpresaDto> {
     try {
       const idFound = await this.findOne(id);
@@ -239,7 +242,7 @@ export class EmpresaService {
       });
 
       if (empresa) {
-        this.file.eliminarDocumento(empresa.UrlBase + '/' + empresa.LogoNombre);
+        this.file.eliminarDocumento(empresa.UrlBase + '/' + empresa.NombreLogo);
 
         this.message.setMessage(0, 'Empresa - Registro eliminado');
         return { message: this.message, registro: empresa };

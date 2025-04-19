@@ -1,6 +1,7 @@
 import {
   IsBoolean,
   IsDateString,
+  IsIn,
   IsInt,
   IsNotEmpty,
   IsOptional,
@@ -30,18 +31,26 @@ export class Documento {
 
   @IsString()
   @IsOptional()
-  UrlDocumento: string;
-
-  @IsString()
-  @IsOptional()
   FormatoDocumento: string;
-  
+
   @IsString()
   @IsOptional()
   NombreDocumento: string;
 
+  @IsString()
+  @IsOptional()
+  UrlDocumento: string;
+
   @IsInt()
-  @IsNotEmpty()
+  @IsOptional()
+  SizeDocumento: number;
+
+  @IsString()
+  @IsOptional()
+  UrlBase: string;
+
+  @IsInt()
+  @IsOptional()
   IdTipoDocumento: number;
 
   @IsInt()
@@ -60,7 +69,16 @@ export class Documento {
   @IsOptional()
   IdCarpeta: number;
 
+  @IsInt()
+  @IsOptional()
+  IdEstado: number;
+
   @IsBoolean()
   @IsNotEmpty()
   Activo: boolean = true;
+
+  // MF:my files, FA:files area, FS:files shared
+  @IsIn(['MF', 'FA', 'FS'])
+  @IsOptional()
+  Categoria: string;
 }

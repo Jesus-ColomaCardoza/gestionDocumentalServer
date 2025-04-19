@@ -16,15 +16,16 @@ export interface Usuario {
   IdCargo?: number;
   IdArea?: number;
   CodigoConfirmacion?: string;
-  FotoPerfilNombre?: string;
-  FotoPerfilUrl?: string;
+  FormatoFotoPerfil?: string;
+  NombreFotoPerfil?: string;
+  UrlFotoPerfil?: string;
+  SizeFotoPerfil?: number;
   UrlBase?: string;
   Activo?: boolean;
   CreadoEl?: Date;
   CreadoPor?: string;
   ModificadoEl?: Date;
   ModificadoPor?: string;
-
   TipoIdentificacion?: {
     IdTipoIdentificacion: number;
     Descripcion: string;

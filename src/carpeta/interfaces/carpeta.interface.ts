@@ -3,12 +3,12 @@ export interface Carpeta {
   Descripcion?: string;
   IdCarpetaPadre?: number;
   IdUsuario?: number;
+  Categoria?: string;
   Activo?: boolean;
   CreadoEl?: Date;
   CreadoPor?: string;
   ModificadoEl?: Date;
   ModificadoPor?: string;
-
   CarpetaPadre?: {
     IdCarpeta: number;
     Descripcion: string;

@@ -2,12 +2,15 @@ import {
   Controller,
   Post,
   UploadedFile,
+  UseFilters,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileService } from './file.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { MulterExceptionFilter } from './filter/multer-exception.filter';
+import { OutFileDto } from './dto/out-file.dto';
 @Controller('file')
 @ApiTags('file')
 // @UseGuards(AuthGuard)
@@ -19,7 +22,8 @@ export class FileController {
 
   @Post('create')
   @UseInterceptors(FileInterceptor('file'))
-  create(@UploadedFile() file: Express.Multer.File) {
+  @UseFilters(MulterExceptionFilter)
+  create(@UploadedFile() file: Express.Multer.File): Promise<OutFileDto> {
     return this.fileService.create(file);
   }
 }

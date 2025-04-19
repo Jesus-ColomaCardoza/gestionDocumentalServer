@@ -16,7 +16,7 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Request } from 'express';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { Empresa } from '@prisma/client';
-import { OutEmpresaDto, OutEmpresasDto } from './dto/out-empresa-dto';
+import { OutEmpresaDto, OutEmpresasDto } from './dto/out-empresa.dto';
 
 @Controller('empresa')
 @ApiTags('empresa')

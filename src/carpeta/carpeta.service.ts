@@ -23,6 +23,7 @@ export class CarpetaService {
   private readonly customOut = {
     IdCarpeta: true,
     Descripcion: true,
+    Categoria: true,
     CarpetaPadre: {
       select: {
         IdCarpeta: true,

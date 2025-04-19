@@ -1,4 +1,11 @@
-import { IsBoolean, IsString, IsInt, IsNotEmpty, IsOptional } from 'class-validator';
+import {
+  IsBoolean,
+  IsString,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsIn,
+} from 'class-validator';
 
 export class Carpeta {
   @IsString()
@@ -16,4 +23,9 @@ export class Carpeta {
   @IsBoolean()
   @IsNotEmpty()
   Activo: boolean = true;
+
+  // MF:my files, FA:files area, FS:files shared
+  @IsIn(['MF', 'FA', 'FS'])
+  @IsOptional()
+  Categoria: string;
 }

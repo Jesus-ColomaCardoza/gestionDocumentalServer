@@ -7,7 +7,7 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Request } from 'express';
 import { Rol } from '@prisma/client';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
-import { OutRolDto, OutRolesDto } from './dto/out-rol-dto';
+import { OutRolDto, OutRolesDto } from './dto/out-rol.dto';
 
 @Controller('rol')
 @ApiTags('rol')

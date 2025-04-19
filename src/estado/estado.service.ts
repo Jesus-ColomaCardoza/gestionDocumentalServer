@@ -22,9 +22,10 @@ export class EstadoService {
 
   private readonly customOut = {
     EsquemaEstado: {
-      select: { 
-        IdEsquemaEstado: true, 
-        Descripcion: true },
+      select: {
+        IdEsquemaEstado: true,
+        Descripcion: true,
+      },
     },
   };
 
@@ -43,6 +44,7 @@ export class EstadoService {
           ...createEstadoDto,
           CreadoPor: `${request?.user?.id ?? 'test user'}`,
         },
+        include: this.customOut,
       });
 
       if (estado) {
@@ -59,7 +61,9 @@ export class EstadoService {
     }
   }
 
-  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<OutEstadosDto> {
+  async findAll(
+    combinationsFiltersDto: CombinationsFiltersDto,
+  ): Promise<OutEstadosDto> {
     try {
       let filtros = combinationsFiltersDto.filters;
       let cantidad_max = combinationsFiltersDto.cantidad_max;
@@ -130,6 +134,7 @@ export class EstadoService {
           ...updateEstadoDto,
           ModificadoPor: `${request?.user?.id ?? 'test user'}`,
         },
+        include: this.customOut,
       });
 
       if (estado) {

@@ -132,17 +132,11 @@ export class Helpers {
     return (
       nodos
         // filter child nodes of the parent node
-        .filter(
-          (nodo) =>
-            (nodo.accesoPadre?.IdAcceso ?? null) === parentId,
-        )
+        .filter((nodo) => (nodo.accesoPadre?.IdAcceso ?? null) === parentId)
         // recursively finds its children
         .map((nodo) => ({
           ...nodo,
-          accesohijo: this.generateAccesosTree(
-            nodos,
-            nodo.IdAcceso,
-          ),
+          accesohijo: this.generateAccesosTree(nodos, nodo.IdAcceso),
         }))
     );
   }
@@ -151,17 +145,11 @@ export class Helpers {
     return (
       nodos
         // filter child nodes of the parent node
-        .filter(
-          (nodo) =>
-            (nodo.menupadre?.IdMenu ?? null) === parentId,
-        )
+        .filter((nodo) => (nodo.menupadre?.IdMenu ?? null) === parentId)
         // recursively finds its children
         .map((nodo) => ({
           ...nodo,
-          menuhijo: this.generateMenuTree(
-            nodos,
-            nodo.IdMenu,
-          ),
+          menuhijo: this.generateMenuTree(nodos, nodo.IdMenu),
         }))
     );
   }
@@ -220,5 +208,18 @@ export class Helpers {
         this.iterateAccesosTree(nodo.accesohijo, nivel + 1);
       }
     });
+  }
+
+  /**
+   * format file size
+   *
+   * @param { number} bytes
+   */
+  formatFileSize(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    const kb = bytes / 1024;
+    if (kb < 1024) return `${kb.toFixed(2)} KB`;
+    const mb = kb / 1024;
+    return `${mb.toFixed(2)} MB`;
   }
 }

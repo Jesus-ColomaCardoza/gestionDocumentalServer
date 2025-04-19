@@ -1,20 +1,19 @@
 import { Expose } from 'class-transformer';
 import { Menssage } from 'src/menssage/menssage.entity';
-import { Empresa } from '../interfaces/empresa';
+import { File } from '../interfaces/file.interface';
 
-export class OutEmpresaDto {
+export class OutFileDto {
   @Expose()
   message: Menssage;
 
   @Expose()
-  registro?: Empresa;
+  registro?: File;
 }
 
-export class OutEmpresasDto {
+export class OutFilesDto {
   @Expose()
   message: Menssage;
 
   @Expose()
-  registro?: Empresa[];
+  registro?: File[];
 }
-

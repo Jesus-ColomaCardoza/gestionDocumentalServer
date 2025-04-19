@@ -1,19 +1,20 @@
 import { Expose } from 'class-transformer';
 import { Menssage } from 'src/menssage/menssage.entity';
-import { Documento } from '../interfaces/documento.interface';
+import { FileManager } from '../interfaces/file-manager.interface';
 
-export class OutDocumentoDto {
+export class OutFileManagerDto {
   @Expose()
   message: Menssage;
 
   @Expose()
-  registro?: Documento;
+  registro?: FileManager;
 }
 
-export class OutDocumentosDto {
+export class OutFileManagersDto {
   @Expose()
   message: Menssage;
 
   @Expose()
-  registro?: Documento[];
+  registro?: FileManager[];
 }
+

@@ -36,6 +36,7 @@ model Carpeta {
   Descripcion    String?     @db.VarChar(100)
   IdCarpetaPadre Int?
   IdUsuario      Int?
+  Categoria      String?     @db.VarChar(2)
   Activo         Boolean?    @default(false)
   CreadoEl       DateTime    @default(now()) @db.Timestamp(6)
   CreadoPor      String?     @db.VarChar(50)
@@ -68,19 +69,24 @@ model Documento {
   Descripcion      String?         @db.VarChar(100)
   Folios           Int?
   FechaEmision     DateTime        @default(dbgenerated("CURRENT_DATE")) @db.Date
-  UrlDocumento     String?         @db.VarChar(100)
   FormatoDocumento String?         @db.VarChar(100)
   NombreDocumento  String?         @db.VarChar(100)
+  UrlDocumento     String?         @db.VarChar(100)
+  SizeDocumento    Int?
+  UrlBase          String?         @db.VarChar(255)
   IdTipoDocumento  Int?
   IdTramite        Int?
   IdUsuario        Int?
   FirmaDigital     Boolean?
   IdCarpeta        Int?
+  IdEstado         Int?
+  Categoria        String?         @db.VarChar(2)
   Activo           Boolean?        @default(false)
   CreadoEl         DateTime        @default(now()) @db.Timestamp(6)
   CreadoPor        String?         @db.VarChar(50)
   ModificadoEl     DateTime?       @db.Timestamp(6)
   ModificadoPor    String?         @db.VarChar(50)
+  Estado           Estado?         @relation(fields: [IdEstado], references: [IdEstado], onDelete: NoAction, onUpdate: NoAction, map: "documento_estado_fk")
   Carpeta          Carpeta?        @relation(fields: [IdCarpeta], references: [IdCarpeta], onDelete: NoAction, onUpdate: NoAction, map: "documento_idcarpeta_fkey")
   TipoDocumento    TipoDocumento?  @relation(fields: [IdTipoDocumento], references: [IdTipoDocumento], onDelete: NoAction, onUpdate: NoAction, map: "documento_idtipodocumento_fkey")
   Tramite          Tramite?        @relation(fields: [IdTramite], references: [IdTramite], onDelete: NoAction, onUpdate: NoAction, map: "documento_idtramite_fkey")
@@ -90,19 +96,21 @@ model Documento {
 
 model Empresa {
   IdEmpresa         Int       @id(map: "empresa_pkey") @default(autoincrement())
-  RazonSocial       String?   @db.VarChar(100)
   Descripcion       String?   @db.VarChar(100)
   NroIdentificacion String?   @db.VarChar(50)
   Email             String?   @db.VarChar(100)
   Celular           String?   @db.VarChar(15)
-  UrlBase           String?   @db.VarChar(255)
-  LogoUrl           String?   @db.VarChar(255)
-  LogoNombre        String?   @db.VarChar(100)
   Activo            Boolean?  @default(false)
   CreadoEl          DateTime  @default(now()) @db.Timestamp(6)
   CreadoPor         String?   @db.VarChar(50)
   ModificadoEl      DateTime? @db.Timestamp(6)
   ModificadoPor     String?   @db.VarChar(50)
+  RazonSocial       String?   @db.VarChar(100)
+  FormatoLogo       String?   @db.VarChar(100)
+  NombreLogo        String?   @db.VarChar(100)
+  UrlLogo           String?   @db.VarChar(255)
+  SizeLogo          Int?
+  UrlBase           String?   @db.VarChar(255)
 }
 
 model EsquemaEstado {
@@ -125,6 +133,7 @@ model Estado {
   CreadoPor                      String?        @db.VarChar(50)
   ModificadoEl                   DateTime?      @db.Timestamp(6)
   ModificadoPor                  String?        @db.VarChar(50)
+  Documento                      Documento[]
   EsquemaEstado                  EsquemaEstado? @relation(fields: [IdEsquemaEstado], references: [IdEsquemaEstado], onDelete: NoAction, onUpdate: NoAction, map: "fk_estado_esquema")
   Tramite_Tramite_EstadoToEstado Tramite[]      @relation("Tramite_EstadoToEstado")
 }
@@ -222,12 +231,12 @@ model Tramite {
   Folios        Int?
   IdRemitente   Int?
   IdTipoTramite Int?
-  IdEstado      Int?
   Activo        Boolean?     @default(false)
   CreadoEl      DateTime     @default(now()) @db.Timestamp(6)
   CreadoPor     String?      @db.VarChar(50)
   ModificadoEl  DateTime?    @db.Timestamp(6)
   ModificadoPor String?      @db.VarChar(50)
+  IdEstado      Int?
   Documento     Documento[]
   Movimiento    Movimiento[]
   Estado        Estado?      @relation("Tramite_EstadoToEstado", fields: [IdEstado], references: [IdEstado], onDelete: NoAction, onUpdate: NoAction, map: "fk_tramite_estado")
@@ -244,7 +253,6 @@ model Usuario {
   Email                String?             @db.VarChar(100)
   Contrasena           String?             @db.VarChar(200)
   Celular              String?             @db.VarChar(15)
-  CodigoConfirmacion   String?             @db.VarChar(10)
   Genero               String?             @db.Char(1)
   RazonSocial          String?             @db.VarChar(100)
   IdTipoIdentificacion Int?
@@ -253,14 +261,17 @@ model Usuario {
   IdRol                String?             @db.VarChar(20)
   IdCargo              Int?
   IdArea               Int?
-  UrlBase              String?             @db.VarChar(255)
-  FotoPerfilUrl        String?             @db.VarChar(255)
-  FotoPerfilNombre     String?             @db.VarChar(100)
   Activo               Boolean?            @default(false)
   CreadoEl             DateTime            @default(now()) @db.Timestamp(6)
   CreadoPor            String?             @db.VarChar(50)
   ModificadoEl         DateTime?           @db.Timestamp(6)
   ModificadoPor        String?             @db.VarChar(50)
+  FormatoFotoPerfil    String?             @db.VarChar(100)
+  NombreFotoPerfil     String?             @db.VarChar(100)
+  UrlFotoPerfil        String?             @db.VarChar(255)
+  SizeFotoPerfil       Int?
+  UrlBase              String?             @db.VarChar(255)
+  CodigoConfirmacion   String?             @db.VarChar(10)
   Carpeta              Carpeta[]
   Compartido           Compartido[]
   Documento            Documento[]

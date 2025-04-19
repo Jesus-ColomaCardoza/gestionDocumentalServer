@@ -7,7 +7,6 @@ export interface Estado {
     CreadoPor?: string;
     ModificadoEl?: Date;
     ModificadoPor?: string;
-
     EsquemaEstado?: {
         IdEsquemaEstado?: number, 
         Descripcion?: string },

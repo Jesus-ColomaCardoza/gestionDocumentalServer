@@ -180,8 +180,8 @@ export class UsuarioService {
               ...createUsuarioDto,
               CreadoPor: `${request?.user?.id ?? 'test user'}`,
               UrlBase: file.UrlBase,
-              FotoPerfilUrl: file.Url,
-              FotoPerfilNombre: file.Nombre,
+              UrlFotoPerfil: file.Url,
+              NombreFotoPerfil: file.Nombre,
             }
           : {
               ...createUsuarioDto,
@@ -203,7 +203,9 @@ export class UsuarioService {
     }
   }
 
-  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<OutUsuariosDto> {
+  async findAll(
+    combinationsFiltersDto: CombinationsFiltersDto,
+  ): Promise<OutUsuariosDto> {
     try {
       let filtros = combinationsFiltersDto.filters;
       let cantidad_max = combinationsFiltersDto.cantidad_max;
@@ -395,9 +397,9 @@ export class UsuarioService {
                 ModificadoPor: `${request?.user?.id ?? 'test user'}`,
                 UrlBase:
                   fileUpdate == fileUpdateValues[0] ? null : file.UrlBase,
-                FotoPerfilUrl:
+                UrlFotoPerfil:
                   fileUpdate == fileUpdateValues[0] ? null : file.Url,
-                FotoPerfilNombre:
+                NombreFotoPerfil:
                   fileUpdate == fileUpdateValues[0] ? null : file.Nombre,
               }
             : {
@@ -412,7 +414,7 @@ export class UsuarioService {
           fileUpdate == fileUpdateValues[2]
         ) {
           await this.file.eliminarDocumento(
-            idFound.registro.UrlBase + '/' + idFound.registro.FotoPerfilNombre,
+            idFound.registro.UrlBase + '/' + idFound.registro.NombreFotoPerfil,
           );
         }
 
@@ -440,7 +442,7 @@ export class UsuarioService {
 
       if (usuario) {
         this.file.eliminarDocumento(
-          usuario.UrlBase + '/' + usuario.FotoPerfilNombre,
+          usuario.UrlBase + '/' + usuario.NombreFotoPerfil,
         );
 
         this.message.setMessage(0, 'Usuario - Registro eliminado');

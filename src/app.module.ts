@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CargoModule } from './cargo/cargo.module';
 import { AuthModule } from './auth/auth.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration from 'config/configuration';
 import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
@@ -28,17 +28,32 @@ import { RegistroFirmaModule } from './registro-firma/registro-firma.module';
 import { EmpresaModule } from './empresa/empresa.module';
 import { CarpetaModule } from './carpeta/carpeta.module';
 import { FileModule } from './file/file.module';
+import { FileManagerModule } from './file-manager/file-manager.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       envFilePath: `./env/${process.env.NODE_ENV}.env`,
-      load:  [configuration],
+      load: [configuration],
       isGlobal: true,
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '../../', 'public'),
-      // serveRoot:'/files'
+      serveRoot: '/public',
+    }),
+    ServeStaticModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => [
+        {
+          rootPath: join(
+            __dirname,
+            '../..',
+            configService.get('config.filesSgdFolder'),
+          ),
+          serveRoot: `/${configService.get('config.filesSgdFolder')}`,
+        },
+      ],
     }),
     CargoModule,
     AuthModule,
@@ -60,9 +75,10 @@ import { FileModule } from './file/file.module';
     RegistroFirmaModule,
     EmpresaModule,
     CarpetaModule,
-    FileModule
+    FileModule,
+    FileManagerModule,
   ],
   controllers: [AppController],
-  providers: [AppService,FiltersService,PrismaService],
+  providers: [AppService, FiltersService, PrismaService],
 })
 export class AppModule {}

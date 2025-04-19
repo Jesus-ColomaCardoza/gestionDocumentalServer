@@ -1,6 +1,6 @@
 import { Expose } from 'class-transformer';
 import { Menssage } from 'src/menssage/menssage.entity';
-import { Carpeta } from '../interfaces/carpeta';
+import { Carpeta } from '../interfaces/carpeta.interface';
 
 export class OutCarpetaDto {
   @Expose()

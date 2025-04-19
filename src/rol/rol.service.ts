@@ -7,7 +7,7 @@ import { FiltersService } from 'src/filters/filters.service';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { Prisma } from '@prisma/client';
 import { Request } from 'express';
-import { OutRolDto, OutRolesDto } from './dto/out-rol-dto';
+import { OutRolDto, OutRolesDto } from './dto/out-rol.dto';
 
 @Injectable()
 export class RolService {
