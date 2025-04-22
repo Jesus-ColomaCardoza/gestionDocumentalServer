@@ -239,6 +239,9 @@ export class FileManagerService {
             },
           },
         },
+        orderBy: {
+          FechaEmision: 'asc',
+        },
       });
 
       documentos.map((documento) => {
@@ -295,6 +298,9 @@ export class FileManagerService {
             },
           },
         },
+        orderBy: {
+          CreadoEl: 'asc',
+        },
       });
 
       carpetas.map((carpeta) => {
@@ -318,6 +324,12 @@ export class FileManagerService {
         };
         filesManager.push(fileManager);
       });
+
+      // filesManager.sort((a, b) => {
+      //   const fechaA = a.FechaEmision ? new Date(a.FechaEmision).getTime() : 0;
+      //   const fechaB = b.FechaEmision ? new Date(b.FechaEmision).getTime() : 0;
+      //   return fechaB - fechaA;
+      // });
 
       if (filesManager) {
         this.message.setMessage(0, 'File Manager - Registros encontrados');
@@ -385,6 +397,9 @@ export class FileManagerService {
             },
           },
         },
+        orderBy: {
+          FechaEmision: 'asc',
+        },
       });
 
       documentos.map((documento) => {
@@ -443,6 +458,9 @@ export class FileManagerService {
               Descripcion: true,
             },
           },
+        },
+        orderBy: {
+          CreadoEl: 'asc',
         },
       });
 

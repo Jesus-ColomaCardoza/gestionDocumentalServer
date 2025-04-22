@@ -6,6 +6,7 @@ import path, { extname } from 'path';
 import * as fs from 'fs/promises';
 import { ConfigService } from '@nestjs/config';
 import { OutFileDto } from './dto/out-file.dto';
+import { RemoveFileDto } from './dto/remove-file.dto';
 
 @Injectable()
 export class FileService {
@@ -14,7 +15,7 @@ export class FileService {
 
   constructor(private configEnv: ConfigService) {}
 
-  async create(file: Express.Multer.File) : Promise<OutFileDto>{
+  async create(file: Express.Multer.File): Promise<OutFileDto> {
     try {
       if (file.filename && file.path) {
         this.message.setMessage(0, 'File - Registro creado');
@@ -22,8 +23,8 @@ export class FileService {
           message: this.message,
           registro: {
             ...file,
-            parseoriginalname:path.parse(file.originalname).name,
-            url:  await this.traerRuta(file.filename, this.subPath),
+            parseoriginalname: path.parse(file.originalname).name,
+            url: await this.traerRuta(file.filename, this.subPath),
           },
         };
       } else {
@@ -33,6 +34,43 @@ export class FileService {
     } catch (error: any) {
       console.log(error);
       this.message.setMessage(1, error.message);
+      return { message: this.message };
+    }
+  }
+
+  async remove(removeFileDto: RemoveFileDto): Promise<OutFileDto> {
+    try {
+      const basePublicUrl = this.obtenerAmbiente();
+
+      const relativePath = removeFileDto.PublicUrl.replace(
+        basePublicUrl,
+        ' ',
+      ).replace(/ /g, '');
+
+      const fullPath = path.join(
+        __dirname,
+        '../../../',
+        this.configEnv.get('config.filesSgdFolder'),
+        relativePath,
+      );
+
+      // console.log(fullPath);
+
+      // Verificamos si el archivo existe
+      await fs.access(fullPath);
+
+      // Eliminamos el archivo
+      await fs.unlink(fullPath);
+
+      this.message.setMessage(0, 'File - Registro eliminado');
+      return { message: this.message };
+    } catch (error: any) {
+      // Si el error es que el archivo no existe
+      if (error.code === 'ENOENT') {
+        this.message.setMessage(1, 'Este File no existe');
+      } else {
+        this.message.setMessage(1, error.message);
+      }
       return { message: this.message };
     }
   }
