@@ -5,10 +5,12 @@ import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto
 import { Request } from 'express';
 import { PrismaService } from 'src/connection/prisma.service';
 import { FiltersService } from 'src/filters/filters.service';
-import { Prisma} from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { Menssage } from 'src/menssage/menssage.entity';
 import { UsuarioService } from 'src/usuario/usuario.service';
 import { OutCarpetaDto, OutCarpetasDto } from './dto/out-carpeta.dto';
+import { GetTreeCarpetaDto } from './dto/get-tree-carpeta.dto';
+import { TreeNode } from './interfaces/carpeta.interface';
 
 @Injectable()
 export class CarpetaService {
@@ -85,7 +87,9 @@ export class CarpetaService {
     }
   }
 
-  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<OutCarpetasDto> {
+  async findAll(
+    combinationsFiltersDto: CombinationsFiltersDto,
+  ): Promise<OutCarpetasDto> {
     try {
       let filtros = combinationsFiltersDto.filters;
       let cantidad_max = combinationsFiltersDto.cantidad_max;
@@ -102,10 +106,77 @@ export class CarpetaService {
         this.message.setMessage(0, 'Carpeta - Registros encontrados');
         return { message: this.message, registro: carpetas };
       } else {
-        this.message.setMessage(
-          1,
-          'Error: Carpeta - Registros no encontrados',
-        );
+        this.message.setMessage(1, 'Error: Carpeta - Registros no encontrados');
+        return { message: this.message };
+      }
+    } catch (error: any) {
+      console.log(error);
+      this.message.setMessage(1, error.message);
+      return { message: this.message };
+    }
+  }
+
+  async findAllTree(getTreeCarpetaDto: GetTreeCarpetaDto): Promise<any> {
+    try {
+      const nodeMap = new Map<number, TreeNode>();
+      const roots: TreeNode[] = [];
+      const icon = getTreeCarpetaDto.CustomIcon || 'pi pi-folder-open';
+      let filtros = getTreeCarpetaDto.filters;
+      let cantidad_max = getTreeCarpetaDto.cantidad_max;
+      let clausula = this.filtersService.fabricarClausula(filtros);
+      let limitRows = parseInt(cantidad_max) || 999;
+
+      const customClausula = clausula.AND.map((c: any) => c.OR[0]);
+
+      customClausula.push({
+        Usuario: {
+          IdArea: getTreeCarpetaDto.IdArea,
+        },
+        IdCarpeta:{notIn:[getTreeCarpetaDto.NotIncludeIdCarpeta]}
+
+      });
+
+      const carpetas = await this.prisma.carpeta.findMany({
+        where: {
+          AND: customClausula,
+        },
+        take: limitRows,
+        select: this.customOut,
+      });
+
+      if (carpetas) {
+        // we Create individual nodos
+        for (const item of carpetas) {
+          nodeMap.set(item.IdCarpeta, {
+            key: String(item.IdCarpeta),
+            label: item.Descripcion,
+            icon: icon,
+            data: {
+              IdCarpeta: item.IdCarpeta,
+              Descripcion: item.Descripcion,
+              Categoria: item.Categoria,
+              CarpetaPadre: item.CarpetaPadre,
+            },
+            children: [],
+          });
+        }
+
+        // we associate child nodes with parent
+        for (const item of carpetas) {
+          const node = nodeMap.get(item.IdCarpeta);
+
+          if (item.CarpetaPadre && item.CarpetaPadre.IdCarpeta != null) {
+            const parentNode = nodeMap.get(item.CarpetaPadre.IdCarpeta);
+            parentNode?.children?.push(node);
+          } else {
+            roots.push(node);
+          }
+        }
+
+        this.message.setMessage(0, 'Carpeta - Registros encontrados');
+        return { message: this.message, registro: roots };
+      } else {
+        this.message.setMessage(1, 'Error: Carpeta - Registros no encontrados');
         return { message: this.message };
       }
     } catch (error: any) {
@@ -126,10 +197,7 @@ export class CarpetaService {
         this.message.setMessage(0, 'Carpeta - Registro encontrado');
         return { message: this.message, registro: carpeta };
       } else {
-        this.message.setMessage(
-          1,
-          'Error: Carpeta - Registro no encontrado',
-        );
+        this.message.setMessage(1, 'Error: Carpeta - Registro no encontrado');
         return { message: this.message };
       }
     } catch (error: any) {

@@ -20,3 +20,11 @@ export interface Carpeta {
     ApellidoMaterno: string;
   };
 }
+
+export type TreeNode = {
+  key: string;
+  label: string;
+  icon: string;
+  data: any;
+  children?: TreeNode[];
+};
