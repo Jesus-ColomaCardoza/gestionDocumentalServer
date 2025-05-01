@@ -29,6 +29,7 @@ import { EmpresaModule } from './empresa/empresa.module';
 import { CarpetaModule } from './carpeta/carpeta.module';
 import { FileModule } from './file/file.module';
 import { FileManagerModule } from './file-manager/file-manager.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { FileManagerModule } from './file-manager/file-manager.module';
     CarpetaModule,
     FileModule,
     FileManagerModule,
+    MailModule
   ],
   controllers: [AppController],
   providers: [AppService, FiltersService, PrismaService],

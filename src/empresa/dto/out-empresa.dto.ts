@@ -8,6 +8,7 @@ export class OutEmpresaDto {
   message: Menssage;
 
   @Expose()
+  // dto salida example
   // @ApiProperty({
   //   example: {
   //     IdEmpresa: 'number',

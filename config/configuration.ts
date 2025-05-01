@@ -2,14 +2,17 @@ import { registerAs } from '@nestjs/config';
 
 export default registerAs('config', () => ({
   serverEnv: process.env.SERVER_ENV,
+  serverDomain: process.env.SERVER_DOMAIN,
   databaseUrl: process.env.DATABASE_URL,
-  // port: parseInt(process.env.PORT, 10) || 3000,
 
-
-  // mailPort: parseInt(process.env.MAIL_PORT),
+  mailUser: process.env.MAIL_USER,
+  mailPassword: process.env.MAIL_PASSWORD,
+  mailHost: process.env.MAIL_HOST,
+  mailPort: parseInt(process.env.MAIL_PORT),
 
   keyToken: process.env.KEY_TOKEN,
   keyTokenRefresh: process.env.KEY_TOKEN_REFRESH,
+  timeToken: process.env.TIME_TOKEN,
 
   // keyTwilioSid:process.env.TWILIO_ACCOUNT_SID,
   // keyTwiliotoken:process.env.TWILIO_AUTH_TOKEN,

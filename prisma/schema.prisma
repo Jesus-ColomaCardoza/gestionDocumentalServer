@@ -245,41 +245,42 @@ model Tramite {
 }
 
 model Usuario {
-  IdUsuario            Int                 @id(map: "usuario_pkey") @default(autoincrement())
-  Nombres              String?             @db.VarChar(100)
-  ApellidoPaterno      String?             @db.VarChar(50)
-  ApellidoMaterno      String?             @db.VarChar(50)
-  FechaNacimiento      DateTime?           @db.Date
-  Email                String?             @db.VarChar(100)
-  Contrasena           String?             @db.VarChar(200)
-  Celular              String?             @db.VarChar(15)
-  Genero               String?             @db.Char(1)
-  RazonSocial          String?             @db.VarChar(100)
-  IdTipoIdentificacion Int?
-  NroIdentificacion    String?             @db.VarChar(50)
-  IdTipoUsuario        Int?
-  IdRol                String?             @db.VarChar(20)
-  IdCargo              Int?
-  IdArea               Int?
-  Activo               Boolean?            @default(false)
-  CreadoEl             DateTime            @default(now()) @db.Timestamp(6)
-  CreadoPor            String?             @db.VarChar(50)
-  ModificadoEl         DateTime?           @db.Timestamp(6)
-  ModificadoPor        String?             @db.VarChar(50)
-  FormatoFotoPerfil    String?             @db.VarChar(100)
-  NombreFotoPerfil     String?             @db.VarChar(100)
-  UrlFotoPerfil        String?             @db.VarChar(255)
-  SizeFotoPerfil       Int?
-  UrlBase              String?             @db.VarChar(255)
-  CodigoConfirmacion   String?             @db.VarChar(10)
-  Carpeta              Carpeta[]
-  Compartido           Compartido[]
-  Documento            Documento[]
-  RegistroFirma        RegistroFirma[]
-  Tramite              Tramite[]
-  Area                 Area?               @relation(fields: [IdArea], references: [IdArea], onDelete: NoAction, onUpdate: NoAction, map: "usuario_idarea_fkey")
-  Cargo                Cargo?              @relation(fields: [IdCargo], references: [IdCargo], onDelete: NoAction, onUpdate: NoAction, map: "usuario_idcargo_fkey")
-  Rol                  Rol?                @relation(fields: [IdRol], references: [IdRol], onDelete: NoAction, onUpdate: NoAction, map: "usuario_idrol_fkey")
-  TipoIdentificacion   TipoIdentificacion? @relation(fields: [IdTipoIdentificacion], references: [IdTipoIdentificacion], onDelete: NoAction, onUpdate: NoAction, map: "usuario_idtipoidentificacion_fkey")
-  TipoUsuario          TipoUsuario?        @relation(fields: [IdTipoUsuario], references: [IdTipoUsuario], onDelete: NoAction, onUpdate: NoAction, map: "usuario_idtipousuario_fkey")
+  IdUsuario             Int                 @id(map: "usuario_pkey") @default(autoincrement())
+  Nombres               String?             @db.VarChar(100)
+  ApellidoPaterno       String?             @db.VarChar(50)
+  ApellidoMaterno       String?             @db.VarChar(50)
+  FechaNacimiento       DateTime?           @db.Date
+  Email                 String?             @db.VarChar(100)
+  Contrasena            String?             @db.VarChar(200)
+  Celular               String?             @db.VarChar(15)
+  Genero                String?             @db.Char(1)
+  RazonSocial           String?             @db.VarChar(100)
+  IdTipoIdentificacion  Int?
+  NroIdentificacion     String?             @db.VarChar(50)
+  IdTipoUsuario         Int?
+  IdRol                 String?             @db.VarChar(20)
+  IdCargo               Int?
+  IdArea                Int?
+  Activo                Boolean?            @default(false)
+  CreadoEl              DateTime            @default(now()) @db.Timestamp(6)
+  CreadoPor             String?             @db.VarChar(50)
+  ModificadoEl          DateTime?           @db.Timestamp(6)
+  ModificadoPor         String?             @db.VarChar(50)
+  FormatoFotoPerfil     String?             @db.VarChar(100)
+  NombreFotoPerfil      String?             @db.VarChar(100)
+  UrlFotoPerfil         String?             @db.VarChar(255)
+  SizeFotoPerfil        Int?
+  UrlBase               String?             @db.VarChar(255)
+  CodigoConfirmacion    String?             @db.VarChar(100)
+  CodigoConfirmacionExp DateTime?           @db.Timestamp(6)
+  Carpeta               Carpeta[]
+  Compartido            Compartido[]
+  Documento             Documento[]
+  RegistroFirma         RegistroFirma[]
+  Tramite               Tramite[]
+  Area                  Area?               @relation(fields: [IdArea], references: [IdArea], onDelete: NoAction, onUpdate: NoAction, map: "usuario_idarea_fkey")
+  Cargo                 Cargo?              @relation(fields: [IdCargo], references: [IdCargo], onDelete: NoAction, onUpdate: NoAction, map: "usuario_idcargo_fkey")
+  Rol                   Rol?                @relation(fields: [IdRol], references: [IdRol], onDelete: NoAction, onUpdate: NoAction, map: "usuario_idrol_fkey")
+  TipoIdentificacion    TipoIdentificacion? @relation(fields: [IdTipoIdentificacion], references: [IdTipoIdentificacion], onDelete: NoAction, onUpdate: NoAction, map: "usuario_idtipoidentificacion_fkey")
+  TipoUsuario           TipoUsuario?        @relation(fields: [IdTipoUsuario], references: [IdTipoUsuario], onDelete: NoAction, onUpdate: NoAction, map: "usuario_idtipousuario_fkey")
 }

@@ -45,7 +45,7 @@
     "firebase-admin": "^12.5.0",
     "imagekit": "^5.0.1",
     "js-sha256": "^0.11.0",
-    "moment-timezone": "^0.5.46",
+    "moment-timezone": "^0.5.48",
     "nodemailer": "^6.9.15",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",

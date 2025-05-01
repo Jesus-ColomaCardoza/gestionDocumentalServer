@@ -33,12 +33,13 @@ export class UsuarioService {
   ) {}
 
   private readonly customOut = {
+    Contrasena:true,
     IdUsuario: true,
     Nombres: true,
     ApellidoPaterno: true,
     ApellidoMaterno: true,
-    FotoPerfilNombre: true,
-    FotoPerfilUrl: true,
+    NombreFotoPerfil: true,
+    UrlFotoPerfil: true,
     UrlBase: true,
     FechaNacimiento: true,
     CodigoConfirmacion: true,
@@ -274,7 +275,7 @@ export class UsuarioService {
     }
   }
 
-  async findOneByEmail(email: string): Promise<any> {
+  async findOneByEmail(email: string): Promise<OutUsuarioDto> {
     try {
       const usuario = await this.prisma.usuario.findFirst({
         where: { Email: email },
