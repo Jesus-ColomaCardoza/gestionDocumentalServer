@@ -133,7 +133,7 @@ export class AuthService {
       const isPasswordValid =
         signupAuthDto.Contrasena === signupAuthDto.ContrasenaConfirmacion;
       if (!isPasswordValid) {
-        this.message.setMessage(1, 'Contraseñas no coinciden');
+        this.message.setMessage(2, 'Contraseñas no coinciden');
         return {
           message: this.message,
         };
@@ -150,7 +150,7 @@ export class AuthService {
       });
 
       if (findUser) {
-        this.message.setMessage(1, 'Correo ya registrado');
+        this.message.setMessage(2, 'Correo ya registrado');
         return {
           message: this.message,
         };
