@@ -65,7 +65,7 @@ export class AuthService {
       });
 
       if (!user) {
-        this.message.setMessage(1, 'Correo no registrado');
+        this.message.setMessage(2, 'Correo no registrado');
         return {
           message: this.message,
           registro: { ...outLoginAuthRegistro },
@@ -114,7 +114,7 @@ export class AuthService {
           registro: { ...outLoginAuthRegistro },
         };
       } else {
-        this.message.setMessage(1, 'Contraseña incorrecta');
+        this.message.setMessage(2, 'Contraseña incorrecta');
         return {
           message: this.message,
           registro: { ...outLoginAuthRegistro },
