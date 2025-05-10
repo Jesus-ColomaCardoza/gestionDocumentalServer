@@ -213,7 +213,7 @@ export class AuthService {
       });
 
       if (!findUser) {
-        this.message.setMessage(1, 'Correo no registrado');
+        this.message.setMessage(2, 'Correo no registrado');
         return {
           message: this.message,
         };
@@ -241,7 +241,7 @@ export class AuthService {
         ApellidoPaterno: updateUser.ApellidoPaterno,
         ApellidoMaterno: updateUser.ApellidoMaterno,
         Email: updateUser.Email,
-        UrlResetPassword: `${this.configEnv.get('config.serverDomain')}/reset_password/${codigoConfirmacion}`,
+        UrlResetPassword: `${this.configEnv.get('config.serverDomain')}/auth/reset_password/${codigoConfirmacion}`,
       });
 
       if (mail.message.msgId == 0) {
@@ -273,7 +273,7 @@ export class AuthService {
         resetPasswordAuthDto.Contrasena ===
         resetPasswordAuthDto.ContrasenaConfirmacion;
       if (!isPasswordValid) {
-        this.message.setMessage(1, 'Contraseñas no coinciden');
+        this.message.setMessage(2, 'Contraseñas no coinciden');
         return {
           message: this.message,
         };
@@ -293,7 +293,7 @@ export class AuthService {
       });
 
       if (!findUser) {
-        this.message.setMessage(1, 'Formulario expirado o inválido');
+        this.message.setMessage(2, 'Formulario expirado o inválido');
         return {
           message: this.message,
         };
