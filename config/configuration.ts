@@ -24,6 +24,8 @@ export default registerAs('config', () => ({
   filesSgdUrl:process.env.FILES_SGD_URL,
   filesSgdFolder:process.env.FILES_SGD_FOLDER,
 
+  idOauth2Google:process.env.ID_OAUTH2_GOOGLE,
+
   // imagekitUrl: process.env.IMAGE_KIT_URL_ENDPOINT,
   // imagekitPublicKey: process.env.IMAGE_KIT_PUBLIC_KEY,
   // imagekitPrivateKey: process.env.IMAGE_KIT_PRIVATE_KEY,

@@ -11,7 +11,11 @@ import { ConfigService } from '@nestjs/config';
 import { printLog } from 'src/utils/utils';
 import moment from 'moment-timezone';
 import bcrypt from 'bcryptjs';
-import { OutSignupAuthDto, SignupAuthDto } from './dto/signup-auth.dto';
+import {
+  OutSignupAuthDto,
+  SignupAuthDto,
+  SignupGoogleAuthDto,
+} from './dto/signup-auth.dto';
 import { MailService } from 'src/mail/mail.service';
 import {
   ForgotPasswordAuthDto,
@@ -23,10 +27,15 @@ import {
   OutVerifyTokenAuthDto,
   VerifyTokenAuthDto,
 } from './dto/verify-token-auth.dto';
+import { TokenAuthDto } from './dto/token-auth.dto';
+import { OAuth2Client } from 'google-auth-library';
 
 @Injectable()
 export class AuthService {
   private message = new Menssage();
+  private clientGoogle = new OAuth2Client(
+    this.configEnv.get('config.idOauth2Google'),
+  );
 
   constructor(
     private prisma: PrismaService,
@@ -77,7 +86,7 @@ export class AuthService {
       // we compare the paswword
       const isPasswordValid =
         // true;
-        await bcrypt.compare(loginAuthDto.Contrasena, user.Contrasena);
+        await bcrypt.compare(loginAuthDto.Contrasena, user.Contrasena||'');
 
       if (isPasswordValid) {
         // correct password
@@ -115,6 +124,99 @@ export class AuthService {
         };
       } else {
         this.message.setMessage(2, 'Contraseña incorrecta');
+        return {
+          message: this.message,
+          registro: { ...outLoginAuthRegistro },
+        };
+      }
+    } catch (error) {
+      console.log(error);
+      this.message.setMessage(1, error.message);
+      return { message: this.message };
+    }
+  }
+
+  async loginGoogle(tokenAuthDto: TokenAuthDto): Promise<OutLoginAuthDto> {
+    try {
+      const clientGoogle = await this.clientGoogle.verifyIdToken({
+        idToken: tokenAuthDto.Token,
+        audience: this.configEnv.get('config.idOauth2Google'),
+      });
+
+      const payloadGoogle = clientGoogle.getPayload();
+      printLog(payloadGoogle);
+
+      let outLoginAuthRegistro = {
+        AccessToken: '',
+        AccessTokenTime: '',
+        // RefreshToken: refreshToken,
+        ExpiresIn: '',
+      };
+
+      if (payloadGoogle) {
+        // validate If user already exist
+        const user = await this.prisma.usuario.findFirst({
+          where: {
+            Email: payloadGoogle.email,
+          },
+          select: {
+            IdUsuario: true,
+            Email: true,
+            Contrasena: true,
+            Rol: {
+              select: {
+                IdRol: true,
+                Descripcion: true,
+              },
+            },
+          },
+        });
+
+        if (!user) {
+          this.message.setMessage(2, 'Correo no registrado');
+          return {
+            message: this.message,
+            registro: { ...outLoginAuthRegistro },
+          };
+        }
+
+        printLog(user);
+
+        // correct password
+        const payload = {
+          IdUsuario: user.IdUsuario,
+          Email: user.Email,
+          IdRol: user.Rol.IdRol,
+        };
+
+        const accessToken = this.jwtService.sign(payload, {
+          secret: this.configEnv.get('config.keyToken'),
+          expiresIn: `${this.configEnv.get('config.timeToken')}`,
+        });
+
+        // Decodificar el token para obtener el tiempo de expiración
+        const decodedToken = this.jwtService.decode(accessToken) as {
+          exp: number;
+        };
+        const expirationDate = moment.unix(decodedToken.exp).tz('America/Lima');
+        const formattedExpiration = expirationDate.format(
+          'DD/MM/YYYY HH:mm:ss',
+        );
+
+        this.message.setMessage(0, 'Inicio de sesión exitoso');
+        outLoginAuthRegistro = {
+          AccessToken: accessToken,
+          AccessTokenTime: `${this.configEnv.get('config.timeToken')}`,
+          // RefreshToken: refreshToken,
+          ExpiresIn: formattedExpiration,
+        };
+
+        return {
+          message: this.message,
+          registro: { ...outLoginAuthRegistro },
+        };
+      } else {
+        this.message.setMessage(1, 'Error: Error interno en el servidor');
         return {
           message: this.message,
           registro: { ...outLoginAuthRegistro },
@@ -168,6 +270,69 @@ export class AuthService {
       const createUser = await this.prisma.usuario.create({
         data: {
           ...signupAuthDto,
+          CreadoEl: new Date().toISOString(),
+          CreadoPor: `test user`,
+          // CreadoPor: `${request?.user?.id ?? 'test user'}`,
+        },
+        select: {
+          IdUsuario: true,
+        },
+      });
+
+      if (createUser) {
+        this.message.setMessage(0, 'Registro de usuario exitoso');
+        return { message: this.message, registro: createUser };
+      } else {
+        this.message.setMessage(1, 'Error: Error interno en el servidor');
+        return { message: this.message };
+      }
+    } catch (error) {
+      console.log(error);
+      this.message.setMessage(1, error.message);
+      return { message: this.message };
+    }
+  }
+
+  async signupGoogle(
+    signupGoogleAuthDto: SignupGoogleAuthDto,
+  ): Promise<OutSignupAuthDto> {
+    try {
+      const clientGoogle = await this.clientGoogle.verifyIdToken({
+        idToken: signupGoogleAuthDto.Token,
+        audience: this.configEnv.get('config.idOauth2Google'),
+      });
+
+      const payloadGoogle = clientGoogle.getPayload();
+      printLog(payloadGoogle);
+
+      // validate if user already exist
+      const findUser = await this.prisma.usuario.findFirst({
+        where: {
+          Email: payloadGoogle.email,
+        },
+        select: {
+          IdUsuario: true,
+        },
+      });
+
+      if (findUser) {
+        this.message.setMessage(2, 'Correo ya registrado');
+        return {
+          message: this.message,
+        };
+      }
+
+      // we create the user
+      delete signupGoogleAuthDto.Token;
+      const apellidos = payloadGoogle.family_name.split(' ');
+      const createUser = await this.prisma.usuario.create({
+        data: {
+          Nombres: payloadGoogle.given_name,
+          Email: payloadGoogle.email,
+          ApellidoPaterno: apellidos[0],
+          ApellidoMaterno: apellidos[1],
+          UrlFotoPerfil: payloadGoogle.picture,
+          ...signupGoogleAuthDto,
           CreadoEl: new Date().toISOString(),
           CreadoPor: `test user`,
           // CreadoPor: `${request?.user?.id ?? 'test user'}`,
@@ -369,6 +534,12 @@ export class AuthService {
           ApellidoMaterno: true,
           UrlFotoPerfil: true,
           Email: true,
+          Cargo:{
+            select:{
+              IdCargo: true,
+              Descripcion: true,              
+            }
+          },
           Rol: {
             select: {
               IdRol: true,

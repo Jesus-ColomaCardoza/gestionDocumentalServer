@@ -7,6 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 import { Menssage } from 'src/menssage/menssage.entity';
+import { TokenAuthDto } from './token-auth.dto';
 
 export class SignupAuthDto {
   @IsString()
@@ -33,6 +34,20 @@ export class SignupAuthDto {
   @IsNotEmpty()
   ContrasenaConfirmacion: string;
 
+  @IsString()
+  @IsOptional()
+  IdRol: string;
+
+  @IsInt()
+  @IsOptional()
+  IdCargo: number;
+
+  @IsInt()
+  @IsOptional()
+  IdArea: number;
+}
+
+export class SignupGoogleAuthDto extends TokenAuthDto{
   @IsString()
   @IsOptional()
   IdRol: string;

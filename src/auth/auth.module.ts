@@ -35,7 +35,7 @@ import { Helpers } from 'src/utils/helpers';
     CargoService,
     AreaService,
     MailService,
-    Helpers
+    Helpers,
   ],
 })
 export class AuthModule {}
