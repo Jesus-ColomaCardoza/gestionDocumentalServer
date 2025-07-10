@@ -39,6 +39,10 @@ export class Usuario {
 
   @IsString()
   @IsOptional()
+  CodigoConfirmacionExp: string;
+
+  @IsString()
+  @IsOptional()
   Celular: string;
 
   @ApiProperty({ example: 'M(masculino )| F(femenino)' })
