@@ -284,3 +284,14 @@ model Usuario {
   TipoIdentificacion    TipoIdentificacion? @relation(fields: [IdTipoIdentificacion], references: [IdTipoIdentificacion], onDelete: NoAction, onUpdate: NoAction, map: "usuario_idtipoidentificacion_fkey")
   TipoUsuario           TipoUsuario?        @relation(fields: [IdTipoUsuario], references: [IdTipoUsuario], onDelete: NoAction, onUpdate: NoAction, map: "usuario_idtipousuario_fkey")
 }
+
+model Constante {
+  IdGrupo     String? @db.VarChar(50)
+  IdConstante String  @db.VarChar(50)
+  Valor       String? @db.Text
+  Descripcion String? @db.Text
+  IdEmpresa   Int
+
+  @@id([IdConstante, IdEmpresa])
+  @@index([IdGrupo], map: "IdGrupo")
+}
