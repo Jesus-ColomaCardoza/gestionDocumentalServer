@@ -27,8 +27,10 @@ export class TramiteService {
 
   private readonly customOut = {
     IdTramite: true,
+    CodigoReferencia: true,
     Asunto: true,
     Descripcion: true,
+    Observaciones: true,
     FechaInicio: true,
     FechaFin: true,
     Folios: true,
@@ -43,6 +45,18 @@ export class TramiteService {
     TipoTramite: {
       select: {
         IdTipoTramite: true,
+        Descripcion: true,
+      },
+    },
+    TipoDocumento: {
+      select: {
+        IdTipoDocumento: true,
+        Descripcion: true,
+      },
+    },
+    Area: {
+      select: {
+        IdArea: true,
         Descripcion: true,
       },
     },

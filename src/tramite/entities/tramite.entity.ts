@@ -3,11 +3,19 @@ import { IsBoolean, IsInt, IsNotEmpty, IsOptional, IsString } from 'class-valida
 export class Tramite {
   @IsString()
   @IsNotEmpty()
+  CodigoReferencia: string;
+
+  @IsString()
+  @IsNotEmpty()
   Asunto: string;
 
   @IsString()
   @IsOptional()
   Descripcion: string;
+
+  @IsString()
+  @IsOptional()
+  Observaciones: string;
 
   @IsString()
   @IsOptional()
@@ -28,6 +36,14 @@ export class Tramite {
   @IsInt()
   @IsNotEmpty()
   IdTipoTramite: number;
+
+  @IsInt()
+  @IsNotEmpty()
+  IdTipoDocumento: number;
+
+  @IsInt()
+  @IsNotEmpty()
+  IdAreaEmision: number;
 
   @IsInt()
   @IsNotEmpty()
