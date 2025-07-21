@@ -5,6 +5,7 @@ export interface FileManager {
   UrlFM?: string;
   FirmaDigital?: boolean | null;
   Categoria?: string;
+  Size?: number;
   Activo?: boolean | null;
   Usuario?: {
     IdUsuario: number;

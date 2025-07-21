@@ -70,6 +70,12 @@ export class AuthService {
               Descripcion: true,
             },
           },
+          Area:{
+            select:{
+              IdArea:true,
+              Descripcion:true
+            }
+          }
         },
       });
 

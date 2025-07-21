@@ -1,6 +1,9 @@
 export interface Movimiento {
   IdMovimiento?: number;
   FechaMovimiento?: Date;
+  Copia?: boolean;
+  NombreResponsable?: string;
+  IdMovimientoPadre?: number;
   IdAreaOrigen?: number;
   IdAreaDestino?: number;
   IdTramite?: number;
@@ -9,7 +12,6 @@ export interface Movimiento {
   CreadoPor?: string;
   ModificadoEl?: Date;
   ModificadoPor?: string;
-  
   AreaDestino?: {
     IdArea: number;
     Descripcion: string;

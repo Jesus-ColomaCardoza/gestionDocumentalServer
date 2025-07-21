@@ -30,6 +30,7 @@ import { CarpetaModule } from './carpeta/carpeta.module';
 import { FileModule } from './file/file.module';
 import { FileManagerModule } from './file-manager/file-manager.module';
 import { MailModule } from './mail/mail.module';
+import { AnexoModule } from './anexo/anexo.module';
 
 @Module({
   imports: [
@@ -78,9 +79,10 @@ import { MailModule } from './mail/mail.module';
     CarpetaModule,
     FileModule,
     FileManagerModule,
-    MailModule
+    MailModule,
+    AnexoModule
   ],
   controllers: [AppController],
-  providers: [AppService, FiltersService, PrismaService],
+  providers: [AppService, FiltersService],
 })
 export class AppModule {}

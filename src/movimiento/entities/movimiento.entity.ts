@@ -3,6 +3,8 @@ import {
   IsDateString,
   IsInt,
   IsNotEmpty,
+  IsOptional,
+  IsString,
 } from 'class-validator';
 
 export class Movimiento {
@@ -21,6 +23,22 @@ export class Movimiento {
   @IsDateString()
   @IsNotEmpty()
   FechaMovimiento: string;
+
+  @IsBoolean()
+  @IsNotEmpty()
+  Copia: boolean = false;
+
+  @IsBoolean()
+  @IsNotEmpty()
+  FirmaDigital: boolean = false;
+
+  @IsInt()
+  @IsOptional()
+  IdMovimientoPadre: number;
+
+  @IsString()
+  @IsOptional()
+  NombreResponsable: string;
 
   @IsBoolean()
   @IsNotEmpty()

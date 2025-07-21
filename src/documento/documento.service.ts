@@ -39,6 +39,7 @@ export class DocumentoService {
     UrlDocumento: true,
     FormatoDocumento: true,
     NombreDocumento: true,
+    SizeDocumento:true,
     Categoria: true,
     TipoDocumento: {
       select: {
@@ -203,7 +204,7 @@ export class DocumentoService {
     id: number,
     updateDocumentoDto: UpdateDocumentoDto,
     @Req() request?: Request,
-  ): Promise<OutTipoDocumentoDto> {
+  ): Promise<OutDocumentoDto> {
     try {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;

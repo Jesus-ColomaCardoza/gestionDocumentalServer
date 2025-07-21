@@ -70,6 +70,7 @@ export class FileManagerService {
           UrlFM: null,
           FirmaDigital: null,
           Categoria: carpeta.Categoria,
+          Size: 0,
           Activo: carpeta.Activo,
           Usuario: {
             IdUsuario: carpeta.Usuario.IdUsuario,
@@ -130,6 +131,7 @@ export class FileManagerService {
           UrlDocumento: true,
           FirmaDigital: true,
           Categoria: true,
+          SizeDocumento: true,
           Activo: true,
           Usuario: {
             select: {
@@ -168,6 +170,7 @@ export class FileManagerService {
           UrlFM: documento.UrlDocumento,
           FirmaDigital: documento.FirmaDigital,
           Categoria: documento.Categoria,
+          Size: documento.SizeDocumento,
           Usuario: {
             IdUsuario: documento.Usuario.IdUsuario,
             Nombres: documento.Usuario.Nombres,
@@ -211,6 +214,7 @@ export class FileManagerService {
           UrlDocumento: true,
           FirmaDigital: true,
           Categoria: true,
+          SizeDocumento:true,
           Activo: true,
           Usuario: {
             select: {
@@ -252,6 +256,7 @@ export class FileManagerService {
           UrlFM: documento.UrlDocumento,
           FirmaDigital: documento.FirmaDigital,
           Categoria: documento.Categoria,
+          Size:documento.SizeDocumento,
           Usuario: {
             IdUsuario: documento.Usuario.IdUsuario,
             Nombres: documento.Usuario.Nombres,
@@ -311,6 +316,7 @@ export class FileManagerService {
           UrlFM: null,
           FirmaDigital: null,
           Categoria: carpeta.Categoria,
+          Size:0,
           Activo: carpeta.Activo,
           Usuario: {
             IdUsuario: carpeta.Usuario.IdUsuario,
@@ -369,6 +375,7 @@ export class FileManagerService {
           UrlDocumento: true,
           FirmaDigital: true,
           Categoria: true,
+          SizeDocumento: true,
           Activo: true,
           Usuario: {
             select: {
@@ -410,6 +417,7 @@ export class FileManagerService {
           UrlFM: documento.UrlDocumento,
           FirmaDigital: documento.FirmaDigital,
           Categoria: documento.Categoria,
+          Size: documento.SizeDocumento,
           Activo: documento.Activo,
           Usuario: {
             IdUsuario: documento.Usuario.IdUsuario,
@@ -472,6 +480,7 @@ export class FileManagerService {
           UrlFM: null,
           FirmaDigital: null,
           Categoria: carpeta.Categoria,
+          Size: 0,
           Activo: carpeta.Activo,
           Usuario: {
             IdUsuario: carpeta.Usuario.IdUsuario,
@@ -561,6 +570,7 @@ export class FileManagerService {
           UrlFM: null,
           FirmaDigital: null,
           Categoria: carpeta.Categoria,
+          Size:0,
           Activo: carpeta.Activo,
           Usuario: {
             IdUsuario: carpeta.Usuario.IdUsuario,
@@ -609,6 +619,7 @@ export class FileManagerService {
           UrlDocumento: true,
           FirmaDigital: true,
           Categoria: true,
+          SizeDocumento:true,
           Activo: true,
           Usuario: {
             select: {
@@ -647,6 +658,7 @@ export class FileManagerService {
           UrlFM: documento.UrlDocumento,
           FirmaDigital: documento.FirmaDigital,
           Categoria: documento.Categoria,
+          Size:documento.SizeDocumento,
           Usuario: {
             IdUsuario: documento.Usuario.IdUsuario,
             Nombres: documento.Usuario.Nombres,
@@ -717,6 +729,7 @@ export class FileManagerService {
           UrlFM: null,
           FirmaDigital: null,
           Categoria: carpeta.Categoria,
+          Size:0,
           Activo: carpeta.Activo,
           Usuario: {
             IdUsuario: carpeta.Usuario.IdUsuario,
@@ -769,6 +782,7 @@ export class FileManagerService {
           UrlDocumento: true,
           FirmaDigital: true,
           Categoria: true,
+          SizeDocumento:true,
           Activo: true,
           Usuario: {
             select: {
@@ -807,6 +821,7 @@ export class FileManagerService {
           UrlFM: documento.UrlDocumento,
           FirmaDigital: documento.FirmaDigital,
           Categoria: documento.Categoria,
+          Size:documento.SizeDocumento,
           Usuario: {
             IdUsuario: documento.Usuario.IdUsuario,
             Nombres: documento.Usuario.Nombres,
