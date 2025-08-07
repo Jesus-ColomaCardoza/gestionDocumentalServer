@@ -317,14 +317,17 @@ model Usuario {
 }
 
 model Constante {
-  IdGrupo     String? @db.VarChar(50)
-  IdConstante String  @db.VarChar(50)
-  Valor       String?
-  Descripcion String?
-  IdEmpresa   Int
-
-  @@id([IdConstante, IdEmpresa])
-  @@index([IdGrupo], map: "IdGrupo")
+  IdConstante   Int       @id(map: "constante_pkey") @default(autoincrement())
+  NombreTecnico String?   @db.VarChar(50)
+  IdGrupo       String?   @db.VarChar(50)
+  Valor         String?
+  Descripcion   String?
+  IdEmpresa     Int?
+  Activo        Boolean?  @default(false)
+  CreadoEl      DateTime  @default(now()) @db.Timestamp(6)
+  CreadoPor     String?   @db.VarChar(50)
+  ModificadoEl  DateTime? @db.Timestamp(6)
+  ModificadoPor String?   @db.VarChar(50)
 }
 
 model Anexo {

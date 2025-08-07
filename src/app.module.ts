@@ -30,6 +30,7 @@ import { CarpetaModule } from './carpeta/carpeta.module';
 import { FileModule } from './file/file.module';
 import { FileManagerModule } from './file-manager/file-manager.module';
 import { MailModule } from './mail/mail.module';
+import { ConstanteModule } from './constante/constante.module';
 import { AnexoModule } from './anexo/anexo.module';
 
 @Module({
@@ -80,6 +81,7 @@ import { AnexoModule } from './anexo/anexo.module';
     FileModule,
     FileManagerModule,
     MailModule,
+    ConstanteModule,
     AnexoModule
   ],
   controllers: [AppController],
