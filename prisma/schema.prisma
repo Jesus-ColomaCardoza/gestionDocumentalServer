@@ -126,39 +126,55 @@ model EsquemaEstado {
 }
 
 model Estado {
-  IdEstado                       Int            @id(map: "estado_pkey") @default(autoincrement())
-  Descripcion                    String?        @db.VarChar(100)
+  IdEstado                       Int                          @id(map: "estado_pkey") @default(autoincrement())
+  Descripcion                    String?                      @db.VarChar(100)
   IdEsquemaEstado                Int?
-  Activo                         Boolean?       @default(false)
-  CreadoEl                       DateTime       @default(now()) @db.Timestamp(6)
-  CreadoPor                      String?        @db.VarChar(50)
-  ModificadoEl                   DateTime?      @db.Timestamp(6)
-  ModificadoPor                  String?        @db.VarChar(50)
+  Activo                         Boolean?                     @default(false)
+  CreadoEl                       DateTime                     @default(now()) @db.Timestamp(6)
+  CreadoPor                      String?                      @db.VarChar(50)
+  ModificadoEl                   DateTime?                    @db.Timestamp(6)
+  ModificadoPor                  String?                      @db.VarChar(50)
   Documento                      Documento[]
-  EsquemaEstado                  EsquemaEstado? @relation(fields: [IdEsquemaEstado], references: [IdEsquemaEstado], onDelete: NoAction, onUpdate: NoAction, map: "fk_estado_esquema")
-  Tramite_Tramite_EstadoToEstado Tramite[]      @relation("Tramite_EstadoToEstado")
+  EsquemaEstado                  EsquemaEstado?               @relation(fields: [IdEsquemaEstado], references: [IdEsquemaEstado], onDelete: NoAction, onUpdate: NoAction, map: "fk_estado_esquema")
+  HistorialMovimientoxEstado     HistorialMovimientoxEstado[]
+  Tramite_Tramite_EstadoToEstado Tramite[]                    @relation("Tramite_EstadoToEstado")
 }
 
 model Movimiento {
-  IdMovimiento      Int          @id(map: "movimiento_pkey") @default(autoincrement())
-  IdTramite         Int?
-  IdAreaOrigen      Int?
-  IdAreaDestino     Int?
-  FechaMovimiento   DateTime     @default(now()) @db.Timestamp(6)
-  Activo            Boolean?     @default(false)
-  CreadoEl          DateTime     @default(now()) @db.Timestamp(6)
-  CreadoPor         String?      @db.VarChar(50)
-  ModificadoEl      DateTime?    @db.Timestamp(6)
-  ModificadoPor     String?      @db.VarChar(50)
-  Copia             Boolean?     @default(false)
-  FirmaDigital      Boolean?     @default(false)
-  IdMovimientoPadre Int?
-  NombreResponsable String?      @db.VarChar(50)
-  AreaDestino       Area?        @relation("Movimiento_IdAreaDestinoToArea", fields: [IdAreaDestino], references: [IdArea], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimiento_destino")
-  AreaOrigen        Area?        @relation("Movimiento_IdAreaOrigenToArea", fields: [IdAreaOrigen], references: [IdArea], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimiento_origen")
-  Tramite           Tramite?     @relation(fields: [IdTramite], references: [IdTramite], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimiento_tramite")
-  MovimientoPadre   Movimiento?  @relation("MovimientoToMovimiento", fields: [IdMovimientoPadre], references: [IdMovimiento], onDelete: NoAction, map: "movimiento_movimiento_fk")
-  other_Movimiento  Movimiento[] @relation("MovimientoToMovimiento")
+  IdMovimiento               Int                          @id(map: "movimiento_pkey") @default(autoincrement())
+  IdTramite                  Int?
+  IdAreaOrigen               Int?
+  IdAreaDestino              Int?
+  FechaMovimiento            DateTime                     @default(now()) @db.Timestamp(6)
+  Activo                     Boolean?                     @default(false)
+  CreadoEl                   DateTime                     @default(now()) @db.Timestamp(6)
+  CreadoPor                  String?                      @db.VarChar(50)
+  ModificadoEl               DateTime?                    @db.Timestamp(6)
+  ModificadoPor              String?                      @db.VarChar(50)
+  Copia                      Boolean?                     @default(false)
+  IdMovimientoPadre          Int?
+  NombreResponsable          String?                      @db.VarChar(50)
+  FirmaDigital               Boolean?                     @default(false)
+  HistorialMovimientoxEstado HistorialMovimientoxEstado[]
+  AreaDestino                Area?                        @relation("Movimiento_IdAreaDestinoToArea", fields: [IdAreaDestino], references: [IdArea], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimiento_destino")
+  AreaOrigen                 Area?                        @relation("Movimiento_IdAreaOrigenToArea", fields: [IdAreaOrigen], references: [IdArea], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimiento_origen")
+  Tramite                    Tramite?                     @relation(fields: [IdTramite], references: [IdTramite], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimiento_tramite")
+  MovimientoPadre            Movimiento?                  @relation("MovimientoToMovimiento", fields: [IdMovimientoPadre], references: [IdMovimiento], onDelete: NoAction, map: "movimiento_movimiento_fk")
+  other_Movimiento           Movimiento[]                 @relation("MovimientoToMovimiento")
+}
+
+model HistorialMovimientoxEstado {
+  IdHistorialMxE    Int         @id(map: "historialmovimientoxestado_pkey") @default(autoincrement())
+  IdEstado          Int?
+  IdMovimiento      Int?
+  FechaHistorialMxE DateTime    @default(now()) @db.Timestamp(6)
+  Activo            Boolean?    @default(false)
+  CreadoEl          DateTime    @default(now()) @db.Timestamp(6)
+  CreadoPor         String?     @db.VarChar(50)
+  ModificadoEl      DateTime?   @db.Timestamp(6)
+  ModificadoPor     String?     @db.VarChar(50)
+  Estado            Estado?     @relation(fields: [IdEstado], references: [IdEstado], onDelete: NoAction, onUpdate: NoAction, map: "historialmovimientoxestado_estado_fk")
+  Movimiento        Movimiento? @relation(fields: [IdMovimiento], references: [IdMovimiento], onDelete: NoAction, onUpdate: NoAction, map: "historialmovimientoxestado_movimiento_fk")
 }
 
 model RegistroFirma {
@@ -194,6 +210,7 @@ model TipoDocumento {
   ModificadoEl    DateTime?   @db.Timestamp(6)
   ModificadoPor   String?     @db.VarChar(50)
   Documento       Documento[]
+  Tramite         Tramite[]
 }
 
 model TipoIdentificacion {
@@ -230,31 +247,32 @@ model TipoUsuario {
 }
 
 model Tramite {
-  IdTramite        Int          @id(map: "tramite_pkey") @default(autoincrement())
-  Asunto           String?      @db.VarChar(100)
-  Descripcion      String?      @db.VarChar(100)
-  FechaInicio      DateTime     @db.Timestamp(6)
-  FechaFin         DateTime     @db.Timestamp(6)
+  IdTramite        Int            @id(map: "tramite_pkey") @default(autoincrement())
+  Asunto           String?        @db.VarChar(100)
+  Descripcion      String?        @db.VarChar(100)
+  FechaInicio      DateTime       @db.Timestamp(6)
+  FechaFin         DateTime?      @db.Timestamp(6)
   Folios           Int?
   IdRemitente      Int?
   IdTipoTramite    Int?
-  Activo           Boolean?     @default(false)
-  CreadoEl         DateTime     @default(now()) @db.Timestamp(6)
-  CreadoPor        String?      @db.VarChar(50)
-  ModificadoEl     DateTime?    @db.Timestamp(6)
-  ModificadoPor    String?      @db.VarChar(50)
+  Activo           Boolean?       @default(false)
+  CreadoEl         DateTime       @default(now()) @db.Timestamp(6)
+  CreadoPor        String?        @db.VarChar(50)
+  ModificadoEl     DateTime?      @db.Timestamp(6)
+  ModificadoPor    String?        @db.VarChar(50)
   IdEstado         Int?
   IdTipoDocumento  Int?
-  CodigoReferencia String?      @db.VarChar(50)
-  Observaciones    String?      @db.VarChar(100)
+  CodigoReferencia String?        @db.VarChar(50)
+  Observaciones    String?        @db.VarChar(100)
   IdAreaEmision    Int?
   Anexo            Anexo[]
   Documento        Documento[]
   Movimiento       Movimiento[]
-  Estado           Estado?      @relation("Tramite_EstadoToEstado", fields: [IdEstado], references: [IdEstado], onDelete: NoAction, onUpdate: NoAction, map: "fk_tramite_estado")
-  Remitente        Usuario?     @relation(fields: [IdRemitente], references: [IdUsuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_tramite_remitente")
-  TipoTramite      TipoTramite? @relation(fields: [IdTipoTramite], references: [IdTipoTramite], onDelete: NoAction, onUpdate: NoAction, map: "fk_tramite_tipo")
-  Area             Area?        @relation(fields: [IdAreaEmision], references: [IdArea], onDelete: NoAction, map: "tramite_area_fk")
+  Estado           Estado?        @relation("Tramite_EstadoToEstado", fields: [IdEstado], references: [IdEstado], onDelete: NoAction, onUpdate: NoAction, map: "fk_tramite_estado")
+  Remitente        Usuario?       @relation(fields: [IdRemitente], references: [IdUsuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_tramite_remitente")
+  TipoTramite      TipoTramite?   @relation(fields: [IdTipoTramite], references: [IdTipoTramite], onDelete: NoAction, onUpdate: NoAction, map: "fk_tramite_tipo")
+  Area             Area?          @relation(fields: [IdAreaEmision], references: [IdArea], onDelete: NoAction, map: "tramite_area_fk")
+  TipoDocumento    TipoDocumento? @relation(fields: [IdTipoDocumento], references: [IdTipoDocumento], onDelete: NoAction, onUpdate: NoAction, map: "tramite_tipodocumento_fk")
 }
 
 model Usuario {

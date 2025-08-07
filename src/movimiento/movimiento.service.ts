@@ -95,6 +95,34 @@ export class MovimientoService {
     }
   }
 
+  async createAll(
+    createMovimientoDto: CreateMovimientoDto[],
+    @Req() request?: Request,
+  ): Promise<OutMovimientoDto> {
+    try {
+
+      createMovimientoDto.map((mov) => {
+        mov.CreadoPor = `${request?.user?.id ?? 'test user'}`
+      })
+
+      const movimiento = await this.prisma.movimiento.createMany({
+        data: createMovimientoDto,
+      });
+
+      if (movimiento) {
+        this.message.setMessage(0, 'Movimiento - Registros creados');
+        return { message: this.message };
+      } else {
+        this.message.setMessage(1, 'Error: Error interno en el servidor');
+        return { message: this.message };
+      }
+    } catch (error: any) {
+      console.log(error);
+      this.message.setMessage(1, error.message);
+      return { message: this.message };
+    }
+  }
+
   async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<OutMovimientosDto> {
     try {
       let filtros = combinationsFiltersDto.filters;

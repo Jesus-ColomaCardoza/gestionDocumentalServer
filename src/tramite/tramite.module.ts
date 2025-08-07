@@ -10,6 +10,7 @@ import { TipoUsuarioService } from 'src/tipo-usuario/tipo-usuario.service';
 import { RolService } from 'src/rol/rol.service';
 import { CargoService } from 'src/cargo/cargo.service';
 import { AreaService } from 'src/area/area.service';
+import { TipoDocumentoService } from 'src/tipo-documento/tipo-documento.service';
 
 @Module({
   controllers: [TramiteController],
@@ -23,7 +24,7 @@ import { AreaService } from 'src/area/area.service';
     TipoUsuarioService,
     RolService,
     CargoService,
-    AreaService
+    AreaService, TipoDocumentoService
   ],
 })
-export class TramiteModule {}
+export class TramiteModule { }

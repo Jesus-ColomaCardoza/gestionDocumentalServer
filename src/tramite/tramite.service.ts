@@ -5,13 +5,23 @@ import { Menssage } from 'src/menssage/menssage.entity';
 import { PrismaService } from 'src/connection/prisma.service';
 import { FiltersService } from 'src/filters/filters.service';
 import { Request } from 'express';
-import { Prisma } from '@prisma/client';
+import { Prisma, Tramite } from '@prisma/client';
 import { TipoTramiteService } from 'src/tipo-tramite/tipo-tramite.service';
 import { EstadoService } from 'src/estado/estado.service';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { UsuarioService } from 'src/usuario/usuario.service';
-import { OutTramiteDto } from './dto/out-tramite.dto';
+import { OutTramiteDto, OutTramiteEmitidoDto } from './dto/out-tramite.dto';
 import { OutTipoTramitesDto } from 'src/tipo-tramite/dto/out-tipo-tramite.dto';
+import { CreateTramiteEmitidoDto } from './dto/create-tramite-emitido.dto';
+import { FileManager } from 'src/file-manager/entities/file-manager.entity';
+import { Movimiento } from 'src/movimiento/entities/movimiento.entity';
+import { Anexo } from 'src/anexo/entities/anexo.entity';
+import { printLog } from 'src/utils/utils';
+import { CreateMovimientoDto } from 'src/movimiento/dto/create-movimiento.dto';
+import { FileService } from 'src/file/file.service';
+import { CreateAnexoDto } from 'src/anexo/dto/create-anexo.dto';
+import { TipoDocumentoService } from 'src/tipo-documento/tipo-documento.service';
+import { AreaService } from 'src/area/area.service';
 
 @Injectable()
 export class TramiteService {
@@ -20,10 +30,13 @@ export class TramiteService {
   constructor(
     private prisma: PrismaService,
     private filtersService: FiltersService,
+    private file: FileService,
     private tipoTramite: TipoTramiteService,
+    private tipoDocumento: TipoDocumentoService,
     private estado: EstadoService,
+    private area: AreaService,
     private remitente: UsuarioService,
-  ) {}
+  ) { }
 
   private readonly customOut = {
     IdTramite: true,
@@ -77,6 +90,30 @@ export class TramiteService {
     CreadoPor: true,
     ModificadoEl: true,
     ModificadoPor: true,
+    Anexo: {
+      select: {
+        IdAnexo: true,
+        NombreAnexo: true,
+        UrlAnexo: true,
+      }
+    },
+    Documento: {
+      select: {
+        IdDocumento: true,
+        NombreDocumento: true,
+        UrlDocumento: true,
+      },
+    },
+    Movimiento: {
+      select: {
+        IdMovimiento: true,
+        AreaDestino: {
+          select: {
+            Descripcion: true,
+          }
+        }
+      },
+    }
   };
 
   async create(
@@ -117,6 +154,250 @@ export class TramiteService {
         return { message: this.message };
       }
     } catch (error: any) {
+      console.log(error);
+      this.message.setMessage(1, error.message);
+      return { message: this.message };
+    }
+  }
+
+  async createEmitido(
+    createTramiteEmitidoDto: CreateTramiteEmitidoDto,
+    @Req() request?: Request,
+    // ): Promise<OutTramiteEmitidoDto> {
+  ): Promise<any> {
+
+    let digitalFiles: { IdFM: number }[] = createTramiteEmitidoDto.DigitalFiles.map((df) => ({ IdFM: +df.IdFM.split("_")[1] }));
+
+    let tramiteDestinos: CreateMovimientoDto[] = createTramiteEmitidoDto.TramiteDestinos;
+
+    let anexos: CreateAnexoDto[] = createTramiteEmitidoDto.Anexos;
+
+    try {
+      //we validate FKs
+      const idAreaFound = await this.area.findOne(
+        createTramiteEmitidoDto.IdAreaEmision,
+      );
+      if (idAreaFound.message.msgId === 1) return idAreaFound;
+
+      const idTipoDocumentoFound = await this.tipoDocumento.findOne(
+        createTramiteEmitidoDto.IdTipoDocumento,
+      );
+      if (idTipoDocumentoFound.message.msgId === 1) return idTipoDocumentoFound;
+
+      const idTipoTramiteFound = await this.tipoTramite.findOne(
+        createTramiteEmitidoDto.IdTipoTramite,
+      );
+      if (idTipoTramiteFound.message.msgId === 1) return idTipoTramiteFound;
+
+      const idEstadoFound = await this.estado.findOne(
+        createTramiteEmitidoDto.IdEstado,
+      );
+      if (idEstadoFound.message.msgId === 1) return idEstadoFound;
+
+      const idRemitenteFound = await this.remitente.findOne(
+        createTramiteEmitidoDto.IdRemitente,
+      );
+      if (idRemitenteFound.message.msgId === 1) return idRemitenteFound;
+
+
+      const result = await this.prisma.$transaction(async (prisma) => {
+
+        // printLog(digitalFiles);
+
+        // printLog(tramiteDestinos);
+
+        // printLog(anexos);
+
+        delete createTramiteEmitidoDto.DigitalFiles;
+
+        delete createTramiteEmitidoDto.TramiteDestinos;
+
+        delete createTramiteEmitidoDto.Anexos;
+
+        // we create the tramites emitido
+        const tramiteEmitido = await prisma.tramite.create({
+          data: {
+            ...createTramiteEmitidoDto,
+            CreadoPor: `${request?.user?.id ?? 'test user'}`,
+          },
+        });
+
+        // printLog(tramiteEmitido);
+
+        if (tramiteEmitido && tramiteEmitido.IdTramite) {
+          //b1-we update the digital files
+          const responseDigitalFiles = await Promise.all(
+            digitalFiles?.map(async (df) => {
+              const dataDF = await prisma.documento.update({
+                where: { IdDocumento: df.IdFM },
+                data: {
+                  IdTramite: tramiteEmitido.IdTramite
+                  // IdEstado: 1,//cambiar a estado de adjuntado
+                  // IdTipoDocumento:1 // cambiar a un tipo de documento by default
+                },
+              })
+
+              if (dataDF) {
+                return {
+                  success: true,
+                  data: dataDF,
+                }
+              } else {
+                return {
+                  success: false,
+                  error: "Error en actualizar el archivo digital",
+                };
+              }
+
+            })
+          )
+
+          const failedResponseDigitalFiles = responseDigitalFiles.filter((r) => !r.success);
+
+          if (failedResponseDigitalFiles.length > 0) {
+            const customError = new Error('Error en actualizar los archivos digitales')
+            customError.name = 'FAILD_TRAMITE_EMITIDO'
+            throw customError
+          }
+          //b1---------------------------------------
+
+          //b2-we create the tramites destino
+          tramiteDestinos = tramiteDestinos.map((destino) => {
+            return {
+              IdTramite: tramiteEmitido.IdTramite,
+              IdAreaOrigen: tramiteEmitido.IdAreaEmision,
+              IdAreaDestino: destino.IdAreaDestino,
+              FechaMovimiento: destino.FechaMovimiento,
+              Copia: destino.Copia,
+              FirmaDigital: destino.FirmaDigital,
+              IdMovimientoPadre: null,
+              NombreResponsable: destino.NombreResponsable?.NombreCompleto ? destino.NombreResponsable.NombreCompleto : destino.NombreResponsable,
+              Activo: destino.Activo,
+              CreadoEl: new Date().toISOString(),
+              CreadoPor: `${request?.user?.id ?? 'test user'}`,
+            }
+          })
+
+          const responseDestinos = await Promise.all(
+            tramiteDestinos?.map(async (destino: Movimiento) => {
+              //we create movimientos
+              const dataDestino = await prisma.movimiento.create({
+                data: destino,
+              })
+
+              if (dataDestino) {
+                //we create the historial movimiento x estado 
+                const dataHxE = await prisma.historialMovimientoxEstado.create({
+                  data: {
+                    IdEstado: 2, // cambiar a default estado de "Pendiente a recibir" con esquema movimiento
+                    IdMovimiento: dataDestino.IdMovimiento,
+                    Activo: true,
+                    CreadoEl: new Date().toISOString(),
+                    CreadoPor: `${request?.user?.id ?? 'test user'}`,
+                  },
+                })
+
+                if (dataHxE) {
+                  return {
+                    success: true,
+                    data: dataDestino,
+                  }
+                } else {
+                  return {
+                    success: false,
+                    error: "Error en crear historialMxE",
+                  };
+                }
+              } else {
+                return {
+                  success: false,
+                  error: "Error en crear destino",
+                };
+              }
+            })
+          )
+
+          const failedResponseDestinos = responseDestinos.filter((r) => !r.success);
+
+          if (failedResponseDestinos.length > 0) {
+            const customError = new Error('Error en crear los destinos')
+            customError.name = 'FAILD_TRAMITE_EMITIDO'
+            throw customError
+          }
+          //b2---------------------------------------
+
+          //b3-we update the digital files
+          anexos = anexos.map((anexo) => {
+            return {
+              Titulo: anexo.Titulo,
+              FormatoAnexo: anexo.FormatoAnexo,
+              NombreAnexo: anexo.NombreAnexo,
+              UrlAnexo: anexo.UrlAnexo,
+              SizeAnexo: anexo.SizeAnexo,
+              UrlBase: anexo.UrlBase,
+              IdTramite: tramiteEmitido.IdTramite,
+              Activo: anexo.Activo,
+              CreadoEl: new Date().toISOString(),
+              CreadoPor: `${request?.user?.id ?? 'test user'}`,
+            }
+          })
+
+          const responseAnexos = await Promise.all(
+            anexos?.map(async (anexo: Anexo) => {
+              const dataAnexo = await prisma.anexo.create({
+                data: anexo,
+              })
+
+              if (dataAnexo) {
+                return {
+                  success: true,
+                  data: dataAnexo,
+                }
+              } else {
+                return {
+                  success: false,
+                  error: "Error en crear anexo",
+                };
+              }
+            })
+          )
+
+          const failedResponseAnexos = responseAnexos.filter((r) => !r.success);
+
+          if (failedResponseAnexos.length > 0) {
+            const customError = new Error('Error en crear los anexos')
+            customError.name = 'FAILD_TRAMITE_EMITIDO'
+            throw customError
+          }
+          //b3---------------------------------------
+
+          return {
+            TramiteEmitido: tramiteEmitido,
+            DigitalFiles: responseDigitalFiles,
+            Destinos: responseDestinos,
+            Anexos: responseAnexos
+          }
+        } else {
+          const customError = new Error('Error al crear el trámite emitido')
+          customError.name = 'FAILD_TRAMITE_EMITIDO'
+          throw customError
+        }
+      })
+
+      if (result?.TramiteEmitido?.IdTramite) {
+        this.message.setMessage(0, 'Trámite - Registro creado');
+        return { message: this.message, registro: result };
+      } else {
+        this.message.setMessage(1, 'Error interno en el servidor');
+        return { message: this.message };
+      }
+    } catch (error: any) {
+      if (error?.name === 'FAILD_TRAMITE_EMITIDO') {
+        anexos.forEach(async (anexo) => {
+          await this.file.remove({ PublicUrl: anexo.UrlAnexo })
+        })
+      }
+
       console.log(error);
       this.message.setMessage(1, error.message);
       return { message: this.message };

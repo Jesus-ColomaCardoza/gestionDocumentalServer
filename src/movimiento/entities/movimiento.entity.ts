@@ -36,9 +36,8 @@ export class Movimiento {
   @IsOptional()
   IdMovimientoPadre: number;
 
-  @IsString()
   @IsOptional()
-  NombreResponsable: string;
+  NombreResponsable: any;
 
   @IsBoolean()
   @IsNotEmpty()

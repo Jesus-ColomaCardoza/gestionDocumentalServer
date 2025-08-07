@@ -11,6 +11,7 @@ import { TipoIdentificacionService } from 'src/tipo-identificacion/tipo-identifi
 import { TipoUsuarioService } from 'src/tipo-usuario/tipo-usuario.service';
 import { RolService } from 'src/rol/rol.service';
 import { CargoService } from 'src/cargo/cargo.service';
+import { TipoDocumentoService } from 'src/tipo-documento/tipo-documento.service';
 
 @Module({
   controllers: [MovimientoController],
@@ -25,7 +26,8 @@ import { CargoService } from 'src/cargo/cargo.service';
     TipoIdentificacionService,
     TipoUsuarioService,
     RolService,
-    CargoService
+    CargoService,
+    TipoDocumentoService
   ],
 })
 export class MovimientoModule {}

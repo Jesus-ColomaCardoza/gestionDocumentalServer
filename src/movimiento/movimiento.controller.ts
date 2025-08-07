@@ -32,6 +32,14 @@ export class MovimientoController {
     return this.movimientoService.create(createMovimientoDto, request);
   }
 
+  @Post('create_all')
+  createAll(
+    @Body() createMovimientoDto: CreateMovimientoDto[],
+    @Req() request?: Request,
+  ): Promise<OutMovimientoDto> {
+    return this.movimientoService.createAll(createMovimientoDto, request);
+  }
+
   @Post('find_all')
   findAll(
     @Body() combinationsFiltersDto: CombinationsFiltersDto,

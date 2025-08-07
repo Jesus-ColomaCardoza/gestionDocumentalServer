@@ -16,7 +16,8 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Request } from 'express';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { Tramite } from '@prisma/client';
-import { OutTramiteDto, OutTramitesDto } from './dto/out-tramite.dto';
+import { OutTramiteDto, OutTramiteEmitidoDto, OutTramitesDto } from './dto/out-tramite.dto';
+import { CreateTramiteEmitidoDto } from './dto/create-tramite-emitido.dto';
 @Controller('tramite')
 @ApiTags('tramite')
 // @UseGuards(AuthGuard)
@@ -30,6 +31,14 @@ export class TramiteController {
     @Req() request?: Request,
   ): Promise<OutTramiteDto> {
     return this.tramiteService.create(createTramiteDto, request);
+  }
+
+  @Post('create_emitido')
+  createEmitido(
+    @Body() createTramiteEmitidoDto: CreateTramiteEmitidoDto,
+    @Req() request?: Request,
+  ): Promise<OutTramiteEmitidoDto> {
+    return this.tramiteService.createEmitido(createTramiteEmitidoDto, request);
   }
 
   @Post('find_all')
