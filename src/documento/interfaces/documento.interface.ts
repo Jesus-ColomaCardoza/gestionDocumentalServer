@@ -11,7 +11,6 @@ export interface Documento {
   SizeDocumento?: number;
   UrlBase?: string;
   IdTipoDocumento?: number;
-  IdTramite?: number;
   IdUsuario?: number;
   FirmaDigital?: boolean;
   IdCarpeta?: number;
@@ -21,14 +20,18 @@ export interface Documento {
   CreadoPor?: string;
   ModificadoEl?: Date;
   ModificadoPor?: string;
+
+  Asunto?: string;
+// IdTramite: number;
+
   TipoDocumento?: {
     IdTipoDocumento: number;
     Descripcion: string;
   };
-  Tramite?: {
-    IdTramite: number;
-    Asunto: string;
-  };
+  // Tramite?: {
+  //   IdTramite: number;
+  //   Asunto: string;
+  // };
   Usuario?: {
     IdUsuario: number;
     Nombres: string;

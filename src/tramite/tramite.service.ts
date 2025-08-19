@@ -231,7 +231,7 @@ export class TramiteService {
               const dataDF = await prisma.documento.update({
                 where: { IdDocumento: df.IdFM },
                 data: {
-                  IdTramite: tramiteEmitido.IdTramite
+                  // IdTramite: tramiteEmitido.IdTramite
                   // IdEstado: 1,//cambiar a estado de adjuntado
                   // IdTipoDocumento:1 // cambiar a un tipo de documento by default
                 },

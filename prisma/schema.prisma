@@ -64,35 +64,38 @@ model Compartido {
 }
 
 model Documento {
-  IdDocumento      Int             @id(map: "documento_pkey") @default(autoincrement())
-  CodigoReferencia String?         @db.VarChar(50)
-  Titulo           String?         @db.VarChar(100)
-  Descripcion      String?         @db.VarChar(100)
-  Folios           Int?
-  FechaEmision     DateTime        @default(dbgenerated("CURRENT_DATE")) @db.Date
-  FormatoDocumento String?         @db.VarChar(100)
-  NombreDocumento  String?         @db.VarChar(100)
-  UrlDocumento     String?         @db.VarChar(100)
-  SizeDocumento    Int?
-  UrlBase          String?         @db.VarChar(255)
-  IdTipoDocumento  Int?
-  IdTramite        Int?
-  IdUsuario        Int?
-  FirmaDigital     Boolean?
-  IdCarpeta        Int?
-  IdEstado         Int?
-  Categoria        String?         @db.VarChar(2)
-  Activo           Boolean?        @default(false)
-  CreadoEl         DateTime        @default(now()) @db.Timestamp(6)
-  CreadoPor        String?         @db.VarChar(50)
-  ModificadoEl     DateTime?       @db.Timestamp(6)
-  ModificadoPor    String?         @db.VarChar(50)
-  Estado           Estado?         @relation(fields: [IdEstado], references: [IdEstado], onDelete: NoAction, onUpdate: NoAction, map: "documento_estado_fk")
-  Carpeta          Carpeta?        @relation(fields: [IdCarpeta], references: [IdCarpeta], onDelete: NoAction, onUpdate: NoAction, map: "documento_idcarpeta_fkey")
-  TipoDocumento    TipoDocumento?  @relation(fields: [IdTipoDocumento], references: [IdTipoDocumento], onDelete: NoAction, onUpdate: NoAction, map: "documento_idtipodocumento_fkey")
-  Tramite          Tramite?        @relation(fields: [IdTramite], references: [IdTramite], onDelete: NoAction, onUpdate: NoAction, map: "documento_idtramite_fkey")
-  Usuario          Usuario?        @relation(fields: [IdUsuario], references: [IdUsuario], onDelete: NoAction, onUpdate: NoAction, map: "documento_idusuario_fkey")
-  RegistroFirma    RegistroFirma[]
+  IdDocumento         Int             @id(map: "documento_pkey") @default(autoincrement())
+  CodigoReferenciaDoc String?         @db.VarChar(50)
+  Titulo              String?         @db.VarChar(100)
+  Descripcion         String?         @db.VarChar(100)
+  Folios              Int?
+  FechaEmision        DateTime        @default(dbgenerated("CURRENT_DATE")) @db.Date
+  FormatoDocumento    String?         @db.VarChar(100)
+  NombreDocumento     String?         @db.VarChar(100)
+  UrlDocumento        String?         @db.VarChar(100)
+  SizeDocumento       Int?
+  UrlBase             String?         @db.VarChar(255)
+  IdTipoDocumento     Int?
+  IdUsuario           Int?
+  FirmaDigital        Boolean?
+  IdCarpeta           Int?
+  IdEstado            Int?
+  Categoria           String?         @db.VarChar(2)
+  Activo              Boolean?        @default(false)
+  CreadoEl            DateTime        @default(now()) @db.Timestamp(6)
+  CreadoPor           String?         @db.VarChar(50)
+  ModificadoEl        DateTime?       @db.Timestamp(6)
+  ModificadoPor       String?         @db.VarChar(50)
+  Asunto              String?         @db.VarChar(100)
+  Observaciones       String?         @db.VarChar(100)
+  Anexo               Anexo[]
+  Estado              Estado?         @relation(fields: [IdEstado], references: [IdEstado], onDelete: NoAction, onUpdate: NoAction, map: "documento_estado_fk")
+  Carpeta             Carpeta?        @relation(fields: [IdCarpeta], references: [IdCarpeta], onDelete: NoAction, onUpdate: NoAction, map: "documento_idcarpeta_fkey")
+  TipoDocumento       TipoDocumento?  @relation(fields: [IdTipoDocumento], references: [IdTipoDocumento], onDelete: NoAction, onUpdate: NoAction, map: "documento_idtipodocumento_fkey")
+  Usuario             Usuario?        @relation(fields: [IdUsuario], references: [IdUsuario], onDelete: NoAction, onUpdate: NoAction, map: "documento_idusuario_fkey")
+  Movimiento          Movimiento[]
+  RegistroFirma       RegistroFirma[]
+  Tramite             Tramite[]
 }
 
 model Empresa {
@@ -155,10 +158,16 @@ model Movimiento {
   IdMovimientoPadre          Int?
   NombreResponsable          String?                      @db.VarChar(50)
   FirmaDigital               Boolean?                     @default(false)
+  Motivo                     String?                      @db.VarChar(50)
+  IdDocumento                Int?
+  Visible                    Boolean?
+  Acciones                   String?                      @db.VarChar(100)
+  Indicaciones               String?                      @db.VarChar(100)
   HistorialMovimientoxEstado HistorialMovimientoxEstado[]
   AreaDestino                Area?                        @relation("Movimiento_IdAreaDestinoToArea", fields: [IdAreaDestino], references: [IdArea], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimiento_destino")
   AreaOrigen                 Area?                        @relation("Movimiento_IdAreaOrigenToArea", fields: [IdAreaOrigen], references: [IdArea], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimiento_origen")
   Tramite                    Tramite?                     @relation(fields: [IdTramite], references: [IdTramite], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimiento_tramite")
+  Documento                  Documento?                   @relation(fields: [IdDocumento], references: [IdDocumento], onDelete: NoAction, map: "movimiento_documento_fk")
   MovimientoPadre            Movimiento?                  @relation("MovimientoToMovimiento", fields: [IdMovimientoPadre], references: [IdMovimiento], onDelete: NoAction, map: "movimiento_movimiento_fk")
   other_Movimiento           Movimiento[]                 @relation("MovimientoToMovimiento")
 }
@@ -210,7 +219,6 @@ model TipoDocumento {
   ModificadoEl    DateTime?   @db.Timestamp(6)
   ModificadoPor   String?     @db.VarChar(50)
   Documento       Documento[]
-  Tramite         Tramite[]
 }
 
 model TipoIdentificacion {
@@ -247,32 +255,29 @@ model TipoUsuario {
 }
 
 model Tramite {
-  IdTramite        Int            @id(map: "tramite_pkey") @default(autoincrement())
-  Asunto           String?        @db.VarChar(100)
-  Descripcion      String?        @db.VarChar(100)
-  FechaInicio      DateTime       @db.Timestamp(6)
-  FechaFin         DateTime?      @db.Timestamp(6)
-  Folios           Int?
-  IdRemitente      Int?
-  IdTipoTramite    Int?
-  Activo           Boolean?       @default(false)
-  CreadoEl         DateTime       @default(now()) @db.Timestamp(6)
-  CreadoPor        String?        @db.VarChar(50)
-  ModificadoEl     DateTime?      @db.Timestamp(6)
-  ModificadoPor    String?        @db.VarChar(50)
-  IdEstado         Int?
-  IdTipoDocumento  Int?
-  CodigoReferencia String?        @db.VarChar(50)
-  Observaciones    String?        @db.VarChar(100)
-  IdAreaEmision    Int?
-  Anexo            Anexo[]
-  Documento        Documento[]
-  Movimiento       Movimiento[]
-  Estado           Estado?        @relation("Tramite_EstadoToEstado", fields: [IdEstado], references: [IdEstado], onDelete: NoAction, onUpdate: NoAction, map: "fk_tramite_estado")
-  Remitente        Usuario?       @relation(fields: [IdRemitente], references: [IdUsuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_tramite_remitente")
-  TipoTramite      TipoTramite?   @relation(fields: [IdTipoTramite], references: [IdTipoTramite], onDelete: NoAction, onUpdate: NoAction, map: "fk_tramite_tipo")
-  Area             Area?          @relation(fields: [IdAreaEmision], references: [IdArea], onDelete: NoAction, map: "tramite_area_fk")
-  TipoDocumento    TipoDocumento? @relation(fields: [IdTipoDocumento], references: [IdTipoDocumento], onDelete: NoAction, onUpdate: NoAction, map: "tramite_tipodocumento_fk")
+  IdTramite            Int          @id(map: "tramite_pkey") @default(autoincrement())
+  Descripcion          String?      @db.VarChar(100)
+  FechaInicio          DateTime     @db.Timestamp(6)
+  FechaFin             DateTime?    @db.Timestamp(6)
+  IdRemitente          Int?
+  IdTipoTramite        Int?
+  Activo               Boolean?     @default(false)
+  CreadoEl             DateTime     @default(now()) @db.Timestamp(6)
+  CreadoPor            String?      @db.VarChar(50)
+  ModificadoEl         DateTime?    @db.Timestamp(6)
+  ModificadoPor        String?      @db.VarChar(50)
+  IdEstado             Int?
+  CodigoReferenciaTram String?      @db.VarChar(50)
+  IdAreaEmision        Int?
+  IdArchivador         Int?
+  IdDocumento          Int?
+  Movimiento           Movimiento[]
+  Estado               Estado?      @relation("Tramite_EstadoToEstado", fields: [IdEstado], references: [IdEstado], onDelete: NoAction, onUpdate: NoAction, map: "fk_tramite_estado")
+  Remitente            Usuario?     @relation(fields: [IdRemitente], references: [IdUsuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_tramite_remitente")
+  TipoTramite          TipoTramite? @relation(fields: [IdTipoTramite], references: [IdTipoTramite], onDelete: NoAction, onUpdate: NoAction, map: "fk_tramite_tipo")
+  Archivador           Archivador?  @relation(fields: [IdArchivador], references: [IdArchivador], onDelete: NoAction, map: "tramite_archivador_fk")
+  Area                 Area?        @relation(fields: [IdAreaEmision], references: [IdArea], onDelete: NoAction, map: "tramite_area_fk")
+  Documento            Documento?   @relation(fields: [IdDocumento], references: [IdDocumento], onDelete: NoAction, map: "tramite_documento_fk")
 }
 
 model Usuario {
@@ -331,18 +336,32 @@ model Constante {
 }
 
 model Anexo {
-  IdAnexo       Int       @id(map: "anexo_pkey") @default(autoincrement())
-  Titulo        String?   @db.VarChar(100)
-  FormatoAnexo  String?   @db.VarChar(100)
-  NombreAnexo   String?   @db.VarChar(100)
-  UrlAnexo      String?   @db.VarChar(100)
+  IdAnexo       Int        @id(map: "anexo_pkey") @default(autoincrement())
+  Titulo        String?    @db.VarChar(100)
+  FormatoAnexo  String?    @db.VarChar(100)
+  NombreAnexo   String?    @db.VarChar(100)
+  UrlAnexo      String?    @db.VarChar(100)
   SizeAnexo     Int?
-  UrlBase       String?   @db.VarChar(255)
-  IdTramite     Int?
+  UrlBase       String?    @db.VarChar(255)
+  IdDocumento   Int?
+  Activo        Boolean?   @default(false)
+  CreadoEl      DateTime   @default(now()) @db.Timestamp(6)
+  CreadoPor     String?    @db.VarChar(50)
+  ModificadoEl  DateTime?  @db.Timestamp(6)
+  ModificadoPor String?    @db.VarChar(50)
+  Documento     Documento? @relation(fields: [IdDocumento], references: [IdDocumento], onDelete: NoAction, map: "anexo_documento_fk")
+}
+
+model Archivador {
+  IdArchivador  Int       @id(map: "archivador_pkey") @default(autoincrement())
+  Ano           Int?
+  Descripcion   String?   @db.VarChar(100)
+  Nombre        String?   @db.VarChar(100)
+  NroTramites   Int?
   Activo        Boolean?  @default(false)
   CreadoEl      DateTime  @default(now()) @db.Timestamp(6)
   CreadoPor     String?   @db.VarChar(50)
   ModificadoEl  DateTime? @db.Timestamp(6)
   ModificadoPor String?   @db.VarChar(50)
-  Tramite       Tramite?  @relation(fields: [IdTramite], references: [IdTramite], onDelete: NoAction, map: "anexo_tramite_fk")
+  Tramite       Tramite[]
 }
