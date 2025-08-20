@@ -32,6 +32,7 @@ import { FileManagerModule } from './file-manager/file-manager.module';
 import { MailModule } from './mail/mail.module';
 import { ConstanteModule } from './constante/constante.module';
 import { AnexoModule } from './anexo/anexo.module';
+import { ArchivadorModule } from './archivador/archivador.module';
 
 @Module({
   imports: [
@@ -82,7 +83,9 @@ import { AnexoModule } from './anexo/anexo.module';
     FileManagerModule,
     MailModule,
     ConstanteModule,
-    AnexoModule
+    AnexoModule,
+    ArchivadorModule
+
   ],
   controllers: [AppController],
   providers: [AppService, FiltersService],
