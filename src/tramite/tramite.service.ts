@@ -172,6 +172,18 @@ export class TramiteService {
 
     let anexos: CreateAnexoDto[] = createTramiteEmitidoDto.Anexos;
 
+    // printLog(digitalFiles);
+
+    // printLog(tramiteDestinos);
+
+    // printLog(anexos);
+
+    delete createTramiteEmitidoDto.DigitalFiles;
+
+    delete createTramiteEmitidoDto.TramiteDestinos;
+
+    delete createTramiteEmitidoDto.Anexos;
+
     try {
       //we validate FKs
       const idAreaFound = await this.area.findOne(
@@ -201,64 +213,89 @@ export class TramiteService {
 
 
       const result = await this.prisma.$transaction(async (prisma) => {
-
-        // printLog(digitalFiles);
-
-        // printLog(tramiteDestinos);
-
-        // printLog(anexos);
-
-        delete createTramiteEmitidoDto.DigitalFiles;
-
-        delete createTramiteEmitidoDto.TramiteDestinos;
-
-        delete createTramiteEmitidoDto.Anexos;
-
         // we create the tramites emitido
         const tramiteEmitido = await prisma.tramite.create({
           data: {
-            ...createTramiteEmitidoDto,
+            IdDocumento: digitalFiles[0].IdFM,
+            Activo: createTramiteEmitidoDto.Activo,
+            FechaInicio: createTramiteEmitidoDto.FechaInicio,
+            IdTipoTramite: createTramiteEmitidoDto.IdTipoTramite,
+            IdAreaEmision: createTramiteEmitidoDto.IdAreaEmision,
+            IdEstado: createTramiteEmitidoDto.IdEstado,
+            IdRemitente: createTramiteEmitidoDto.IdRemitente,
+            CreadoEl: new Date().toISOString(),
             CreadoPor: `${request?.user?.id ?? 'test user'}`,
           },
+          select: {
+            IdTramite: true,
+            IdAreaEmision: true,
+            IdDocumento: true,
+          }
         });
 
         // printLog(tramiteEmitido);
 
         if (tramiteEmitido && tramiteEmitido.IdTramite) {
-          //b1-we update the digital files
-          const responseDigitalFiles = await Promise.all(
-            digitalFiles?.map(async (df) => {
-              const dataDF = await prisma.documento.update({
-                where: { IdDocumento: df.IdFM },
-                data: {
-                  // IdTramite: tramiteEmitido.IdTramite
-                  // IdEstado: 1,//cambiar a estado de adjuntado
-                  // IdTipoDocumento:1 // cambiar a un tipo de documento by default
-                },
-              })
+          //b1-we update the data digital files(documentos)
+          const responseDigitalFiles = await prisma.documento.update({
+            where: {
+              IdDocumento: tramiteEmitido.IdDocumento
+            },
+            data: {
+              CodigoReferenciaDoc: createTramiteEmitidoDto.CodigoReferenciaDoc,
+              Asunto: createTramiteEmitidoDto.Asunto,
+              Observaciones: createTramiteEmitidoDto.Observaciones,
+              Folios: createTramiteEmitidoDto.Folios,
+              IdTipoDocumento: createTramiteEmitidoDto.IdTipoDocumento,
+              IdEstado: 4// IdEstado - Adjuntado - 4
+            },
+            select: {
+              IdDocumento: true,
+              NombreDocumento: true,
+              UrlDocumento: true,
+            }
 
-              if (dataDF) {
-                return {
-                  success: true,
-                  data: dataDF,
-                }
-              } else {
-                return {
-                  success: false,
-                  error: "Error en actualizar el archivo digital",
-                };
-              }
+          })
 
-            })
-          )
-
-          const failedResponseDigitalFiles = responseDigitalFiles.filter((r) => !r.success);
-
-          if (failedResponseDigitalFiles.length > 0) {
-            const customError = new Error('Error en actualizar los archivos digitales')
+          if (!responseDigitalFiles) {
+            const customError = new Error('Error al actualizar estado del documento')
             customError.name = 'FAILD_TRAMITE_EMITIDO'
             throw customError
           }
+          //b1-we update the digital files
+          // const responseDigitalFiles = await Promise.all(
+          //   digitalFiles?.map(async (df) => {
+          //     const dataDF = await prisma.documento.update({
+          //       where: { IdDocumento: df.IdFM },
+          //       data: {
+          //         // IdTramite: tramiteEmitido.IdTramite
+          //         // IdEstado: 1,//cambiar a estado de adjuntado
+          //         // IdTipoDocumento:1 // cambiar a un tipo de documento by default
+          //       },
+          //     })
+
+          //     if (dataDF) {
+          //       return {
+          //         success: true,
+          //         data: dataDF,
+          //       }
+          //     } else {
+          //       return {
+          //         success: false,
+          //         error: "Error en actualizar el archivo digital",
+          //       };
+          //     }
+
+          //   })
+          // )
+
+          // const failedResponseDigitalFiles = responseDigitalFiles.filter((r) => !r.success);
+
+          // if (failedResponseDigitalFiles.length > 0) {
+          //   const customError = new Error('Error en actualizar los archivos digitales')
+          //   customError.name = 'FAILD_TRAMITE_EMITIDO'
+          //   throw customError
+          // }
           //b1---------------------------------------
 
           //b2-we create the tramites destino
@@ -335,7 +372,7 @@ export class TramiteService {
               UrlAnexo: anexo.UrlAnexo,
               SizeAnexo: anexo.SizeAnexo,
               UrlBase: anexo.UrlBase,
-              IdTramite: tramiteEmitido.IdTramite,
+              IdDocumento: digitalFiles[0].IdFM,
               Activo: anexo.Activo,
               CreadoEl: new Date().toISOString(),
               CreadoPor: `${request?.user?.id ?? 'test user'}`,
@@ -392,11 +429,11 @@ export class TramiteService {
         return { message: this.message };
       }
     } catch (error: any) {
-      if (error?.name === 'FAILD_TRAMITE_EMITIDO') {
-        anexos.forEach(async (anexo) => {
-          await this.file.remove({ PublicUrl: anexo.UrlAnexo })
-        })
-      }
+      // if (error?.name === 'FAILD_TRAMITE_EMITIDO') {
+      anexos.forEach(async (anexo) => {
+        await this.file.remove({ PublicUrl: anexo.UrlAnexo })
+      })
+      // }
 
       console.log(error);
       this.message.setMessage(1, error.message);
@@ -414,7 +451,85 @@ export class TramiteService {
       const tramites = await this.prisma.tramite.findMany({
         where: clausula,
         take: limitRows,
-        select: this.customOut,
+        select: {
+          IdTramite: true,
+          CodigoReferenciaTram: true,
+          Descripcion: true,
+          FechaInicio: true,
+          FechaFin: true,
+          Remitente: {
+            select: {
+              IdUsuario: true,
+              Nombres: true,
+              ApellidoPaterno: true,
+              ApellidoMaterno: true,
+            },
+          },
+          TipoTramite: {
+            select: {
+              IdTipoTramite: true,
+              Descripcion: true,
+            },
+          },
+
+          Area: {
+            select: {
+              IdArea: true,
+              Descripcion: true,
+            },
+          },
+          Estado: {
+            select: {
+              IdEstado: true,
+              Descripcion: true,
+              EsquemaEstado: {
+                select: {
+                  IdEsquemaEstado: true,
+                  Descripcion: true,
+                },
+              },
+            },
+          },
+          Activo: true,
+          CreadoEl: true,
+          CreadoPor: true,
+          ModificadoEl: true,
+          ModificadoPor: true,
+          Documento: {
+            select: {
+              IdDocumento: true,
+              NombreDocumento: true,
+              UrlDocumento: true,
+              CodigoReferenciaDoc: true,
+              Asunto: true,
+              Observaciones: true,
+              Folios: true,
+              TipoDocumento: {
+                select: {
+                  IdTipoDocumento: true,
+                  Descripcion: true,
+                }
+              },
+              Anexo: {
+                select: {
+                  IdAnexo: true,
+                  NombreAnexo: true,
+                  UrlAnexo: true,
+                }
+              },
+            },
+          },
+          Movimiento: {
+            select: {
+              IdMovimiento: true,
+              AreaDestino: {
+                select: {
+                  Descripcion: true,
+                }
+              }
+            },
+          }
+        },
       });
 
       if (tramites) {

@@ -11,11 +11,19 @@ import {
 export class Documento {
   @IsString()
   @IsOptional()
-  CodigoReferencia: string;
+  CodigoReferenciaDoc: string;
 
   @IsString()
   @IsOptional()
   Titulo: string;
+
+  @IsString()
+  @IsOptional()
+  Asunto: string;
+
+  @IsString()
+  @IsOptional()
+  Observaciones: string;
 
   @IsString()
   @IsOptional()

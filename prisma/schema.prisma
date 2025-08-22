@@ -37,12 +37,12 @@ model Carpeta {
   Descripcion    String?     @db.VarChar(100)
   IdCarpetaPadre Int?
   IdUsuario      Int?
-  Categoria      String?     @db.VarChar(2)
   Activo         Boolean?    @default(false)
   CreadoEl       DateTime    @default(now()) @db.Timestamp(6)
   CreadoPor      String?     @db.VarChar(50)
   ModificadoEl   DateTime?   @db.Timestamp(6)
   ModificadoPor  String?     @db.VarChar(50)
+  Categoria      String?     @db.VarChar(2)
   CarpetaPadre   Carpeta?    @relation("CarpetaToCarpeta", fields: [IdCarpetaPadre], references: [IdCarpeta], onDelete: NoAction, onUpdate: NoAction, map: "fk_carpeta_padre")
   other_Carpeta  Carpeta[]   @relation("CarpetaToCarpeta")
   Usuario        Usuario?    @relation(fields: [IdUsuario], references: [IdUsuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_carpeta_usuario")
@@ -65,28 +65,28 @@ model Compartido {
 
 model Documento {
   IdDocumento         Int             @id(map: "documento_pkey") @default(autoincrement())
-  CodigoReferenciaDoc String?         @db.VarChar(50)
   Titulo              String?         @db.VarChar(100)
   Descripcion         String?         @db.VarChar(100)
   Folios              Int?
   FechaEmision        DateTime        @default(dbgenerated("CURRENT_DATE")) @db.Date
-  FormatoDocumento    String?         @db.VarChar(100)
-  NombreDocumento     String?         @db.VarChar(100)
   UrlDocumento        String?         @db.VarChar(100)
-  SizeDocumento       Int?
-  UrlBase             String?         @db.VarChar(255)
+  FormatoDocumento    String?         @db.VarChar(100)
   IdTipoDocumento     Int?
   IdUsuario           Int?
   FirmaDigital        Boolean?
   IdCarpeta           Int?
-  IdEstado            Int?
-  Categoria           String?         @db.VarChar(2)
   Activo              Boolean?        @default(false)
   CreadoEl            DateTime        @default(now()) @db.Timestamp(6)
   CreadoPor           String?         @db.VarChar(50)
   ModificadoEl        DateTime?       @db.Timestamp(6)
   ModificadoPor       String?         @db.VarChar(50)
+  NombreDocumento     String?         @db.VarChar(100)
+  Categoria           String?         @db.VarChar(2)
+  IdEstado            Int?
+  SizeDocumento       Int?
+  UrlBase             String?         @db.VarChar(255)
   Asunto              String?         @db.VarChar(100)
+  CodigoReferenciaDoc String?         @db.VarChar(50)
   Observaciones       String?         @db.VarChar(100)
   Anexo               Anexo[]
   Estado              Estado?         @relation(fields: [IdEstado], references: [IdEstado], onDelete: NoAction, onUpdate: NoAction, map: "documento_estado_fk")
@@ -110,11 +110,11 @@ model Empresa {
   ModificadoEl      DateTime? @db.Timestamp(6)
   ModificadoPor     String?   @db.VarChar(50)
   RazonSocial       String?   @db.VarChar(100)
+  UrlBase           String?   @db.VarChar(255)
   FormatoLogo       String?   @db.VarChar(100)
   NombreLogo        String?   @db.VarChar(100)
-  UrlLogo           String?   @db.VarChar(255)
   SizeLogo          Int?
-  UrlBase           String?   @db.VarChar(255)
+  UrlLogo           String?   @db.VarChar(255)
 }
 
 model EsquemaEstado {
@@ -155,14 +155,14 @@ model Movimiento {
   ModificadoEl               DateTime?                    @db.Timestamp(6)
   ModificadoPor              String?                      @db.VarChar(50)
   Copia                      Boolean?                     @default(false)
+  FirmaDigital               Boolean?                     @default(false)
   IdMovimientoPadre          Int?
   NombreResponsable          String?                      @db.VarChar(50)
-  FirmaDigital               Boolean?                     @default(false)
-  Motivo                     String?                      @db.VarChar(50)
-  IdDocumento                Int?
-  Visible                    Boolean?
   Acciones                   String?                      @db.VarChar(100)
+  IdDocumento                Int?
   Indicaciones               String?                      @db.VarChar(100)
+  Motivo                     String?                      @db.VarChar(50)
+  Visible                    Boolean?
   HistorialMovimientoxEstado HistorialMovimientoxEstado[]
   AreaDestino                Area?                        @relation("Movimiento_IdAreaDestinoToArea", fields: [IdAreaDestino], references: [IdArea], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimiento_destino")
   AreaOrigen                 Area?                        @relation("Movimiento_IdAreaOrigenToArea", fields: [IdAreaOrigen], references: [IdArea], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimiento_origen")
@@ -267,10 +267,11 @@ model Tramite {
   ModificadoEl         DateTime?    @db.Timestamp(6)
   ModificadoPor        String?      @db.VarChar(50)
   IdEstado             Int?
-  CodigoReferenciaTram String?      @db.VarChar(50)
   IdAreaEmision        Int?
+  CodigoReferenciaTram String?      @db.VarChar(50)
   IdArchivador         Int?
   IdDocumento          Int?
+  Detalle              String?      @db.VarChar(100)
   Movimiento           Movimiento[]
   Estado               Estado?      @relation("Tramite_EstadoToEstado", fields: [IdEstado], references: [IdEstado], onDelete: NoAction, onUpdate: NoAction, map: "fk_tramite_estado")
   Remitente            Usuario?     @relation(fields: [IdRemitente], references: [IdUsuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_tramite_remitente")
@@ -302,12 +303,12 @@ model Usuario {
   CreadoPor             String?             @db.VarChar(50)
   ModificadoEl          DateTime?           @db.Timestamp(6)
   ModificadoPor         String?             @db.VarChar(50)
+  CodigoConfirmacion    String?             @db.VarChar(100)
+  UrlBase               String?             @db.VarChar(255)
   FormatoFotoPerfil     String?             @db.VarChar(100)
   NombreFotoPerfil      String?             @db.VarChar(100)
-  UrlFotoPerfil         String?             @db.VarChar(255)
   SizeFotoPerfil        Int?
-  UrlBase               String?             @db.VarChar(255)
-  CodigoConfirmacion    String?             @db.VarChar(100)
+  UrlFotoPerfil         String?             @db.VarChar(255)
   CodigoConfirmacionExp DateTime?           @db.Timestamp(6)
   Carpeta               Carpeta[]
   Compartido            Compartido[]
@@ -343,12 +344,12 @@ model Anexo {
   UrlAnexo      String?    @db.VarChar(100)
   SizeAnexo     Int?
   UrlBase       String?    @db.VarChar(255)
-  IdDocumento   Int?
   Activo        Boolean?   @default(false)
   CreadoEl      DateTime   @default(now()) @db.Timestamp(6)
   CreadoPor     String?    @db.VarChar(50)
   ModificadoEl  DateTime?  @db.Timestamp(6)
   ModificadoPor String?    @db.VarChar(50)
+  IdDocumento   Int?
   Documento     Documento? @relation(fields: [IdDocumento], references: [IdDocumento], onDelete: NoAction, map: "anexo_documento_fk")
 }
 

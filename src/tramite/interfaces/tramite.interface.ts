@@ -1,29 +1,32 @@
 export interface Tramite {
   IdTramite?: number;
-  CodigoReferencia?: string;
-  Asunto?: string;
+  CodigoReferenciaTram?: string;
   Descripcion?: string;
-  Observaciones?: string;
   FechaInicio?: Date;
   FechaFin?: Date;
-  Folios?: number;
   IdRemitente?: number;
   IdTipoTramite?: number;
-  IdTipoDocumento?: number;
   IdAreaEmision?: number;
   IdEstado?: number;
+  IdArchivador?: number;
+  IdDocumento?: number;
   Activo?: boolean;
   CreadoEl?: Date;
   CreadoPor?: string;
   ModificadoEl?: Date;
   ModificadoPor?: string;
+  
+  Documento?:{
+    IdDocumento:number;
+    NombreDocumento:string;
+  };
   TipoTramite?: {
     IdTipoTramite: number;
     Descripcion: string;
   };
-  TipoDocumento?: {
-    IdTipoDocumento: number;
-    Descripcion: string;
+  Archivador?: {
+    IdArchivador: number;
+    Nombre: string;
   };
   Area?: {
     IdArea: number;

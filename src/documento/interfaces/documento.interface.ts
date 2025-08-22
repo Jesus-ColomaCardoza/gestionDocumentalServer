@@ -1,9 +1,11 @@
 export interface Documento {
   IdDocumento?: number;
-  CodigoReferencia?: string;
+  CodigoReferenciaDoc?: string;
   Titulo?: string;
   Descripcion?: string;
-  folios?: number;
+  Asunto?: string;
+  Observaciones?: string;
+  Folios?: number;
   FechaEmision?: Date;
   FormatoDocumento?: string;
   NombreDocumento?: string;
@@ -12,6 +14,7 @@ export interface Documento {
   UrlBase?: string;
   IdTipoDocumento?: number;
   IdUsuario?: number;
+  IdEstado?: number;
   FirmaDigital?: boolean;
   IdCarpeta?: number;
   Categoria?: string,
@@ -21,17 +24,18 @@ export interface Documento {
   ModificadoEl?: Date;
   ModificadoPor?: string;
 
-  Asunto?: string;
-// IdTramite: number;
-
   TipoDocumento?: {
     IdTipoDocumento: number;
     Descripcion: string;
   };
-  // Tramite?: {
-  //   IdTramite: number;
-  //   Asunto: string;
-  // };
+  Estado?: {
+    IdEstado: number;
+    Descripcion: string;
+    EsquemaEstado: {
+      IdEsquemaEstado: number;
+      Descripcion: string;
+    };
+  };
   Usuario?: {
     IdUsuario: number;
     Nombres: string;

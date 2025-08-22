@@ -6,13 +6,13 @@ export interface Anexo {
   UrlAnexo?: string;
   SizeAnexo?: number;
   UrlBase?: string;
-  IdTramite?: number;
+  IdDocumento?: number;
   CreadoEl?: Date;
   CreadoPor?: string;
   ModificadoEl?: Date;
   ModificadoPor?: string;
-  Tramite?: {
-    IdTramite: number;
-    Asunto: string;
+  Documento?: {
+    IdDocumento: number;
+    NombreDocumento: string;
   };
 }

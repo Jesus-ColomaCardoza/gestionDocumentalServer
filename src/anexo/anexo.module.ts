@@ -13,6 +13,7 @@ import { AreaService } from 'src/area/area.service';
 import { EsquemaEstadoService } from 'src/esquema-estado/esquema-estado.service';
 import { CarpetaService } from 'src/carpeta/carpeta.service';
 import { TipoDocumentoService } from 'src/tipo-documento/tipo-documento.service';
+import { DocumentoService } from 'src/documento/documento.service';
 
 @Module({
   controllers: [AnexoController],
@@ -29,7 +30,8 @@ import { TipoDocumentoService } from 'src/tipo-documento/tipo-documento.service'
     EsquemaEstadoService,
     AreaService,
     CarpetaService,
-    TipoDocumentoService
+    TipoDocumentoService,
+    DocumentoService
   ],
 })
 export class AnexoModule { }

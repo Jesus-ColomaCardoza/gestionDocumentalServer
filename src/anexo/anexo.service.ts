@@ -9,6 +9,7 @@ import { Request } from 'express';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { TramiteService } from 'src/tramite/tramite.service';
 import { OutAnexoDto, OutAnexosDto } from './dto/out-anexo.dto';
+import { DocumentoService } from 'src/documento/documento.service';
 
 @Injectable()
 export class AnexoService {
@@ -17,7 +18,7 @@ export class AnexoService {
   constructor(
     private prisma: PrismaService,
     private filtersService: FiltersService,
-    private tramite: TramiteService,
+    private documento: DocumentoService,
   ) { }
 
   private readonly customOut = {
@@ -27,10 +28,10 @@ export class AnexoService {
     FormatoAnexo: true,
     NombreAnexo: true,
     SizeAnexo: true,
-    Tramite: {
+    Documento: {
       select: {
-        IdTramite: true,
-        Asunto: true,
+        IdDocumento: true,
+        NombreDocumento: true,
       },
     },
     Activo: true,
@@ -46,11 +47,10 @@ export class AnexoService {
   ): Promise<OutAnexoDto> {
     try {
       //we validate FKs
-
-      const idTramite = createAnexoDto.IdTramite;
-      if (idTramite) {
-        const idTramiteFound = await this.tramite.findOne(idTramite);
-        if (idTramiteFound.message.msgId === 1) return idTramiteFound;
+      const idDocumento = createAnexoDto.IdDocumento;
+      if (idDocumento) {
+        const idDocumentoFound = await this.documento.findOne(idDocumento);
+        if (idDocumentoFound.message.msgId === 1) return idDocumentoFound;
       }
 
       //we create new register
@@ -137,10 +137,10 @@ export class AnexoService {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;
 
-      const idTramite = updateAnexoDto.IdTramite;
-      if (idTramite) {
-        const idTramiteFound = await this.tramite.findOne(idTramite);
-        if (idTramiteFound.message.msgId === 1) return idTramiteFound;
+      const idDocumento = updateAnexoDto.IdDocumento;
+      if (idDocumento) {
+        const idDocumentoFound = await this.documento.findOne(idDocumento);
+        if (idDocumentoFound.message.msgId === 1) return idDocumentoFound;
       }
 
       const anexo = await this.prisma.anexo.update({

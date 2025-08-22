@@ -2,12 +2,8 @@ import { IsBoolean, IsInt, IsNotEmpty, IsOptional, IsString } from 'class-valida
 
 export class Tramite {
   @IsString()
-  @IsNotEmpty()
-  CodigoReferencia: string;
-
-  @IsString()
-  @IsNotEmpty()
-  Asunto: string;
+  @IsOptional()
+  CodigoReferenciaTram: string;
 
   @IsString()
   @IsOptional()
@@ -15,7 +11,7 @@ export class Tramite {
 
   @IsString()
   @IsOptional()
-  Observaciones: string;
+  Detalle: string;
 
   @IsString()
   @IsOptional()
@@ -24,10 +20,6 @@ export class Tramite {
   @IsString()
   @IsOptional()
   FechaFin: string;
-
-  @IsInt()
-  @IsOptional()
-  Folios: number;
 
   @IsInt()
   @IsNotEmpty()
@@ -39,11 +31,15 @@ export class Tramite {
 
   @IsInt()
   @IsNotEmpty()
-  IdTipoDocumento: number;
+  IdAreaEmision: number;
 
   @IsInt()
-  @IsNotEmpty()
-  IdAreaEmision: number;
+  @IsOptional()
+  IdArchivador: number;
+
+  @IsInt()
+  @IsOptional()
+  IdDocumento: number;
 
   @IsInt()
   @IsNotEmpty()

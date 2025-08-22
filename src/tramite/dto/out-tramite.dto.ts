@@ -1,6 +1,6 @@
 import { Expose } from 'class-transformer';
 import { Menssage } from 'src/menssage/menssage.entity';
-import { Tramite } from '../interfaces/tramite';
+import { Tramite } from '../interfaces/tramite.interface';
 
 export class OutTramiteDto {
   @Expose()

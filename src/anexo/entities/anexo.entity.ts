@@ -33,7 +33,7 @@ export class Anexo {
 
   @IsInt()
   @IsOptional()
-  IdTramite: number;
+  IdDocumento: number;
 
   @IsBoolean()
   @IsNotEmpty()
