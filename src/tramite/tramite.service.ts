@@ -10,7 +10,7 @@ import { TipoTramiteService } from 'src/tipo-tramite/tipo-tramite.service';
 import { EstadoService } from 'src/estado/estado.service';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { UsuarioService } from 'src/usuario/usuario.service';
-import { OutTramiteDto, OutTramiteEmitidoDto } from './dto/out-tramite.dto';
+import { OutTramiteDto, OutTramiteEmitidoDto, OutTramitesDto, OutTramitesPendienteDto } from './dto/out-tramite.dto';
 import { OutTipoTramitesDto } from 'src/tipo-tramite/dto/out-tipo-tramite.dto';
 import { CreateTramiteEmitidoDto } from './dto/create-tramite-emitido.dto';
 import { FileManager } from 'src/file-manager/entities/file-manager.entity';
@@ -22,6 +22,7 @@ import { FileService } from 'src/file/file.service';
 import { CreateAnexoDto } from 'src/anexo/dto/create-anexo.dto';
 import { TipoDocumentoService } from 'src/tipo-documento/tipo-documento.service';
 import { AreaService } from 'src/area/area.service';
+import { GetAllTramitePendienteDto } from './dto/get-all-tramite-pediente.dto';
 
 @Injectable()
 export class TramiteService {
@@ -326,7 +327,7 @@ export class TramiteService {
                 //we create the historial movimiento x estado 
                 const dataHxE = await prisma.historialMovimientoxEstado.create({
                   data: {
-                    IdEstado: 2, // cambiar a default estado de "Pendiente a recibir" con esquema movimiento
+                    IdEstado: 15, // IdEstado - Pendiente - 15
                     IdMovimiento: dataDestino.IdMovimiento,
                     Activo: true,
                     CreadoEl: new Date().toISOString(),
@@ -441,7 +442,7 @@ export class TramiteService {
     }
   }
 
-  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<OutTipoTramitesDto> {
+  async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<OutTramitesDto> {
     try {
       let filtros = combinationsFiltersDto.filters;
       let cantidad_max = combinationsFiltersDto.cantidad_max;
@@ -531,6 +532,117 @@ export class TramiteService {
           }
         },
       });
+
+      if (tramites) {
+        this.message.setMessage(0, 'Trámite - Registros encontrados');
+        return { message: this.message, registro: tramites };
+      } else {
+        this.message.setMessage(1, 'Error: Trámite - Registros no encontrados');
+        return { message: this.message };
+      }
+    } catch (error: any) {
+      console.log(error);
+      this.message.setMessage(1, error.message);
+      return { message: this.message };
+    }
+  }
+
+  async findAllPendientes(getAllTramitePendienteDto: GetAllTramitePendienteDto): Promise<OutTramitesPendienteDto> {
+    try {
+
+      const tramites = await this.prisma.movimiento.findMany({
+        where: {
+          HistorialMovimientoxEstado: {
+            every: {
+              Estado: {
+                IdEstado: 15// IdEstado - Pendiente - 15
+              }
+            }
+          },
+          IdAreaDestino: getAllTramitePendienteDto.IdAreaDestino,
+        },
+        select: {
+          Documento: {
+            select: {
+              IdDocumento: true,
+              CodigoReferenciaDoc: true,
+              Asunto: true,
+              Folios: true,
+              TipoDocumento: {
+                select: {
+                  IdTipoDocumento: true,
+                  Descripcion: true,
+                }
+              },
+            },
+          },
+          AreaOrigen: {
+            select: {
+              IdArea: true,
+              Descripcion: true,
+            }
+          },
+          AreaDestino: {
+            select: {
+              IdArea: true,
+              Descripcion: true,
+            }
+          },
+          Motivo: true,
+          FechaMovimiento: true,
+
+          // si en el movimiento solo hay documento solo a nivel de tramite, se toma ese
+          // si en el movimiento hay documento a nivel de tramite y movimiento, se toma el de movimiento
+
+          Tramite: {
+            select: {
+              IdTramite: true,
+              CodigoReferenciaTram: true,
+              Descripcion: true,
+              FechaInicio: true,
+              FechaFin: true,
+              Remitente: {
+                select: {
+                  IdUsuario: true,
+                  Nombres: true,
+                  ApellidoPaterno: true,
+                  ApellidoMaterno: true,
+                  NroIdentificacion: true
+                },
+              },
+              TipoTramite: {
+                select: {
+                  IdTipoTramite: true,
+                  Descripcion: true,
+                },
+              },
+              Estado: {
+                select: {
+                  IdEstado: true,
+                  Descripcion: true,
+                },
+              },
+              Documento: {
+                select: {
+                  IdDocumento: true,
+                  CodigoReferenciaDoc: true,
+                  Asunto: true,
+                  Folios: true,
+                  TipoDocumento: {
+                    select: {
+                      IdTipoDocumento: true,
+                      Descripcion: true,
+                    }
+                  },
+                },
+              },
+            }
+          },
+        }
+
+      })
+
+
 
       if (tramites) {
         this.message.setMessage(0, 'Trámite - Registros encontrados');

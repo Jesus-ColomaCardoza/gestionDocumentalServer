@@ -17,6 +17,13 @@ export class OutTramiteEmitidoDto {
   @Expose()
   registro?: any;
 }
+export class OutTramitesPendienteDto {
+  @Expose()
+  message: Menssage;
+
+  @Expose()
+  registro?: any;
+}
 
 export class OutTramitesDto {
   @Expose()

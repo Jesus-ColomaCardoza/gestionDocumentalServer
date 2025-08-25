@@ -64,38 +64,40 @@ model Compartido {
 }
 
 model Documento {
-  IdDocumento         Int             @id(map: "documento_pkey") @default(autoincrement())
-  Titulo              String?         @db.VarChar(100)
-  Descripcion         String?         @db.VarChar(100)
-  Folios              Int?
-  FechaEmision        DateTime        @default(dbgenerated("CURRENT_DATE")) @db.Date
-  UrlDocumento        String?         @db.VarChar(100)
-  FormatoDocumento    String?         @db.VarChar(100)
-  IdTipoDocumento     Int?
-  IdUsuario           Int?
-  FirmaDigital        Boolean?
-  IdCarpeta           Int?
-  Activo              Boolean?        @default(false)
-  CreadoEl            DateTime        @default(now()) @db.Timestamp(6)
-  CreadoPor           String?         @db.VarChar(50)
-  ModificadoEl        DateTime?       @db.Timestamp(6)
-  ModificadoPor       String?         @db.VarChar(50)
-  NombreDocumento     String?         @db.VarChar(100)
-  Categoria           String?         @db.VarChar(2)
-  IdEstado            Int?
-  SizeDocumento       Int?
-  UrlBase             String?         @db.VarChar(255)
-  Asunto              String?         @db.VarChar(100)
-  CodigoReferenciaDoc String?         @db.VarChar(50)
-  Observaciones       String?         @db.VarChar(100)
-  Anexo               Anexo[]
-  Estado              Estado?         @relation(fields: [IdEstado], references: [IdEstado], onDelete: NoAction, onUpdate: NoAction, map: "documento_estado_fk")
-  Carpeta             Carpeta?        @relation(fields: [IdCarpeta], references: [IdCarpeta], onDelete: NoAction, onUpdate: NoAction, map: "documento_idcarpeta_fkey")
-  TipoDocumento       TipoDocumento?  @relation(fields: [IdTipoDocumento], references: [IdTipoDocumento], onDelete: NoAction, onUpdate: NoAction, map: "documento_idtipodocumento_fkey")
-  Usuario             Usuario?        @relation(fields: [IdUsuario], references: [IdUsuario], onDelete: NoAction, onUpdate: NoAction, map: "documento_idusuario_fkey")
-  Movimiento          Movimiento[]
-  RegistroFirma       RegistroFirma[]
-  Tramite             Tramite[]
+  IdDocumento                Int                          @id(map: "documento_pkey") @default(autoincrement())
+  Titulo                     String?                      @db.VarChar(100)
+  Descripcion                String?                      @db.VarChar(100)
+  Folios                     Int?
+  FechaEmision               DateTime                     @default(dbgenerated("CURRENT_DATE")) @db.Date
+  UrlDocumento               String?                      @db.VarChar(100)
+  FormatoDocumento           String?                      @db.VarChar(100)
+  IdTipoDocumento            Int?
+  IdUsuario                  Int?
+  FirmaDigital               Boolean?
+  IdCarpeta                  Int?
+  Activo                     Boolean?                     @default(false)
+  CreadoEl                   DateTime                     @default(now()) @db.Timestamp(6)
+  CreadoPor                  String?                      @db.VarChar(50)
+  ModificadoEl               DateTime?                    @db.Timestamp(6)
+  ModificadoPor              String?                      @db.VarChar(50)
+  NombreDocumento            String?                      @db.VarChar(100)
+  Categoria                  String?                      @db.VarChar(2)
+  IdEstado                   Int?
+  SizeDocumento              Int?
+  UrlBase                    String?                      @db.VarChar(255)
+  Asunto                     String?                      @db.VarChar(100)
+  CodigoReferenciaDoc        String?                      @db.VarChar(50)
+  Observaciones              String?                      @db.VarChar(100)
+  Visible                    Boolean?
+  Anexo                      Anexo[]
+  Estado                     Estado?                      @relation(fields: [IdEstado], references: [IdEstado], onDelete: NoAction, onUpdate: NoAction, map: "documento_estado_fk")
+  Carpeta                    Carpeta?                     @relation(fields: [IdCarpeta], references: [IdCarpeta], onDelete: NoAction, onUpdate: NoAction, map: "documento_idcarpeta_fkey")
+  TipoDocumento              TipoDocumento?               @relation(fields: [IdTipoDocumento], references: [IdTipoDocumento], onDelete: NoAction, onUpdate: NoAction, map: "documento_idtipodocumento_fkey")
+  Usuario                    Usuario?                     @relation(fields: [IdUsuario], references: [IdUsuario], onDelete: NoAction, onUpdate: NoAction, map: "documento_idusuario_fkey")
+  HistorialMovimientoxEstado HistorialMovimientoxEstado[]
+  Movimiento                 Movimiento[]
+  RegistroFirma              RegistroFirma[]
+  Tramite                    Tramite[]
 }
 
 model Empresa {
@@ -162,7 +164,6 @@ model Movimiento {
   IdDocumento                Int?
   Indicaciones               String?                      @db.VarChar(100)
   Motivo                     String?                      @db.VarChar(50)
-  Visible                    Boolean?
   HistorialMovimientoxEstado HistorialMovimientoxEstado[]
   AreaDestino                Area?                        @relation("Movimiento_IdAreaDestinoToArea", fields: [IdAreaDestino], references: [IdArea], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimiento_destino")
   AreaOrigen                 Area?                        @relation("Movimiento_IdAreaOrigenToArea", fields: [IdAreaOrigen], references: [IdArea], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimiento_origen")
@@ -182,6 +183,10 @@ model HistorialMovimientoxEstado {
   CreadoPor         String?     @db.VarChar(50)
   ModificadoEl      DateTime?   @db.Timestamp(6)
   ModificadoPor     String?     @db.VarChar(50)
+  Detalle           String?     @db.VarChar(100)
+  Observaciones     String?     @db.VarChar(100)
+  IdDocumento       Int?
+  Documento         Documento?  @relation(fields: [IdDocumento], references: [IdDocumento], onDelete: NoAction, map: "historialmovimientoxestado_documento_fk")
   Estado            Estado?     @relation(fields: [IdEstado], references: [IdEstado], onDelete: NoAction, onUpdate: NoAction, map: "historialmovimientoxestado_estado_fk")
   Movimiento        Movimiento? @relation(fields: [IdMovimiento], references: [IdMovimiento], onDelete: NoAction, onUpdate: NoAction, map: "historialmovimientoxestado_movimiento_fk")
 }

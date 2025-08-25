@@ -16,8 +16,9 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Request } from 'express';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { Tramite } from '@prisma/client';
-import { OutTramiteDto, OutTramiteEmitidoDto, OutTramitesDto } from './dto/out-tramite.dto';
+import { OutTramiteDto, OutTramiteEmitidoDto, OutTramitesDto, OutTramitesPendienteDto } from './dto/out-tramite.dto';
 import { CreateTramiteEmitidoDto } from './dto/create-tramite-emitido.dto';
+import { GetAllTramitePendienteDto } from './dto/get-all-tramite-pediente.dto';
 @Controller('tramite')
 @ApiTags('tramite')
 // @UseGuards(AuthGuard)
@@ -46,6 +47,13 @@ export class TramiteController {
     @Body() combinationsFiltersDto: CombinationsFiltersDto,
   ): Promise<OutTramitesDto> {
     return this.tramiteService.findAll(combinationsFiltersDto);
+  }
+
+  @Post('find_all_pendientes')
+  findAllPendientes(
+    @Body() getAllTramitePendienteDto: GetAllTramitePendienteDto,
+  ): Promise<OutTramitesPendienteDto> {
+    return this.tramiteService.findAllPendientes(getAllTramitePendienteDto);
   }
 
   @Get('find_one/:id')
