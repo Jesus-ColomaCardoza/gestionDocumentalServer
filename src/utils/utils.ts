@@ -9,10 +9,10 @@ export const printLog = (...args: any[]) => {
   if (match) {
     const file = match[1].split('/').pop(); // Nombre del archivo    
     const line = match[2]; // Número de línea
-    console.log('+'+`-`.repeat(100)+'+');
-    console.log(`\x1b[36;4m[${file.split('\\')[file.split('\\').length-1]}:${line}]\x1b[0m ⬇ To access ctrl + click ⬇`);
+    console.log('+' + `-`.repeat(100) + '+');
+    console.log(`\x1b[36;4m[${file.split('\\')[file.split('\\').length - 1]}:${line}]\x1b[0m ⬇ To access ctrl + click ⬇`);
     console.log(...args);
-    console.log('+'+`-`.repeat(100)+'+');
+    console.log('+' + `-`.repeat(100) + '+');
   } else {
     console.log('[No Info]', ...args);
   }
@@ -30,3 +30,9 @@ export const printLog = (...args: any[]) => {
 \x1b[37m → Blanco
 \x1b[0m → Reset (restablece el color)
 */
+
+
+
+const delay = (ms: number): Promise<void> => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}

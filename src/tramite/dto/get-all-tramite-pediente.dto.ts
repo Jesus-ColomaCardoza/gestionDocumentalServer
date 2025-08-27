@@ -4,6 +4,4 @@ export class GetAllTramitePendienteDto {
     @IsInt()
     @IsNotEmpty()
     IdAreaDestino: number;
-
-
 }

@@ -212,12 +212,11 @@ export class TramiteService {
       );
       if (idRemitenteFound.message.msgId === 1) return idRemitenteFound;
 
-
       const result = await this.prisma.$transaction(async (prisma) => {
         // we create the tramites emitido
         const tramiteEmitido = await prisma.tramite.create({
           data: {
-            IdDocumento: digitalFiles[0].IdFM,
+            IdDocumento: digitalFiles[0]?.IdFM || null,
             Activo: createTramiteEmitidoDto.Activo,
             FechaInicio: createTramiteEmitidoDto.FechaInicio,
             IdTipoTramite: createTramiteEmitidoDto.IdTipoTramite,
@@ -238,30 +237,34 @@ export class TramiteService {
 
         if (tramiteEmitido && tramiteEmitido.IdTramite) {
           //b1-we update the data digital files(documentos)
-          const responseDigitalFiles = await prisma.documento.update({
-            where: {
-              IdDocumento: tramiteEmitido.IdDocumento
-            },
-            data: {
-              CodigoReferenciaDoc: createTramiteEmitidoDto.CodigoReferenciaDoc,
-              Asunto: createTramiteEmitidoDto.Asunto,
-              Observaciones: createTramiteEmitidoDto.Observaciones,
-              Folios: createTramiteEmitidoDto.Folios,
-              IdTipoDocumento: createTramiteEmitidoDto.IdTipoDocumento,
-              IdEstado: 4// IdEstado - Adjuntado - 4
-            },
-            select: {
-              IdDocumento: true,
-              NombreDocumento: true,
-              UrlDocumento: true,
+          let responseDigitalFiles = null
+
+          if (tramiteEmitido.IdDocumento) {
+            responseDigitalFiles = await prisma.documento.update({
+              where: {
+                IdDocumento: tramiteEmitido.IdDocumento
+              },
+              data: {
+                CodigoReferenciaDoc: createTramiteEmitidoDto.CodigoReferenciaDoc,
+                Asunto: createTramiteEmitidoDto.Asunto,
+                Observaciones: createTramiteEmitidoDto.Observaciones,
+                Folios: createTramiteEmitidoDto.Folios,
+                IdTipoDocumento: createTramiteEmitidoDto.IdTipoDocumento,
+                IdEstado: 4// IdEstado - Adjuntado - 4
+              },
+              select: {
+                IdDocumento: true,
+                NombreDocumento: true,
+                UrlDocumento: true,
+              }
+
+            })
+
+            if (!responseDigitalFiles) {
+              const customError = new Error('Error al actualizar estado del documento')
+              customError.name = 'FAILD_TRAMITE_EMITIDO'
+              throw customError
             }
-
-          })
-
-          if (!responseDigitalFiles) {
-            const customError = new Error('Error al actualizar estado del documento')
-            customError.name = 'FAILD_TRAMITE_EMITIDO'
-            throw customError
           }
           //b1-we update the digital files
           // const responseDigitalFiles = await Promise.all(
@@ -307,6 +310,7 @@ export class TramiteService {
               IdAreaDestino: destino.IdAreaDestino,
               FechaMovimiento: destino.FechaMovimiento,
               Copia: destino.Copia,
+              IdDocumento:digitalFiles[0]?.IdFM || null,
               FirmaDigital: destino.FirmaDigital,
               IdMovimientoPadre: null,
               NombreResponsable: destino.NombreResponsable?.NombreCompleto ? destino.NombreResponsable.NombreCompleto : destino.NombreResponsable,
@@ -373,7 +377,7 @@ export class TramiteService {
               UrlAnexo: anexo.UrlAnexo,
               SizeAnexo: anexo.SizeAnexo,
               UrlBase: anexo.UrlBase,
-              IdDocumento: digitalFiles[0].IdFM,
+              IdDocumento: digitalFiles[0]?.IdFM,
               Activo: anexo.Activo,
               CreadoEl: new Date().toISOString(),
               CreadoPor: `${request?.user?.id ?? 'test user'}`,
@@ -411,7 +415,7 @@ export class TramiteService {
 
           return {
             TramiteEmitido: tramiteEmitido,
-            DigitalFiles: responseDigitalFiles,
+            DigitalFiles: responseDigitalFiles || null,
             Destinos: responseDestinos,
             Anexos: responseAnexos
           }
@@ -589,10 +593,11 @@ export class TramiteService {
             }
           },
           Motivo: true,
+          Acciones:true,
           FechaMovimiento: true,
 
-          // si en el movimiento solo hay documento solo a nivel de tramite, se toma ese
-          // si en el movimiento hay documento a nivel de tramite y movimiento, se toma el de movimiento
+          // si en el movimiento solo hay documento solo a nivel de tramite, se toma ese - Documento==null -> emitido
+          // si en el movimiento hay documento a nivel de tramite y movimiento, se toma el de movimiento 
 
           Tramite: {
             select: {
@@ -607,7 +612,7 @@ export class TramiteService {
                   Nombres: true,
                   ApellidoPaterno: true,
                   ApellidoMaterno: true,
-                  NroIdentificacion: true
+                  NroIdentificacion: true,
                 },
               },
               TipoTramite: {
@@ -622,20 +627,20 @@ export class TramiteService {
                   Descripcion: true,
                 },
               },
-              Documento: {
-                select: {
-                  IdDocumento: true,
-                  CodigoReferenciaDoc: true,
-                  Asunto: true,
-                  Folios: true,
-                  TipoDocumento: {
-                    select: {
-                      IdTipoDocumento: true,
-                      Descripcion: true,
-                    }
-                  },
-                },
-              },
+              // Documento: {
+              //   select: {
+              //     IdDocumento: true,
+              //     CodigoReferenciaDoc: true,
+              //     Asunto: true,
+              //     Folios: true,
+              //     TipoDocumento: {
+              //       select: {
+              //         IdTipoDocumento: true,
+              //         Descripcion: true,
+              //       }
+              //     },
+              //   },
+              // },
             }
           },
         }
