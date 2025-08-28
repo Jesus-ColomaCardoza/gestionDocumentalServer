@@ -23,6 +23,8 @@ import { CreateAnexoDto } from 'src/anexo/dto/create-anexo.dto';
 import { TipoDocumentoService } from 'src/tipo-documento/tipo-documento.service';
 import { AreaService } from 'src/area/area.service';
 import { GetAllTramitePendienteDto } from './dto/get-all-tramite-pediente.dto';
+import { HistoriaLMxEDto, RecibirTramiteDto } from './dto/recibir-tramite.dto';
+import { GetAllTramiteRecibidoDto } from './dto/get-all-tramite-recibido.dto';
 
 @Injectable()
 export class TramiteService {
@@ -310,7 +312,7 @@ export class TramiteService {
               IdAreaDestino: destino.IdAreaDestino,
               FechaMovimiento: destino.FechaMovimiento,
               Copia: destino.Copia,
-              IdDocumento:digitalFiles[0]?.IdFM || null,
+              IdDocumento: digitalFiles[0]?.IdFM || null,
               FirmaDigital: destino.FirmaDigital,
               IdMovimientoPadre: null,
               NombreResponsable: destino.NombreResponsable?.NombreCompleto ? destino.NombreResponsable.NombreCompleto : destino.NombreResponsable,
@@ -446,6 +448,75 @@ export class TramiteService {
     }
   }
 
+  async recibir(RecibirTramiteDto: RecibirTramiteDto, @Req() request?: Request): Promise<OutTramitesPendienteDto> {
+    try {
+
+      let movimientos: HistoriaLMxEDto[] = RecibirTramiteDto.Movimientos;
+
+      const result = await this.prisma.$transaction(async (prisma) => {
+
+        //b3
+        movimientos = movimientos.map((movimiento) => {
+          return {
+            IdEstado: 16, // IdEstado - Recibido - 16
+            IdMovimiento: movimiento.IdMovimiento,
+            Observaciones: RecibirTramiteDto.Observaciones,
+            FechaHistorialMxE: new Date().toISOString(),
+            Activo: true,
+            CreadoEl: new Date().toISOString(),
+            CreadoPor: `${request?.user?.id ?? 'test user'}`,
+          }
+        })
+
+        const responseMovimientos = await Promise.all(
+          movimientos?.map(async (movimiento: HistoriaLMxEDto) => {
+            const dataHxE = await prisma.historialMovimientoxEstado.create({
+              data: movimiento,
+            })
+
+            if (dataHxE) {
+              return {
+                success: true,
+                data: dataHxE,
+              }
+            } else {
+              return {
+                success: false,
+                error: "Error en crear HxE",
+              };
+            }
+          })
+        )
+
+        const failedResponseMovimientos = responseMovimientos.filter((r) => !r.success);
+
+        if (failedResponseMovimientos.length > 0) {
+          const customError = new Error('Error en crear los HxE')
+          customError.name = 'FAILD_TRAMITE_EMITIDO'
+          throw customError
+        }
+        //b3---------------------------------------
+
+        return {
+          Movimientos: responseMovimientos
+        }
+
+      })
+
+      if (result?.Movimientos.length > 0) {
+        this.message.setMessage(0, 'Trámite - Registro(s) recibido(s)');
+        return { message: this.message, registro: result };
+      } else {
+        this.message.setMessage(1, 'Error interno en el servidor');
+        return { message: this.message };
+      }
+    } catch (error: any) {
+      console.log(error);
+      this.message.setMessage(1, error.message);
+      return { message: this.message };
+    }
+  }
+
   async findAll(combinationsFiltersDto: CombinationsFiltersDto): Promise<OutTramitesDto> {
     try {
       let filtros = combinationsFiltersDto.filters;
@@ -566,6 +637,7 @@ export class TramiteService {
           IdAreaDestino: getAllTramitePendienteDto.IdAreaDestino,
         },
         select: {
+          IdMovimiento: true,
           Documento: {
             select: {
               IdDocumento: true,
@@ -593,8 +665,155 @@ export class TramiteService {
             }
           },
           Motivo: true,
-          Acciones:true,
+          Acciones: true,
           FechaMovimiento: true,
+          NombreResponsable: true,//destinatario
+
+          // si en el movimiento solo hay documento solo a nivel de tramite, se toma ese - Documento==null -> emitido
+          // si en el movimiento hay documento a nivel de tramite y movimiento, se toma el de movimiento 
+
+          Tramite: {
+            select: {
+              IdTramite: true,
+              CodigoReferenciaTram: true,
+              Descripcion: true,
+              FechaInicio: true,
+              FechaFin: true,
+              Remitente: {
+                select: {
+                  IdUsuario: true,
+                  Nombres: true,
+                  ApellidoPaterno: true,
+                  ApellidoMaterno: true,
+                  NroIdentificacion: true,
+                },
+              },
+              TipoTramite: {
+                select: {
+                  IdTipoTramite: true,
+                  Descripcion: true,
+                },
+              },
+              Estado: {
+                select: {
+                  IdEstado: true,
+                  Descripcion: true,
+                },
+              },
+              // Documento: {
+              //   select: {
+              //     IdDocumento: true,
+              //     CodigoReferenciaDoc: true,
+              //     Asunto: true,
+              //     Folios: true,
+              //     TipoDocumento: {
+              //       select: {
+              //         IdTipoDocumento: true,
+              //         Descripcion: true,
+              //       }
+              //     },
+              //   },
+              // },
+            }
+          },
+        }
+
+      })
+
+
+
+      if (tramites) {
+        this.message.setMessage(0, 'Trámite - Registros encontrados');
+        return { message: this.message, registro: tramites };
+      } else {
+        this.message.setMessage(1, 'Error: Trámite - Registros no encontrados');
+        return { message: this.message };
+      }
+    } catch (error: any) {
+      console.log(error);
+      this.message.setMessage(1, error.message);
+      return { message: this.message };
+    }
+  }
+
+  async findAllRecibidos(getAllTramiteRecibidoDto: GetAllTramiteRecibidoDto): Promise<OutTramitesPendienteDto> {
+    try {
+
+      const tramites = await this.prisma.movimiento.findMany({
+        where: {
+          AND: [
+            {
+              HistorialMovimientoxEstado: {
+                some: {
+                  Estado: {
+                    IdEstado: 15
+                  }
+                }
+              }
+            },
+            {
+              HistorialMovimientoxEstado: {
+                some: {
+                  Estado: {
+                    IdEstado: 16
+                  }
+                }
+              }
+            },
+          ],
+          IdAreaDestino: getAllTramiteRecibidoDto.IdAreaDestino,
+        },
+        select: {
+          IdMovimiento: true,
+
+          HistorialMovimientoxEstado: {
+            select: {
+              IdHistorialMxE: true,
+              FechaHistorialMxE: true,
+              Estado: {
+                select: {
+                  IdEstado: true,
+                  Descripcion: true,
+                }
+              }
+              // Observaciones:true,
+              // Detalle:true,
+            },
+            orderBy: {
+              FechaHistorialMxE: 'desc'
+            },
+            // take:1
+          },
+          Documento: {
+            select: {
+              IdDocumento: true,
+              CodigoReferenciaDoc: true,
+              Asunto: true,
+              Folios: true,
+              TipoDocumento: {
+                select: {
+                  IdTipoDocumento: true,
+                  Descripcion: true,
+                }
+              },
+            },
+          },
+          AreaOrigen: {
+            select: {
+              IdArea: true,
+              Descripcion: true,
+            }
+          },
+          AreaDestino: {
+            select: {
+              IdArea: true,
+              Descripcion: true,
+            }
+          },
+          Motivo: true,
+          Acciones: true,
+          FechaMovimiento: true,
+          NombreResponsable: true,//destinatario
 
           // si en el movimiento solo hay documento solo a nivel de tramite, se toma ese - Documento==null -> emitido
           // si en el movimiento hay documento a nivel de tramite y movimiento, se toma el de movimiento 

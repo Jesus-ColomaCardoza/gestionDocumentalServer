@@ -19,6 +19,7 @@ import { Tramite } from '@prisma/client';
 import { OutTramiteDto, OutTramiteEmitidoDto, OutTramitesDto, OutTramitesPendienteDto } from './dto/out-tramite.dto';
 import { CreateTramiteEmitidoDto } from './dto/create-tramite-emitido.dto';
 import { GetAllTramitePendienteDto } from './dto/get-all-tramite-pediente.dto';
+import { RecibirTramiteDto } from './dto/recibir-tramite.dto';
 @Controller('tramite')
 @ApiTags('tramite')
 // @UseGuards(AuthGuard)
@@ -42,6 +43,14 @@ export class TramiteController {
     return this.tramiteService.createEmitido(createTramiteEmitidoDto, request);
   }
 
+  @Post('recibir')
+  recibir(
+    @Body() recibirTramiteDto: RecibirTramiteDto,
+    @Req() request?: Request,
+  ): Promise<OutTramiteEmitidoDto> {
+    return this.tramiteService.recibir(recibirTramiteDto, request);
+  }
+
   @Post('find_all')
   findAll(
     @Body() combinationsFiltersDto: CombinationsFiltersDto,
@@ -54,6 +63,13 @@ export class TramiteController {
     @Body() getAllTramitePendienteDto: GetAllTramitePendienteDto,
   ): Promise<OutTramitesPendienteDto> {
     return this.tramiteService.findAllPendientes(getAllTramitePendienteDto);
+  }
+
+  @Post('find_all_recibidos')
+  findAllRecibidos(
+    @Body() getAllTramitePendienteDto: GetAllTramitePendienteDto,
+  ): Promise<OutTramitesPendienteDto> {
+    return this.tramiteService.findAllRecibidos(getAllTramitePendienteDto);
   }
 
   @Get('find_one/:id')
