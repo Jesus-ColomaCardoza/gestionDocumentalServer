@@ -20,6 +20,7 @@ import { OutTramiteDto, OutTramiteEmitidoDto, OutTramitesDto, OutTramitesPendien
 import { CreateTramiteEmitidoDto } from './dto/create-tramite-emitido.dto';
 import { GetAllTramitePendienteDto } from './dto/get-all-tramite-pediente.dto';
 import { RecibirTramiteDto } from './dto/recibir-tramite.dto';
+import { RecibirTramiteExternoDto } from './dto/recibir-tramite-externo.dto';
 @Controller('tramite')
 @ApiTags('tramite')
 // @UseGuards(AuthGuard)
@@ -41,6 +42,14 @@ export class TramiteController {
     @Req() request?: Request,
   ): Promise<OutTramiteEmitidoDto> {
     return this.tramiteService.createEmitido(createTramiteEmitidoDto, request);
+  }
+
+  @Post('recibir_externo')
+  recibirExterno(
+    @Body() recibirTramiteExternoDto: RecibirTramiteExternoDto,
+    @Req() request?: Request,
+  ): Promise<OutTramiteEmitidoDto> {
+    return this.tramiteService.recibirExterno(recibirTramiteExternoDto, request);
   }
 
   @Post('recibir')

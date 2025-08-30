@@ -45,6 +45,10 @@ export class Usuario {
   @IsOptional()
   Celular: string;
 
+  @IsString()
+  @IsOptional()
+  Direccion: string;
+
   @ApiProperty({ example: 'M(masculino )| F(femenino)' })
   @MaxLength(1)
   @IsString()

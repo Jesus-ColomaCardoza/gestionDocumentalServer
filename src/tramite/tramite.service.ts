@@ -25,6 +25,7 @@ import { AreaService } from 'src/area/area.service';
 import { GetAllTramitePendienteDto } from './dto/get-all-tramite-pediente.dto';
 import { HistoriaLMxEDto, RecibirTramiteDto } from './dto/recibir-tramite.dto';
 import { GetAllTramiteRecibidoDto } from './dto/get-all-tramite-recibido.dto';
+import { RecibirTramiteExternoDto } from './dto/recibir-tramite-externo.dto';
 
 @Injectable()
 export class TramiteService {
@@ -419,6 +420,328 @@ export class TramiteService {
             TramiteEmitido: tramiteEmitido,
             DigitalFiles: responseDigitalFiles || null,
             Destinos: responseDestinos,
+            Anexos: responseAnexos
+          }
+        } else {
+          const customError = new Error('Error al crear el trámite emitido')
+          customError.name = 'FAILD_TRAMITE_EMITIDO'
+          throw customError
+        }
+      })
+
+      if (result?.TramiteEmitido?.IdTramite) {
+        this.message.setMessage(0, 'Trámite - Registro creado');
+        return { message: this.message, registro: result };
+      } else {
+        this.message.setMessage(1, 'Error interno en el servidor');
+        return { message: this.message };
+      }
+    } catch (error: any) {
+      // if (error?.name === 'FAILD_TRAMITE_EMITIDO') {
+      anexos.forEach(async (anexo) => {
+        await this.file.remove({ PublicUrl: anexo.UrlAnexo })
+      })
+      // }
+
+      console.log(error);
+      this.message.setMessage(1, error.message);
+      return { message: this.message };
+    }
+  }
+
+  async recibirExterno(
+    recibirTramiteExternoDto: RecibirTramiteExternoDto,
+    @Req() request?: Request,
+    // ): Promise<OutTramiteEmitidoDto> {
+  ): Promise<any> {
+
+    let digitalFiles: { IdFM: number }[] = recibirTramiteExternoDto.DigitalFiles.map((df) => ({ IdFM: +df.IdFM.split("_")[1] }));
+
+    let tramiteDestinos: CreateMovimientoDto[] = recibirTramiteExternoDto.TramiteDestinos;
+
+    let anexos: CreateAnexoDto[] = recibirTramiteExternoDto.Anexos;
+
+    // printLog(digitalFiles);
+
+    // printLog(tramiteDestinos);
+
+    // printLog(anexos);
+
+    delete recibirTramiteExternoDto.DigitalFiles;
+
+    delete recibirTramiteExternoDto.TramiteDestinos;
+
+    delete recibirTramiteExternoDto.Anexos;
+
+    try {
+      //we validate FKs
+      const idAreaFound = await this.area.findOne(
+        recibirTramiteExternoDto.IdAreaEmision,
+      );
+      if (idAreaFound.message.msgId === 1) return idAreaFound;
+
+      const idTipoDocumentoFound = await this.tipoDocumento.findOne(
+        recibirTramiteExternoDto.IdTipoDocumento,
+      );
+      if (idTipoDocumentoFound.message.msgId === 1) return idTipoDocumentoFound;
+
+      const idTipoTramiteFound = await this.tipoTramite.findOne(
+        recibirTramiteExternoDto.IdTipoTramite,
+      );
+      if (idTipoTramiteFound.message.msgId === 1) return idTipoTramiteFound;
+
+      const idEstadoFound = await this.estado.findOne(
+        recibirTramiteExternoDto.IdEstado,
+      );
+      if (idEstadoFound.message.msgId === 1) return idEstadoFound;
+
+      const idRemitenteFound = await this.remitente.findOne(
+        recibirTramiteExternoDto.IdRemitente,
+      );
+      if (idRemitenteFound.message.msgId === 1) return idRemitenteFound;
+
+      const result = await this.prisma.$transaction(async (prisma) => {
+        // we create the usuario
+        const remitente = await prisma.usuario.create({
+          data: {
+            Nombres: recibirTramiteExternoDto.Nombres,
+            ApellidoPaterno: recibirTramiteExternoDto.ApellidoPaterno,
+            ApellidoMaterno: recibirTramiteExternoDto.ApellidoMaterno,
+            Email: recibirTramiteExternoDto.Email,
+            Celular: recibirTramiteExternoDto.Celular,
+            Direccion: recibirTramiteExternoDto.Direccion,
+            RazonSocial: recibirTramiteExternoDto.RazonSocial,
+            IdTipoIdentificacion: recibirTramiteExternoDto.RazonSocial != '' ? 2 : 1,
+            NroIdentificacion: recibirTramiteExternoDto.NroIdentificacion,
+            IdTipoUsuario: recibirTramiteExternoDto.IdTipoUsuario,
+            IdRol: recibirTramiteExternoDto.IdRol,
+            CreadoPor: `${request?.user?.id ?? 'test user'}`,
+            CreadoEl: new Date().toISOString(),
+          },
+          select: {
+            IdUsuario: true,
+            Nombres: true,
+            ApellidoPaterno: true,
+            ApellidoMaterno: true,
+          }
+        })
+
+        // we create the tramites emitido
+        const tramiteEmitido = await prisma.tramite.create({
+          data: {
+            IdDocumento: digitalFiles[0]?.IdFM || null,
+            Activo: recibirTramiteExternoDto.Activo,
+            FechaInicio: recibirTramiteExternoDto.FechaInicio,
+            IdTipoTramite: recibirTramiteExternoDto.IdTipoTramite,
+            IdAreaEmision: recibirTramiteExternoDto.IdAreaEmision,
+            IdEstado: recibirTramiteExternoDto.IdEstado,
+            IdRemitente: remitente.IdUsuario,
+            CreadoEl: new Date().toISOString(),
+            CreadoPor: `${request?.user?.id ?? 'test user'}`,
+          },
+          select: {
+            IdTramite: true,
+            IdAreaEmision: true,
+            IdDocumento: true,
+          }
+        });
+
+        // printLog(tramiteEmitido);
+
+        if (tramiteEmitido && tramiteEmitido.IdTramite) {
+          //b1-we update the data digital files(documentos)
+          let responseDigitalFiles = null
+
+          if (tramiteEmitido.IdDocumento) {
+            responseDigitalFiles = await prisma.documento.update({
+              where: {
+                IdDocumento: tramiteEmitido.IdDocumento
+              },
+              data: {
+                CodigoReferenciaDoc: recibirTramiteExternoDto.CodigoReferenciaDoc,
+                Asunto: recibirTramiteExternoDto.Asunto,
+                Observaciones: recibirTramiteExternoDto.Observaciones,
+                Folios: recibirTramiteExternoDto.Folios,
+                IdTipoDocumento: recibirTramiteExternoDto.IdTipoDocumento,
+                IdEstado: 4// IdEstado - Adjuntado - 4
+              },
+              select: {
+                IdDocumento: true,
+                NombreDocumento: true,
+                UrlDocumento: true,
+              }
+
+            })
+
+            if (!responseDigitalFiles) {
+              const customError = new Error('Error al actualizar estado del documento')
+              customError.name = 'FAILD_TRAMITE_EMITIDO'
+              throw customError
+            }
+          }
+          //b1-we update the digital files
+          // const responseDigitalFiles = await Promise.all(
+          //   digitalFiles?.map(async (df) => {
+          //     const dataDF = await prisma.documento.update({
+          //       where: { IdDocumento: df.IdFM },
+          //       data: {
+          //         // IdTramite: tramiteEmitido.IdTramite
+          //         // IdEstado: 1,//cambiar a estado de adjuntado
+          //         // IdTipoDocumento:1 // cambiar a un tipo de documento by default
+          //       },
+          //     })
+
+          //     if (dataDF) {
+          //       return {
+          //         success: true,
+          //         data: dataDF,
+          //       }
+          //     } else {
+          //       return {
+          //         success: false,
+          //         error: "Error en actualizar el archivo digital",
+          //       };
+          //     }
+
+          //   })
+          // )
+
+          // const failedResponseDigitalFiles = responseDigitalFiles.filter((r) => !r.success);
+
+          // if (failedResponseDigitalFiles.length > 0) {
+          //   const customError = new Error('Error en actualizar los archivos digitales')
+          //   customError.name = 'FAILD_TRAMITE_EMITIDO'
+          //   throw customError
+          // }
+          //b1---------------------------------------
+
+          //b2-we create the tramites destino
+          tramiteDestinos = tramiteDestinos.map((destino) => {
+            return {
+              IdTramite: tramiteEmitido.IdTramite,
+              IdAreaOrigen: tramiteEmitido.IdAreaEmision,
+              IdAreaDestino: destino.IdAreaDestino,
+              FechaMovimiento: destino.FechaMovimiento,
+              Copia: destino.Copia,
+              IdDocumento: digitalFiles[0]?.IdFM || null,
+              FirmaDigital: destino.FirmaDigital,
+              IdMovimientoPadre: null,
+              NombreResponsable: destino.NombreResponsable?.NombreCompleto ? destino.NombreResponsable.NombreCompleto : destino.NombreResponsable,
+              Activo: destino.Activo,
+              CreadoEl: new Date().toISOString(),
+              CreadoPor: `${request?.user?.id ?? 'test user'}`,
+            }
+          })
+
+          const responseDestinos = await Promise.all(
+            tramiteDestinos?.map(async (destino: Movimiento) => {
+              //we create movimientos
+              const dataDestino = await prisma.movimiento.create({
+                data: destino,
+              })
+
+              if (dataDestino) {
+                //we create the historial movimiento x estado 
+                const dataHxE = await prisma.historialMovimientoxEstado.create({
+                  data: {
+                    IdEstado: 15, // IdEstado - Pendiente - 15
+                    IdMovimiento: dataDestino.IdMovimiento,
+                    Activo: true,
+                    CreadoEl: new Date().toISOString(),
+                    CreadoPor: `${request?.user?.id ?? 'test user'}`,
+                  },
+                })
+
+                const dataHxE2 = await prisma.historialMovimientoxEstado.create({
+                  data: {
+                    IdEstado: 16, // IdEstado - Recibido - 16
+                    IdMovimiento: dataDestino.IdMovimiento,
+                    Observaciones: recibirTramiteExternoDto.Observaciones,
+                    FechaHistorialMxE: new Date().toISOString(),
+                    Activo: true,
+                    CreadoEl: new Date().toISOString(),
+                    CreadoPor: `${request?.user?.id ?? 'test user'}`,
+                  },
+                })
+
+                if (dataHxE && dataHxE2) {
+                  return {
+                    success: true,
+                    data: dataDestino,
+                  }
+                } else {
+                  return {
+                    success: false,
+                    error: "Error en crear historialMxE",
+                  };
+                }
+              } else {
+                return {
+                  success: false,
+                  error: "Error en crear destino",
+                };
+              }
+            })
+          )
+
+          const failedResponseDestinos = responseDestinos.filter((r) => !r.success);
+
+          if (failedResponseDestinos.length > 0) {
+            const customError = new Error('Error en crear los destinos')
+            customError.name = 'FAILD_TRAMITE_EMITIDO'
+            throw customError
+          }
+          //b2---------------------------------------
+
+          //b3-we update the digital files
+          anexos = anexos.map((anexo) => {
+            return {
+              Titulo: anexo.Titulo,
+              FormatoAnexo: anexo.FormatoAnexo,
+              NombreAnexo: anexo.NombreAnexo,
+              UrlAnexo: anexo.UrlAnexo,
+              SizeAnexo: anexo.SizeAnexo,
+              UrlBase: anexo.UrlBase,
+              IdDocumento: digitalFiles[0]?.IdFM,
+              Activo: anexo.Activo,
+              CreadoEl: new Date().toISOString(),
+              CreadoPor: `${request?.user?.id ?? 'test user'}`,
+            }
+          })
+
+          const responseAnexos = await Promise.all(
+            anexos?.map(async (anexo: Anexo) => {
+              const dataAnexo = await prisma.anexo.create({
+                data: anexo,
+              })
+
+              if (dataAnexo) {
+                return {
+                  success: true,
+                  data: dataAnexo,
+                }
+              } else {
+                return {
+                  success: false,
+                  error: "Error en crear anexo",
+                };
+              }
+            })
+          )
+
+          const failedResponseAnexos = responseAnexos.filter((r) => !r.success);
+
+          if (failedResponseAnexos.length > 0) {
+            const customError = new Error('Error en crear los anexos')
+            customError.name = 'FAILD_TRAMITE_EMITIDO'
+            throw customError
+          }
+          //b3---------------------------------------
+
+          return {
+            TramiteEmitido: tramiteEmitido,
+            DigitalFiles: responseDigitalFiles || null,
+            // Destinos: responseDestinos,
             Anexos: responseAnexos
           }
         } else {

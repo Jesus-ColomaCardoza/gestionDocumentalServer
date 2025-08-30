@@ -39,6 +39,22 @@ export class Movimiento {
   @IsOptional()
   NombreResponsable: any;
 
+  @IsString()
+  @IsOptional()
+  Acciones?: string;
+
+  @IsInt()
+  @IsOptional()
+  IdDocumento?: number;
+
+  @IsString()
+  @IsOptional()
+  Indicaciones?: string;
+
+  @IsString()
+  @IsOptional()
+  Motivo?: string;
+
   @IsBoolean()
   @IsNotEmpty()
   Activo: boolean = true;

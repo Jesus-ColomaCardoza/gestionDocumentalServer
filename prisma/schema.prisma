@@ -292,6 +292,7 @@ model Usuario {
   ApellidoPaterno       String?             @db.VarChar(50)
   ApellidoMaterno       String?             @db.VarChar(50)
   FechaNacimiento       DateTime?           @db.Date
+  Direccion             String?             @db.VarChar(150)
   Email                 String?             @db.VarChar(100)
   Contrasena            String?             @db.VarChar(200)
   Celular               String?             @db.VarChar(15)
