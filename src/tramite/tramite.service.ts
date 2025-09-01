@@ -10,7 +10,7 @@ import { TipoTramiteService } from 'src/tipo-tramite/tipo-tramite.service';
 import { EstadoService } from 'src/estado/estado.service';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { UsuarioService } from 'src/usuario/usuario.service';
-import { OutTramiteDto, OutTramiteEmitidoDto, OutTramitesDto, OutTramitesPendienteDto } from './dto/out-tramite.dto';
+import { OutTramiteDto, OutTramiteEmitidoDto, OutTramitesDto, OutTramitesPendienteDto, OutTramitesRecibidoDto } from './dto/out-tramite.dto';
 import { OutTipoTramitesDto } from 'src/tipo-tramite/dto/out-tipo-tramite.dto';
 import { CreateTramiteEmitidoDto } from './dto/create-tramite-emitido.dto';
 import { FileManager } from 'src/file-manager/entities/file-manager.entity';
@@ -1059,7 +1059,7 @@ export class TramiteService {
     }
   }
 
-  async findAllRecibidos(getAllTramiteRecibidoDto: GetAllTramiteRecibidoDto): Promise<OutTramitesPendienteDto> {
+  async findAllRecibidos(getAllTramiteRecibidoDto: GetAllTramiteRecibidoDto): Promise<OutTramitesRecibidoDto> {
     try {
 
       const tramites = await this.prisma.movimiento.findMany({
