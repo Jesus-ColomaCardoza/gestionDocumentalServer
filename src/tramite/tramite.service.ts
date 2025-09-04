@@ -16,7 +16,7 @@ import { CreateTramiteEmitidoDto } from './dto/create-tramite-emitido.dto';
 import { FileManager } from 'src/file-manager/entities/file-manager.entity';
 import { Movimiento } from 'src/movimiento/entities/movimiento.entity';
 import { Anexo } from 'src/anexo/entities/anexo.entity';
-import { printLog } from 'src/utils/utils';
+import { delay, printLog } from 'src/utils/utils';
 import { CreateMovimientoDto } from 'src/movimiento/dto/create-movimiento.dto';
 import { FileService } from 'src/file/file.service';
 import { CreateAnexoDto } from 'src/anexo/dto/create-anexo.dto';
@@ -652,22 +652,29 @@ export class TramiteService {
                   },
                 })
 
-                const dataHxE2 = await prisma.historialMovimientoxEstado.create({
-                  data: {
-                    IdEstado: 16, // IdEstado - Recibido - 16
-                    IdMovimiento: dataDestino.IdMovimiento,
-                    Observaciones: recibirTramiteExternoDto.Observaciones,
-                    FechaHistorialMxE: new Date().toISOString(),
-                    Activo: true,
-                    CreadoEl: new Date().toISOString(),
-                    CreadoPor: `${request?.user?.id ?? 'test user'}`,
-                  },
-                })
+                if (dataHxE) {
+                  const dataHxE2 = await prisma.historialMovimientoxEstado.create({
+                    data: {
+                      IdEstado: 16, // IdEstado - Recibido - 16
+                      IdMovimiento: dataDestino.IdMovimiento,
+                      Observaciones: recibirTramiteExternoDto.Observaciones,
+                      FechaHistorialMxE: new Date().toISOString(),
+                      Activo: true,
+                      CreadoEl: new Date().toISOString(),
+                      CreadoPor: `${request?.user?.id ?? 'test user'}`,
+                    },
+                  })
 
-                if (dataHxE && dataHxE2) {
-                  return {
-                    success: true,
-                    data: dataDestino,
+                  if (dataHxE && dataHxE2) {
+                    return {
+                      success: true,
+                      data: dataDestino,
+                    }
+                  } else {
+                    return {
+                      success: false,
+                      error: "Error en crear historialMxE",
+                    };
                   }
                 } else {
                   return {
@@ -929,6 +936,9 @@ export class TramiteService {
             },
           }
         },
+        orderBy: {
+          FechaInicio: 'desc',
+        },
       });
 
       if (tramites) {
@@ -1039,8 +1049,10 @@ export class TramiteService {
               // },
             }
           },
-        }
-
+        },
+        orderBy: {
+          FechaMovimiento: 'desc',
+        },
       })
 
 
@@ -1078,7 +1090,9 @@ export class TramiteService {
               HistorialMovimientoxEstado: {
                 some: {
                   Estado: {
-                    IdEstado: 16
+                    IdEstado: {
+                      in: [16,17,18,19,20]
+                    }
                   }
                 }
               }
@@ -1185,8 +1199,10 @@ export class TramiteService {
               // },
             }
           },
-        }
-
+        },
+        orderBy: {
+          FechaMovimiento: 'desc',
+        },
       })
 
 
