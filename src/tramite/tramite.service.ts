@@ -652,6 +652,8 @@ export class TramiteService {
                   },
                 })
 
+                await delay(1000);
+                
                 if (dataHxE) {
                   const dataHxE2 = await prisma.historialMovimientoxEstado.create({
                     data: {
