@@ -495,10 +495,10 @@ export class TramiteService {
       );
       if (idEstadoFound.message.msgId === 1) return idEstadoFound;
 
-      const idRemitenteFound = await this.remitente.findOne(
-        recibirTramiteExternoDto.IdRemitente,
-      );
-      if (idRemitenteFound.message.msgId === 1) return idRemitenteFound;
+      // const idRemitenteFound = await this.remitente.findOne(
+      //   recibirTramiteExternoDto.IdRemitente,
+      // );
+      // if (idRemitenteFound.message.msgId === 1) return idRemitenteFound;
 
       const result = await this.prisma.$transaction(async (prisma) => {
         // we create the usuario
