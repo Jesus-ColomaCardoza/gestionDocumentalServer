@@ -22,6 +22,7 @@ import { GetAllTramitePendienteDto } from './dto/get-all-tramite-pediente.dto';
 import { RecibirTramiteDto } from './dto/recibir-tramite.dto';
 import { RecibirTramiteExternoDto } from './dto/recibir-tramite-externo.dto';
 import { GetAllTramiteRecibidoDto } from './dto/get-all-tramite-recibido.dto';
+import { AtenderTramiteDto } from './dto/atender-tramite.dto';
 @Controller('tramite')
 @ApiTags('tramite')
 // @UseGuards(AuthGuard)
@@ -57,8 +58,16 @@ export class TramiteController {
   recibir(
     @Body() recibirTramiteDto: RecibirTramiteDto,
     @Req() request?: Request,
-  ): Promise<OutTramiteEmitidoDto> {
+  ): Promise<any> {
     return this.tramiteService.recibir(recibirTramiteDto, request);
+  }
+
+  @Post('atender')
+  atender(
+    @Body() atenderTramiteDto: AtenderTramiteDto,
+    @Req() request?: Request,
+  ): Promise<any> {
+    return this.tramiteService.atender(atenderTramiteDto, request);
   }
 
   @Post('find_all')

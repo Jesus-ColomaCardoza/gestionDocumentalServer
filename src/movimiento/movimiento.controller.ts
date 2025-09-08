@@ -15,7 +15,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Request } from 'express';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
-import { OutMovimientoDto, OutMovimientosDto } from './dto/out-movimiento.dto';
+import { OutMovimientoDetailsDto, OutMovimientoDto, OutMovimientosDto } from './dto/out-movimiento.dto';
 
 @Controller('movimiento')
 @ApiTags('movimiento')
@@ -50,6 +50,11 @@ export class MovimientoController {
   @Get('find_one/:id')
   findOne(@Param('id') id: string): Promise<OutMovimientoDto> {
     return this.movimientoService.findOne(+id);
+  }
+
+  @Get('find_one_details/:id')
+  findOneDetails(@Param('id') id: string): Promise<OutMovimientoDetailsDto> {
+    return this.movimientoService.findOneDetails(+id);
   }
 
   @Patch('update/:id')

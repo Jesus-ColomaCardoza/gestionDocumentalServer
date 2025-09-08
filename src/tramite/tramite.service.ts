@@ -26,6 +26,7 @@ import { GetAllTramitePendienteDto } from './dto/get-all-tramite-pediente.dto';
 import { HistoriaLMxEDto, RecibirTramiteDto } from './dto/recibir-tramite.dto';
 import { GetAllTramiteRecibidoDto } from './dto/get-all-tramite-recibido.dto';
 import { RecibirTramiteExternoDto } from './dto/recibir-tramite-externo.dto';
+import { AtenderTramiteDto } from './dto/atender-tramite.dto';
 
 @Injectable()
 export class TramiteService {
@@ -502,6 +503,7 @@ export class TramiteService {
 
       const result = await this.prisma.$transaction(async (prisma) => {
         // we create the usuario
+        // FALTA  VALIDAR SI EXISTE USUARIO POR CORREO SI: UPDATE ELSE: UPDATE 
         const remitente = await prisma.usuario.create({
           data: {
             Nombres: recibirTramiteExternoDto.Nombres,
@@ -653,7 +655,7 @@ export class TramiteService {
                 })
 
                 await delay(1000);
-                
+
                 if (dataHxE) {
                   const dataHxE2 = await prisma.historialMovimientoxEstado.create({
                     data: {
@@ -780,7 +782,7 @@ export class TramiteService {
     }
   }
 
-  async recibir(RecibirTramiteDto: RecibirTramiteDto, @Req() request?: Request): Promise<OutTramitesPendienteDto> {
+  async recibir(RecibirTramiteDto: RecibirTramiteDto, @Req() request?: Request): Promise<any> {
     try {
 
       let movimientos: HistoriaLMxEDto[] = RecibirTramiteDto.Movimientos;
@@ -804,6 +806,78 @@ export class TramiteService {
           movimientos?.map(async (movimiento: HistoriaLMxEDto) => {
             const dataHxE = await prisma.historialMovimientoxEstado.create({
               data: movimiento,
+            })
+
+            if (dataHxE) {
+              return {
+                success: true,
+                data: dataHxE,
+              }
+            } else {
+              return {
+                success: false,
+                error: "Error en crear HxE",
+              };
+            }
+          })
+        )
+
+        const failedResponseMovimientos = responseMovimientos.filter((r) => !r.success);
+
+        if (failedResponseMovimientos.length > 0) {
+          const customError = new Error('Error en crear los HxE')
+          customError.name = 'FAILD_TRAMITE_EMITIDO'
+          throw customError
+        }
+        //b3---------------------------------------
+
+        return {
+          Movimientos: responseMovimientos
+        }
+
+      })
+
+      if (result?.Movimientos.length > 0) {
+        this.message.setMessage(0, 'Trámite - Registro(s) recibido(s)');
+        return { message: this.message, registro: result };
+      } else {
+        this.message.setMessage(1, 'Error interno en el servidor');
+        return { message: this.message };
+      }
+    } catch (error: any) {
+      console.log(error);
+      this.message.setMessage(1, error.message);
+      return { message: this.message };
+    }
+  }
+
+  async atender(atenderTramiteDto: AtenderTramiteDto, @Req() request?: Request): Promise<any> {
+    try {
+
+      let movimientos: HistoriaLMxEDto[] = atenderTramiteDto.Movimientos;
+
+      const result = await this.prisma.$transaction(async (prisma) => {
+
+        //b3
+        movimientos = movimientos.map((movimiento) => {
+          return {
+            IdEstado: 18, // IdEstado - Atendido - 18
+            IdMovimiento: movimiento.IdMovimiento,
+            Observaciones: atenderTramiteDto.Observaciones,
+            FechaHistorialMxE: new Date().toISOString(),
+            Activo: true,
+            CreadoEl: new Date().toISOString(),
+            CreadoPor: `${request?.user?.id ?? 'test user'}`,
+          }
+        })
+
+        const responseMovimientos = await Promise.all(
+          movimientos?.map(async (movimiento: HistoriaLMxEDto) => {
+            const dataHxE = await prisma.historialMovimientoxEstado.create({
+              data: movimiento,
+              include:{
+                Estado: true
+              }
             })
 
             if (dataHxE) {
@@ -1129,6 +1203,7 @@ export class TramiteService {
               CodigoReferenciaDoc: true,
               Asunto: true,
               Folios: true,
+              Visible:true,
               TipoDocumento: {
                 select: {
                   IdTipoDocumento: true,
