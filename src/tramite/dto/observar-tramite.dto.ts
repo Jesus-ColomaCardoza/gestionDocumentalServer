@@ -1,7 +1,7 @@
 import { IsArray, IsBoolean, IsDateString, IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class AtenderTramiteDto {
+export class ObservarTramiteDto {
   @IsArray()
   @Type(() => HistoriaLMxEDto)
   Movimientos: HistoriaLMxEDto[]
@@ -41,8 +41,7 @@ export class HistoriaLMxEDto {
   CreadoEl: string = new Date().toISOString();
 }
 
-
-export class DesmarcarAtenderTramiteDto {
+export class DesmarcarObservarTramiteDto {
   @IsInt()
   @IsNotEmpty()
   IdMovimiento: number

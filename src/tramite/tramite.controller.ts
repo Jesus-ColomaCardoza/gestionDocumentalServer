@@ -22,13 +22,14 @@ import { GetAllTramitePendienteDto } from './dto/get-all-tramite-pediente.dto';
 import { RecibirTramiteDto } from './dto/recibir-tramite.dto';
 import { RecibirTramiteExternoDto } from './dto/recibir-tramite-externo.dto';
 import { GetAllTramiteRecibidoDto } from './dto/get-all-tramite-recibido.dto';
-import { AtenderTramiteDto } from './dto/atender-tramite.dto';
+import { AtenderTramiteDto, DesmarcarAtenderTramiteDto } from './dto/atender-tramite.dto';
+import { DesmarcarObservarTramiteDto, ObservarTramiteDto } from './dto/observar-tramite.dto';
 @Controller('tramite')
 @ApiTags('tramite')
 // @UseGuards(AuthGuard)
 // @ApiBearerAuth()
 export class TramiteController {
-  constructor(private readonly tramiteService: TramiteService) {}
+  constructor(private readonly tramiteService: TramiteService) { }
 
   @Post('create')
   create(
@@ -68,6 +69,28 @@ export class TramiteController {
     @Req() request?: Request,
   ): Promise<any> {
     return this.tramiteService.atender(atenderTramiteDto, request);
+  }
+
+  @Post('desmarcar_atender')
+  desmarcarAtender(
+    @Body() desmarcarAtenderTramiteDto: DesmarcarAtenderTramiteDto,
+  ): Promise<any> {
+    return this.tramiteService.desmarcarAtender(desmarcarAtenderTramiteDto);
+  }
+
+  @Post('observar')
+  observar(
+    @Body() observarTramiteDto: ObservarTramiteDto,
+    @Req() request?: Request,
+  ): Promise<any> {
+    return this.tramiteService.observar(observarTramiteDto, request);
+  }
+
+  @Post('desmarcar_observar')
+  desmarcarObservar(
+    @Body() desmarcarObservarTramiteDto: DesmarcarObservarTramiteDto,
+  ): Promise<any> {
+    return this.tramiteService.desmarcarObservar(desmarcarObservarTramiteDto);
   }
 
   @Post('find_all')

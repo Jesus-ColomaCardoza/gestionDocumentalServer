@@ -26,7 +26,8 @@ import { GetAllTramitePendienteDto } from './dto/get-all-tramite-pediente.dto';
 import { HistoriaLMxEDto, RecibirTramiteDto } from './dto/recibir-tramite.dto';
 import { GetAllTramiteRecibidoDto } from './dto/get-all-tramite-recibido.dto';
 import { RecibirTramiteExternoDto } from './dto/recibir-tramite-externo.dto';
-import { AtenderTramiteDto } from './dto/atender-tramite.dto';
+import { AtenderTramiteDto, DesmarcarAtenderTramiteDto } from './dto/atender-tramite.dto';
+import { DesmarcarObservarTramiteDto, ObservarTramiteDto } from './dto/observar-tramite.dto';
 
 @Injectable()
 export class TramiteService {
@@ -875,8 +876,20 @@ export class TramiteService {
           movimientos?.map(async (movimiento: HistoriaLMxEDto) => {
             const dataHxE = await prisma.historialMovimientoxEstado.create({
               data: movimiento,
-              include:{
-                Estado: true
+              select: {
+                IdHistorialMxE: true,
+                FechaHistorialMxE: true,
+                Estado: {
+                  select: {
+                    IdEstado: true,
+                    Descripcion: true
+                  }
+                },
+                Movimiento: {
+                  select: {
+                    IdMovimiento: true
+                  }
+                }
               }
             })
 
@@ -904,14 +917,208 @@ export class TramiteService {
         //b3---------------------------------------
 
         return {
-          Movimientos: responseMovimientos
+          Movimientos: responseMovimientos.map((r) => r.data)
         }
-
       })
 
       if (result?.Movimientos.length > 0) {
         this.message.setMessage(0, 'Trámite - Registro(s) recibido(s)');
-        return { message: this.message, registro: result };
+        return { message: this.message, registro: result.Movimientos };
+      } else {
+        this.message.setMessage(1, 'Error interno en el servidor');
+        return { message: this.message };
+      }
+    } catch (error: any) {
+      console.log(error);
+      this.message.setMessage(1, error.message);
+      return { message: this.message };
+    }
+  }
+
+  async desmarcarAtender(desmarcarAtenderTramiteDto: DesmarcarAtenderTramiteDto): Promise<any> {
+    try {
+
+      const hMxEFound = await this.prisma.historialMovimientoxEstado.findFirst({
+        where: {
+          Movimiento: {
+            IdMovimiento: desmarcarAtenderTramiteDto.IdMovimiento
+          }, Estado: {
+            IdEstado: 18  // IdEstado - Atendido - 18
+          }
+        },
+        select: {
+          IdHistorialMxE: true
+        }
+      })
+
+      if (!hMxEFound) {
+        this.message.setMessage(1, 'Este movimiento no tiene estado atendido');
+        return { message: this.message };
+      }
+
+      const hMxE = await this.prisma.historialMovimientoxEstado.delete({
+        where: {
+          IdHistorialMxE: hMxEFound.IdHistorialMxE
+        },
+        select: {
+          IdHistorialMxE: true,
+          FechaHistorialMxE: true,
+          Estado: {
+            select: {
+              IdEstado: true,
+              Descripcion: true,
+            }
+          },
+          Movimiento: {
+            select: {
+              IdMovimiento: true
+            }
+          }
+        }
+      })
+
+      if (hMxE) {
+        this.message.setMessage(0, 'Trámite - Registro(s) recibido(s)');
+        return { message: this.message, registro: hMxE };
+      } else {
+        this.message.setMessage(1, 'Error interno en el servidor');
+        return { message: this.message };
+      }
+    } catch (error: any) {
+      console.log(error);
+      this.message.setMessage(1, error.message);
+      return { message: this.message };
+    }
+  }
+
+  async observar(observarTramiteDto: ObservarTramiteDto, @Req() request?: Request): Promise<any> {
+    try {
+
+      let movimientos: HistoriaLMxEDto[] = observarTramiteDto.Movimientos;
+
+      const result = await this.prisma.$transaction(async (prisma) => {
+
+        //b3
+        movimientos = movimientos.map((movimiento) => {
+          return {
+            IdEstado: 20, // IdEstado - Observado - 20
+            IdMovimiento: movimiento.IdMovimiento,
+            Observaciones: observarTramiteDto.Observaciones,
+            FechaHistorialMxE: new Date().toISOString(),
+            Activo: true,
+            CreadoEl: new Date().toISOString(),
+            CreadoPor: `${request?.user?.id ?? 'test user'}`,
+          }
+        })
+
+        const responseMovimientos = await Promise.all(
+          movimientos?.map(async (movimiento: HistoriaLMxEDto) => {
+            const dataHxE = await prisma.historialMovimientoxEstado.create({
+              data: movimiento,
+              select: {
+                IdHistorialMxE: true,
+                FechaHistorialMxE: true,
+                Estado: {
+                  select: {
+                    IdEstado: true,
+                    Descripcion: true
+                  }
+                },
+                Movimiento: {
+                  select: {
+                    IdMovimiento: true
+                  }
+                }
+              }
+            })
+
+            if (dataHxE) {
+              return {
+                success: true,
+                data: dataHxE,
+              }
+            } else {
+              return {
+                success: false,
+                error: "Error en crear HxE",
+              };
+            }
+          })
+        )
+
+        const failedResponseMovimientos = responseMovimientos.filter((r) => !r.success);
+
+        if (failedResponseMovimientos.length > 0) {
+          const customError = new Error('Error en crear los HxE')
+          customError.name = 'FAILD_TRAMITE_EMITIDO'
+          throw customError
+        }
+        //b3---------------------------------------
+
+        return {
+          Movimientos: responseMovimientos.map((r) => r.data)
+        }
+      })
+
+      if (result?.Movimientos.length > 0) {
+        this.message.setMessage(0, 'Trámite - Registro(s) recibido(s)');
+        return { message: this.message, registro: result.Movimientos };
+      } else {
+        this.message.setMessage(1, 'Error interno en el servidor');
+        return { message: this.message };
+      }
+    } catch (error: any) {
+      console.log(error);
+      this.message.setMessage(1, error.message);
+      return { message: this.message };
+    }
+  }
+
+  async desmarcarObservar(desmarcarObservarTramiteDto: DesmarcarObservarTramiteDto): Promise<any> {
+    try {
+
+      const hMxEFound = await this.prisma.historialMovimientoxEstado.findFirst({
+        where: {
+          Movimiento: {
+            IdMovimiento: desmarcarObservarTramiteDto.IdMovimiento
+          }, Estado: {
+            IdEstado: 20  // IdEstado - Observado - 20
+          }
+        },
+        select: {
+          IdHistorialMxE: true
+        }
+      })
+
+      if (!hMxEFound) {
+        this.message.setMessage(1, 'Este movimiento no tiene estado observado');
+        return { message: this.message };
+      }
+
+      const hMxE = await this.prisma.historialMovimientoxEstado.delete({
+        where: {
+          IdHistorialMxE: hMxEFound.IdHistorialMxE
+        },
+        select: {
+          IdHistorialMxE: true,
+          FechaHistorialMxE: true,
+          Estado: {
+            select: {
+              IdEstado: true,
+              Descripcion: true,
+            }
+          },
+          Movimiento: {
+            select: {
+              IdMovimiento: true
+            }
+          }
+        }
+      })
+
+      if (hMxE) {
+        this.message.setMessage(0, 'Trámite - Registro(s) recibido(s)');
+        return { message: this.message, registro: hMxE };
       } else {
         this.message.setMessage(1, 'Error interno en el servidor');
         return { message: this.message };
@@ -1167,7 +1374,7 @@ export class TramiteService {
                 some: {
                   Estado: {
                     IdEstado: {
-                      in: [16,17,18,19,20]
+                      in: [16, 17, 18, 19, 20]
                     }
                   }
                 }
@@ -1203,7 +1410,7 @@ export class TramiteService {
               CodigoReferenciaDoc: true,
               Asunto: true,
               Folios: true,
-              Visible:true,
+              Visible: true,
               TipoDocumento: {
                 select: {
                   IdTipoDocumento: true,
