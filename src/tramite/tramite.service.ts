@@ -23,11 +23,12 @@ import { CreateAnexoDto } from 'src/anexo/dto/create-anexo.dto';
 import { TipoDocumentoService } from 'src/tipo-documento/tipo-documento.service';
 import { AreaService } from 'src/area/area.service';
 import { GetAllTramitePendienteDto } from './dto/get-all-tramite-pediente.dto';
-import { HistoriaLMxEDto, RecibirTramiteDto } from './dto/recibir-tramite.dto';
+import { DesmarcarRecibirTramiteDto, HistoriaLMxEDto, RecibirTramiteDto } from './dto/recibir-tramite.dto';
 import { GetAllTramiteRecibidoDto } from './dto/get-all-tramite-recibido.dto';
 import { RecibirTramiteExternoDto } from './dto/recibir-tramite-externo.dto';
 import { AtenderTramiteDto, DesmarcarAtenderTramiteDto } from './dto/atender-tramite.dto';
 import { DesmarcarObservarTramiteDto, ObservarTramiteDto } from './dto/observar-tramite.dto';
+import { ArchivarTramiteDto, DesmarcarArchivarTramiteDto, HistoriaLMxEDto1 } from './dto/archivar-tramite.dto';
 
 @Injectable()
 export class TramiteService {
@@ -852,6 +853,62 @@ export class TramiteService {
     }
   }
 
+  async desmarcarRecibir(DesmarcarRecibirTramiteDto: DesmarcarRecibirTramiteDto): Promise<any> {
+    try {
+
+      const hMxEFound = await this.prisma.historialMovimientoxEstado.findFirst({
+        where: {
+          Movimiento: {
+            IdMovimiento: DesmarcarRecibirTramiteDto.IdMovimiento
+          }, Estado: {
+            IdEstado: 16  // IdEstado - Recibido - 16
+          }
+        },
+        select: {
+          IdHistorialMxE: true
+        }
+      })
+
+      if (!hMxEFound) {
+        this.message.setMessage(1, 'Este movimiento no tiene estado recibido');
+        return { message: this.message };
+      }
+
+      const hMxE = await this.prisma.historialMovimientoxEstado.delete({
+        where: {
+          IdHistorialMxE: hMxEFound.IdHistorialMxE
+        },
+        select: {
+          IdHistorialMxE: true,
+          FechaHistorialMxE: true,
+          Estado: {
+            select: {
+              IdEstado: true,
+              Descripcion: true,
+            }
+          },
+          Movimiento: {
+            select: {
+              IdMovimiento: true
+            }
+          }
+        }
+      })
+
+      if (hMxE) {
+        this.message.setMessage(0, 'Trámite - Registro(s) recibido(s)');
+        return { message: this.message, registro: hMxE };
+      } else {
+        this.message.setMessage(1, 'Error interno en el servidor');
+        return { message: this.message };
+      }
+    } catch (error: any) {
+      console.log(error);
+      this.message.setMessage(1, error.message);
+      return { message: this.message };
+    }
+  }
+
   async atender(atenderTramiteDto: AtenderTramiteDto, @Req() request?: Request): Promise<any> {
     try {
 
@@ -1119,6 +1176,235 @@ export class TramiteService {
       if (hMxE) {
         this.message.setMessage(0, 'Trámite - Registro(s) recibido(s)');
         return { message: this.message, registro: hMxE };
+      } else {
+        this.message.setMessage(1, 'Error interno en el servidor');
+        return { message: this.message };
+      }
+    } catch (error: any) {
+      console.log(error);
+      this.message.setMessage(1, error.message);
+      return { message: this.message };
+    }
+  }
+
+  async archivar(archivarTramiteDto: ArchivarTramiteDto, @Req() request?: Request): Promise<any> {
+    try {
+
+      let movimientos: HistoriaLMxEDto1[] = archivarTramiteDto.Movimientos;
+
+      const result = await this.prisma.$transaction(async (prisma) => {
+
+        //b3
+        movimientos = movimientos.map((movimiento) => {
+          return {
+            IdTramite: movimiento.IdTramite,
+            IdEstado: 19, // IdEstado - Archivado - 19
+            IdMovimiento: movimiento.IdMovimiento,
+            Detalle: archivarTramiteDto.Detalle,
+            FechaHistorialMxE: new Date().toISOString(),
+            Activo: true,
+            CreadoEl: new Date().toISOString(),
+            CreadoPor: `${request?.user?.id ?? 'test user'}`,
+          }
+        })
+
+        const responseMovimientos = await Promise.all(
+          movimientos?.map(async (movimiento: HistoriaLMxEDto1) => {
+
+            const idTramite = movimiento.IdTramite
+
+            delete movimiento.IdTramite
+
+            const dataHxE = await prisma.historialMovimientoxEstado.create({
+              data: movimiento,
+              select: {
+                IdHistorialMxE: true,
+                FechaHistorialMxE: true,
+                Estado: {
+                  select: {
+                    IdEstado: true,
+                    Descripcion: true
+                  }
+                },
+                Movimiento: {
+                  select: {
+                    IdMovimiento: true
+                  }
+                }
+              }
+            })
+
+            const dataTramite = await prisma.tramite.update({
+              where: {
+                IdTramite: idTramite
+              },
+              data: {
+                IdArchivador: archivarTramiteDto.IdArchivador
+              },
+              select: {
+                IdTramite: true
+              }
+            })
+
+            const dataArchivador = await prisma.archivador.update({
+              where: {
+                IdArchivador: archivarTramiteDto.IdArchivador
+              },
+              data: {
+                NroTramites: {
+                  increment: 1
+                },
+                ModificadoEl: new Date().toISOString(),
+                ModificadoPor: `${request?.user?.id ?? 'test user'}`
+              },
+              select: {
+                IdArchivador: true
+              }
+            })
+
+            if (dataHxE && dataTramite && dataArchivador) {
+              return {
+                success: true,
+                data: dataHxE,
+              }
+            } else {
+              return {
+                success: false,
+                error: "Error en crear HxE o actualizar trámite",
+              };
+            }
+          })
+        )
+
+        const failedResponseMovimientos = responseMovimientos.filter((r) => !r.success);
+
+        if (failedResponseMovimientos.length > 0) {
+          const customError = new Error('Error en crear los HxE')
+          customError.name = 'FAILD_TRAMITE_EMITIDO'
+          throw customError
+        }
+        //b3---------------------------------------
+
+        return {
+          Movimientos: responseMovimientos.map((r) => r.data)
+        }
+      })
+
+      if (result?.Movimientos.length > 0) {
+        this.message.setMessage(0, 'Trámite - Registro(s) recibido(s)');
+        return { message: this.message, registro: result.Movimientos };
+      } else {
+        this.message.setMessage(1, 'Error interno en el servidor');
+        return { message: this.message };
+      }
+    } catch (error: any) {
+      console.log(error);
+      this.message.setMessage(1, error.message);
+      return { message: this.message };
+    }
+  }
+
+  async desmarcarArchivar(
+    desmarcarArchivarTramiteDto: DesmarcarArchivarTramiteDto,
+    request?: Request,
+  ): Promise<any> {
+    try {
+
+      const result = await this.prisma.$transaction(async (prisma) => {
+
+        const hMxEFound = await prisma.historialMovimientoxEstado.findFirst({
+          where: {
+            Movimiento: {
+              IdMovimiento: desmarcarArchivarTramiteDto.IdMovimiento
+            }, Estado: {
+              IdEstado: 19  // IdEstado - Archivado - 19
+            }
+          },
+          select: {
+            IdHistorialMxE: true,
+            Movimiento: {
+              select: {
+                IdTramite: true,
+                Tramite: {
+                  select: {
+                    IdArchivador: true,
+                  }
+                }
+              }
+            }
+          }
+        })
+
+        if (!hMxEFound) {
+          throw Error('Este movimiento no tiene estado archivado');
+        }
+
+        const hMxE = await prisma.historialMovimientoxEstado.delete({
+          where: {
+            IdHistorialMxE: hMxEFound.IdHistorialMxE
+          },
+          select: {
+            IdHistorialMxE: true,
+            FechaHistorialMxE: true,
+            Estado: {
+              select: {
+                IdEstado: true,
+                Descripcion: true,
+              }
+            },
+            Movimiento: {
+              select: {
+                IdMovimiento: true,
+              }
+            },
+          }
+        })
+
+        if (!hMxE) {
+          throw Error('Error al eliminar HxE');
+        }
+
+        const dataArchivador = await prisma.archivador.update({
+          where: {
+            IdArchivador: hMxEFound.Movimiento.Tramite.IdArchivador
+          },
+          data: {
+            NroTramites: {
+              decrement: 1
+            },
+            ModificadoEl: new Date().toISOString(),
+            ModificadoPor: `${request?.user?.id ?? 'test user'}`
+          },
+          select: {
+            IdArchivador: true
+          }
+        })
+
+        if (!dataArchivador) {
+          throw Error('Error actuaslizar el archivador');
+        }
+
+        const dataTramite = await prisma.tramite.update({
+          where: {
+            IdTramite: hMxEFound.Movimiento.IdTramite
+          },
+          data: {
+            IdArchivador: null
+          }
+        })
+
+        if (!dataTramite) {
+          throw Error('Error en actualizar trámite');
+        }
+        return {
+          hMxE,
+          dataTramite,
+        }
+      })
+
+      if (result.dataTramite && result.hMxE) {
+        this.message.setMessage(0, 'Trámite - Registro(s) recibido(s)');
+        return { message: this.message, registro: result.hMxE };
       } else {
         this.message.setMessage(1, 'Error interno en el servidor');
         return { message: this.message };

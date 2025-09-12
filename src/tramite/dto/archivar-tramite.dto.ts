@@ -1,23 +1,25 @@
-import { FileManager } from 'src/file-manager/entities/file-manager.entity';
-import { Tramite } from '../entities/tramite.entity';
 import { IsArray, IsBoolean, IsDateString, IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { Anexo } from 'src/anexo/entities/anexo.entity';
-import { Movimiento } from 'src/movimiento/entities/movimiento.entity';
-import { CreateMovimientoDto } from 'src/movimiento/dto/create-movimiento.dto';
-import { CreateAnexoDto } from 'src/anexo/dto/create-anexo.dto';
 import { Type } from 'class-transformer';
 
-export class RecibirTramiteDto {
+export class ArchivarTramiteDto {
   @IsArray()
-  @Type(() => HistoriaLMxEDto)
-  Movimientos: HistoriaLMxEDto[]
+  @Type(() => HistoriaLMxEDto1)
+  Movimientos: HistoriaLMxEDto1[]
 
   @IsString()
   @IsOptional()
-  Observaciones: string;
+  Detalle: string;
+
+  @IsInt()
+  @IsOptional()
+  IdArchivador: number;
 }
 
-export class HistoriaLMxEDto {
+export class HistoriaLMxEDto1 {
+  @IsInt()
+  @IsOptional()
+  IdTramite: number;
+
   @IsInt()
   @IsOptional()
   IdEstado: number
@@ -28,8 +30,8 @@ export class HistoriaLMxEDto {
 
   @IsString()
   @IsOptional()
-  Observaciones: string;
-  
+  Detalle: string;
+
   @IsDateString()
   @IsOptional()
   FechaHistorialMxE: string = new Date().toISOString();
@@ -47,7 +49,7 @@ export class HistoriaLMxEDto {
   CreadoEl: string = new Date().toISOString();
 }
 
-export class DesmarcarRecibirTramiteDto {
+export class DesmarcarArchivarTramiteDto {
   @IsInt()
   @IsNotEmpty()
   IdMovimiento: number

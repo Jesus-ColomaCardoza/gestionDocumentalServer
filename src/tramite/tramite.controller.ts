@@ -19,11 +19,12 @@ import { Tramite } from '@prisma/client';
 import { OutTramiteDto, OutTramiteEmitidoDto, OutTramitesDto, OutTramitesPendienteDto } from './dto/out-tramite.dto';
 import { CreateTramiteEmitidoDto } from './dto/create-tramite-emitido.dto';
 import { GetAllTramitePendienteDto } from './dto/get-all-tramite-pediente.dto';
-import { RecibirTramiteDto } from './dto/recibir-tramite.dto';
+import { DesmarcarRecibirTramiteDto, RecibirTramiteDto } from './dto/recibir-tramite.dto';
 import { RecibirTramiteExternoDto } from './dto/recibir-tramite-externo.dto';
 import { GetAllTramiteRecibidoDto } from './dto/get-all-tramite-recibido.dto';
 import { AtenderTramiteDto, DesmarcarAtenderTramiteDto } from './dto/atender-tramite.dto';
 import { DesmarcarObservarTramiteDto, ObservarTramiteDto } from './dto/observar-tramite.dto';
+import { ArchivarTramiteDto, DesmarcarArchivarTramiteDto } from './dto/archivar-tramite.dto';
 @Controller('tramite')
 @ApiTags('tramite')
 // @UseGuards(AuthGuard)
@@ -63,6 +64,13 @@ export class TramiteController {
     return this.tramiteService.recibir(recibirTramiteDto, request);
   }
 
+  @Post('desmarcar_recibir')
+  desmarcarRecibir(
+    @Body() desmarcarRecibirTramiteDto: DesmarcarRecibirTramiteDto,
+  ): Promise<any> {
+    return this.tramiteService.desmarcarRecibir(desmarcarRecibirTramiteDto);
+  }
+
   @Post('atender')
   atender(
     @Body() atenderTramiteDto: AtenderTramiteDto,
@@ -91,6 +99,22 @@ export class TramiteController {
     @Body() desmarcarObservarTramiteDto: DesmarcarObservarTramiteDto,
   ): Promise<any> {
     return this.tramiteService.desmarcarObservar(desmarcarObservarTramiteDto);
+  }
+
+  @Post('archivar')
+  archivar(
+    @Body() archivarTramiteDto: ArchivarTramiteDto,
+    @Req() request?: Request,
+  ): Promise<any> {
+    return this.tramiteService.archivar(archivarTramiteDto, request);
+  }
+
+  @Post('desmarcar_archivar')
+  desmarcarArchivar(
+    @Body() desmarcarArchivarTramiteDto: DesmarcarArchivarTramiteDto,
+    @Req() request?: Request,
+  ): Promise<any> {
+    return this.tramiteService.desmarcarArchivar(desmarcarArchivarTramiteDto, request);
   }
 
   @Post('find_all')
