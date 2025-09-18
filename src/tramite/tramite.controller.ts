@@ -25,6 +25,8 @@ import { GetAllTramiteRecibidoDto } from './dto/get-all-tramite-recibido.dto';
 import { AtenderTramiteDto, DesmarcarAtenderTramiteDto } from './dto/atender-tramite.dto';
 import { DesmarcarObservarTramiteDto, ObservarTramiteDto } from './dto/observar-tramite.dto';
 import { ArchivarTramiteDto, DesmarcarArchivarTramiteDto } from './dto/archivar-tramite.dto';
+import { CreateTramiteRecibidoAtendidoDto } from './dto/create-tramite-recibido-atendido.dto';
+import { DerivarTramiteDto } from './dto/derivar-tramite.dto';
 @Controller('tramite')
 @ApiTags('tramite')
 // @UseGuards(AuthGuard)
@@ -46,6 +48,14 @@ export class TramiteController {
     @Req() request?: Request,
   ): Promise<OutTramiteEmitidoDto> {
     return this.tramiteService.createEmitido(createTramiteEmitidoDto, request);
+  }
+
+  @Post('derivar')
+  derivar(
+    @Body() derivarTramiteDto: DerivarTramiteDto,
+    @Req() request?: Request,
+  ): Promise<OutTramiteEmitidoDto> {
+    return this.tramiteService.derivar(derivarTramiteDto, request);
   }
 
   @Post('recibir_externo')
@@ -77,6 +87,14 @@ export class TramiteController {
     @Req() request?: Request,
   ): Promise<any> {
     return this.tramiteService.atender(atenderTramiteDto, request);
+  }
+
+  @Post('atender2')
+  atender2(
+    @Body() createTramiteRecibidoAtendidoDto: CreateTramiteRecibidoAtendidoDto,
+    @Req() request?: Request,
+  ): Promise<any> {
+    return this.tramiteService.atender2(createTramiteRecibidoAtendidoDto, request);
   }
 
   @Post('desmarcar_atender')
