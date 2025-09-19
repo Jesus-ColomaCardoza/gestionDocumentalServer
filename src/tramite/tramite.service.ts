@@ -973,7 +973,7 @@ export class TramiteService {
           }
         })
 
-        if (remitenteFound.IdUsuario) {
+        if (remitenteFound?.IdUsuario) {
           remitente = remitenteFound
         } else {
           const remitenteCreate = await prisma.usuario.create({
