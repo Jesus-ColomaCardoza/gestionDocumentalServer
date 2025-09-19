@@ -25,3 +25,10 @@ export class OutMovimientosDto {
   registro?: Movimiento[];
 }
 
+export class OutMovimientosDetailsDto {
+  @Expose()
+  message: Menssage;
+
+  @Expose()
+  registro?: MovimientoDetails[];
+}

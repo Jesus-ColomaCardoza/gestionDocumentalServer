@@ -15,14 +15,14 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Request } from 'express';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
-import { OutMovimientoDetailsDto, OutMovimientoDto, OutMovimientosDto } from './dto/out-movimiento.dto';
+import { OutMovimientoDetailsDto, OutMovimientoDto, OutMovimientosDetailsDto, OutMovimientosDto } from './dto/out-movimiento.dto';
 
 @Controller('movimiento')
 @ApiTags('movimiento')
 // @UseGuards(AuthGuard)
 // @ApiBearerAuth()
 export class MovimientoController {
-  constructor(private readonly movimientoService: MovimientoService) {}
+  constructor(private readonly movimientoService: MovimientoService) { }
 
   @Post('create')
   create(
@@ -45,6 +45,13 @@ export class MovimientoController {
     @Body() combinationsFiltersDto: CombinationsFiltersDto,
   ): Promise<OutMovimientosDto> {
     return this.movimientoService.findAll(combinationsFiltersDto);
+  }
+
+  @Post('find_all_details')
+  findAllDetails(
+    @Body() combinationsFiltersDto: CombinationsFiltersDto,
+  ): Promise<OutMovimientosDetailsDto> {
+    return this.movimientoService.findAllDetails(combinationsFiltersDto);
   }
 
   @Get('find_one/:id')

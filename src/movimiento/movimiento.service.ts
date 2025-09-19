@@ -9,7 +9,7 @@ import { Request } from 'express';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { TramiteService } from 'src/tramite/tramite.service';
 import { AreaService } from 'src/area/area.service';
-import { OutMovimientoDetailsDto, OutMovimientoDto, OutMovimientosDto } from './dto/out-movimiento.dto';
+import { OutMovimientoDetailsDto, OutMovimientoDto, OutMovimientosDetailsDto, OutMovimientosDto } from './dto/out-movimiento.dto';
 
 @Injectable()
 export class MovimientoService {
@@ -134,6 +134,136 @@ export class MovimientoService {
         where: clausula,
         take: limitRows,
         select: this.customOut,
+      });
+
+      if (movimientos) {
+        this.message.setMessage(0, 'Movimiento - Registros encontrados');
+        return { message: this.message, registro: movimientos };
+      } else {
+        this.message.setMessage(
+          1,
+          'Error: Movimiento - Registros no encontrados',
+        );
+        return { message: this.message };
+      }
+    } catch (error: any) {
+      console.log(error);
+      this.message.setMessage(1, error.message);
+      return { message: this.message };
+    }
+  }
+
+  async findAllDetails(combinationsFiltersDto: CombinationsFiltersDto): Promise<OutMovimientosDetailsDto> {
+    try {
+      let filtros = combinationsFiltersDto.filters;
+      let cantidad_max = combinationsFiltersDto.cantidad_max;
+      let clausula = this.filtersService.fabricarClausula(filtros);
+      let limitRows = parseInt(cantidad_max) || 999;
+
+      const movimientos = await this.prisma.movimiento.findMany({
+        where: clausula,
+        take: limitRows,
+        select: {
+          IdMovimiento: true,
+
+          HistorialMovimientoxEstado: {
+            select: {
+              IdHistorialMxE: true,
+              FechaHistorialMxE: true,
+              Estado: {
+                select: {
+                  IdEstado: true,
+                  Descripcion: true,
+                }
+              }
+              // Observaciones:true,
+              // Detalle:true,
+            },
+            orderBy: {
+              FechaHistorialMxE: 'desc'
+            },
+            // take:1
+          },
+          Documento: {
+            select: {
+              IdDocumento: true,
+              CodigoReferenciaDoc: true,
+              Asunto: true,
+              Folios: true,
+              Visible: true,
+              TipoDocumento: {
+                select: {
+                  IdTipoDocumento: true,
+                  Descripcion: true,
+                }
+              },
+            },
+          },
+          AreaOrigen: {
+            select: {
+              IdArea: true,
+              Descripcion: true,
+            }
+          },
+          AreaDestino: {
+            select: {
+              IdArea: true,
+              Descripcion: true,
+            }
+          },
+          Motivo: true,
+          Acciones: true,
+          FechaMovimiento: true,
+          NombreResponsable: true,//destinatario
+
+          // si en el movimiento solo hay documento solo a nivel de tramite, se toma ese - Documento==null -> emitido
+          // si en el movimiento hay documento a nivel de tramite y movimiento, se toma el de movimiento 
+
+          Tramite: {
+            select: {
+              IdTramite: true,
+              CodigoReferenciaTram: true,
+              Descripcion: true,
+              FechaInicio: true,
+              FechaFin: true,
+              Remitente: {
+                select: {
+                  IdUsuario: true,
+                  Nombres: true,
+                  ApellidoPaterno: true,
+                  ApellidoMaterno: true,
+                  NroIdentificacion: true,
+                },
+              },
+              TipoTramite: {
+                select: {
+                  IdTipoTramite: true,
+                  Descripcion: true,
+                },
+              },
+              Estado: {
+                select: {
+                  IdEstado: true,
+                  Descripcion: true,
+                },
+              },
+              // Documento: {
+              //   select: {
+              //     IdDocumento: true,
+              //     CodigoReferenciaDoc: true,
+              //     Asunto: true,
+              //     Folios: true,
+              //     TipoDocumento: {
+              //       select: {
+              //         IdTipoDocumento: true,
+              //         Descripcion: true,
+              //       }
+              //     },
+              //   },
+              // },
+            }
+          },
+        },
       });
 
       if (movimientos) {
@@ -300,7 +430,6 @@ export class MovimientoService {
       return { message: this.message };
     }
   }
-
   async update(
     id: number,
     updateMovimientoDto: UpdateMovimientoDto,
