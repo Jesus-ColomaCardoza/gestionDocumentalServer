@@ -83,4 +83,9 @@ export class DerivarTramiteDto {
   @IsString()
   @IsOptional()
   Indicaciones: string;
+
+  @IsOptional()
+  @IsBoolean()
+  TypeTab: boolean;
+
 }

@@ -517,6 +517,8 @@ export class TramiteService {
 
     let anexos: CreateAnexoDto[] = derivarTramiteDto.Anexos;
 
+    let typeTab = derivarTramiteDto.TypeTab;
+
     let responseAnexos: {
       success: boolean;
       data: {
@@ -615,32 +617,34 @@ export class TramiteService {
             throw customError
           }
         } else {
-          responseDigitalFiles = await prisma.documento.create({
-            data: {
-              CodigoReferenciaDoc: derivarTramiteDto.CodigoReferenciaDoc,
-              Asunto: derivarTramiteDto.Asunto,
-              Observaciones: derivarTramiteDto.Observaciones,
-              Folios: derivarTramiteDto.Folios,
-              IdTipoDocumento: derivarTramiteDto.IdTipoDocumento,
-              IdEstado: 4,// IdEstado - Adjuntado - 4
-              ModificadoEl: new Date().toISOString(),
-              ModificadoPor: `${request?.user?.id ?? 'test user'}`,
-            },
-            select: {
-              IdDocumento: true,
-              NombreDocumento: true,
-              UrlDocumento: true,
+          if (typeTab) {
+            responseDigitalFiles = await prisma.documento.create({
+              data: {
+                CodigoReferenciaDoc: derivarTramiteDto.CodigoReferenciaDoc,
+                Asunto: derivarTramiteDto.Asunto,
+                Observaciones: derivarTramiteDto.Observaciones,
+                Folios: derivarTramiteDto.Folios,
+                IdTipoDocumento: derivarTramiteDto.IdTipoDocumento,
+                IdEstado: 4,// IdEstado - Adjuntado - 4
+                ModificadoEl: new Date().toISOString(),
+                ModificadoPor: `${request?.user?.id ?? 'test user'}`,
+              },
+              select: {
+                IdDocumento: true,
+                NombreDocumento: true,
+                UrlDocumento: true,
+              }
+
+            })
+
+            if (!responseDigitalFiles) {
+              const customError = new Error('Error al actualizar estado del documento')
+              customError.name = 'FAILD_TRAMITE_EMITIDO'
+              throw customError
             }
 
-          })
-
-          if (!responseDigitalFiles) {
-            const customError = new Error('Error al actualizar estado del documento')
-            customError.name = 'FAILD_TRAMITE_EMITIDO'
-            throw customError
+            digitalFiles.push({ IdFM: responseDigitalFiles.IdDocumento })
           }
-
-          digitalFiles.push({ IdFM: responseDigitalFiles.IdDocumento })
         }
         //b1---------------------------------------
 
