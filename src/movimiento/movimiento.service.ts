@@ -10,6 +10,7 @@ import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto
 import { TramiteService } from 'src/tramite/tramite.service';
 import { AreaService } from 'src/area/area.service';
 import { OutMovimientoDetailsDto, OutMovimientoDto, OutMovimientosDetailsDto, OutMovimientosDto } from './dto/out-movimiento.dto';
+import { FileService } from 'src/file/file.service';
 
 @Injectable()
 export class MovimientoService {
@@ -20,6 +21,7 @@ export class MovimientoService {
     private filtersService: FiltersService,
     private area: AreaService,
     private tramite: TramiteService,
+    private file: FileService,
   ) { }
 
   private readonly customOut = {
@@ -430,6 +432,7 @@ export class MovimientoService {
       return { message: this.message };
     }
   }
+
   async update(
     id: number,
     updateMovimientoDto: UpdateMovimientoDto,
@@ -478,7 +481,6 @@ export class MovimientoService {
       return { message: this.message };
     }
   }
-
   async remove(id: number): Promise<OutMovimientoDto> {
     try {
       const idFound = await this.findOne(id);
@@ -491,6 +493,173 @@ export class MovimientoService {
       if (movimiento) {
         this.message.setMessage(0, 'Movimiento - Registro eliminado');
         return { message: this.message, registro: movimiento };
+      } else {
+        this.message.setMessage(1, 'Error: Error interno en el servidor');
+        return { message: this.message };
+      }
+    } catch (error: any) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        // this code in prisma P2003 verifies referential integrity of FK and PK, we return custom message
+        if (error.code === 'P2003') {
+          this.message.setMessage(
+            1,
+            'Oops! No se puede eliminar este registro porque está relacionado con otros datos.',
+          );
+        }
+      } else {
+        // whatever other error, we return the error message
+        this.message.setMessage(1, error.message);
+      }
+      console.log(error);
+      return { message: this.message };
+    }
+  }
+
+  async removeDetails(id: number): Promise<OutMovimientoDto> {
+    try {
+      const result = await this.prisma.$transaction(async (prisma) => {
+
+        const movimiento = await prisma.movimiento.findUnique({
+          where: { IdMovimiento: id },
+          select: {
+            IdMovimiento: true,
+            HistorialMovimientoxEstado: {
+              select: {
+                IdHistorialMxE: true,
+                FechaHistorialMxE: true,
+                IdDocumento: true,
+                Estado: {
+                  select: {
+                    IdEstado: true,
+                    Descripcion: true,
+                  }
+                }
+              },
+              orderBy: {
+                FechaHistorialMxE: 'desc'
+              },
+              take: 1
+            },
+            Documento: {
+              select: {
+                IdDocumento: true,
+                Anexo: {
+                  select: {
+                    IdAnexo: true,
+                    UrlAnexo: true
+                  }
+                }
+              }
+            }
+          }
+        });
+
+        if (!(movimiento && movimiento?.IdMovimiento)) {
+          throw Error('Error: Movimiento - Registro no encontrado')
+        }
+
+        // if Estado is 15 (Pendiente) we can remove this movimiento
+        if (!(movimiento.HistorialMovimientoxEstado[0].Estado.IdEstado == 15)) {
+          throw Error('Error: Movimiento ya ha sido recibido, no podemos cancelar derivación')
+        }
+
+        if (movimiento.Documento?.IdDocumento) {
+          //we delete HistorialMovimientoxEstado in db
+          const HxE = await prisma.historialMovimientoxEstado.deleteMany({
+            where: {
+              IdMovimiento: id
+            },
+          });
+
+          if (HxE.count != movimiento.HistorialMovimientoxEstado.length) {
+            throw Error('Error al eliminar el Historia lMovimiento x Estado');
+          }
+
+          //we delete movimiento in db
+          const movimientoDelete = await prisma.movimiento.delete({
+            where: {
+              IdMovimiento: id
+            },
+            select: {
+              IdMovimiento: true
+            }
+          });
+
+          if (!movimientoDelete) {
+            throw Error('Error al eliminar el movimiento');
+          }
+
+          // we delete anexos in db
+          if (movimiento.Documento.Anexo.length > 0) {
+            const anexos = await prisma.anexo.deleteMany({
+              where: {
+                IdDocumento: movimiento.Documento.IdDocumento
+              },
+            })
+
+            if (anexos.count != movimiento.Documento.Anexo.length) {
+              throw Error('Error al eliminar anexos');
+            }
+          }
+
+          //we delete documento in db
+          const documentoDelete = await prisma.documento.delete({
+            where: {
+              IdDocumento: movimiento.Documento.IdDocumento
+            },
+            select: {
+              IdDocumento: true,
+              UrlDocumento: true
+            }
+          });
+
+          if (!documentoDelete) {
+            throw Error('Error al eliminar el documento');
+          }
+
+          // we delete phisical files of anexos and documentos bu Url
+          if (movimiento.Documento.Anexo.length > 0) {
+            movimiento.Documento.Anexo.map(async (anexo) => {
+              await this.file.remove({ PublicUrl: anexo.UrlAnexo });
+            })
+          }
+
+          await this.file.remove({ PublicUrl: documentoDelete.UrlDocumento });
+
+          return { movimientoDelete: movimientoDelete }
+        } else {
+          //we delete HistorialMovimientoxEstado in db
+          const HxE = await prisma.historialMovimientoxEstado.deleteMany({
+            where: {
+              IdMovimiento: id
+            },
+          });
+
+          if (HxE.count != movimiento.HistorialMovimientoxEstado.length) {
+            throw Error('Error al eliminar el Historia lMovimiento x Estado');
+          }
+
+          //we delete movimiento in db
+          const movimientoDelete = await prisma.movimiento.delete({
+            where: {
+              IdMovimiento: id
+            },
+            select: {
+              IdMovimiento: true
+            }
+          });
+
+          if (!movimientoDelete) {
+            throw Error('Error al eliminar el movimiento');
+          }
+
+          return { movimientoDelete: movimientoDelete }
+        }
+      })
+
+      if (result.movimientoDelete.IdMovimiento) {
+        this.message.setMessage(0, 'Movimiento - Registro eliminado');
+        return { message: this.message, registro: result.movimientoDelete };
       } else {
         this.message.setMessage(1, 'Error: Error interno en el servidor');
         return { message: this.message };

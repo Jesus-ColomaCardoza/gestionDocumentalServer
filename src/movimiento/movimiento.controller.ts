@@ -77,4 +77,9 @@ export class MovimientoController {
   remove(@Param('id') id: string): Promise<OutMovimientoDto> {
     return this.movimientoService.remove(+id);
   }
+
+  @Post('remove_details/:id')
+  removeDetails(@Param('id') id: string): Promise<OutMovimientoDto> {
+    return this.movimientoService.removeDetails(+id);
+  }
 }
