@@ -15,7 +15,8 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Request } from 'express';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
-import { OutMovimientoDetailsDto, OutMovimientoDto, OutMovimientosDetailsDto, OutMovimientosDto } from './dto/out-movimiento.dto';
+import { OutMovimientoDetailsDto, OutMovimientoDto, OutMovimientosDetailsDto, OutMovimientosDto, OutMovimientoSeguimientoDto } from './dto/out-movimiento.dto';
+import { GetSeguimientoMovimientoDto } from './dto/get-seguimiento-movimiento.dto';
 
 @Controller('movimiento')
 @ApiTags('movimiento')
@@ -62,6 +63,13 @@ export class MovimientoController {
   @Get('find_one_details/:id')
   findOneDetails(@Param('id') id: string): Promise<OutMovimientoDetailsDto> {
     return this.movimientoService.findOneDetails(+id);
+  }
+
+  @Post('find_one_seguimiento')
+  findOneSeguimiento(
+    @Body() getSeguimientoMovimientoDto: GetSeguimientoMovimientoDto,
+  ): Promise<OutMovimientoSeguimientoDto> {
+    return this.movimientoService.findOneSeguimiento(getSeguimientoMovimientoDto);
   }
 
   @Patch('update/:id')

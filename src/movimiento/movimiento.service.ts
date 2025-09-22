@@ -11,6 +11,8 @@ import { TramiteService } from 'src/tramite/tramite.service';
 import { AreaService } from 'src/area/area.service';
 import { OutMovimientoDetailsDto, OutMovimientoDto, OutMovimientosDetailsDto, OutMovimientosDto } from './dto/out-movimiento.dto';
 import { FileService } from 'src/file/file.service';
+import { GetSeguimientoMovimientoDto } from './dto/get-seguimiento-movimiento.dto';
+import { printLog } from 'src/utils/utils';
 
 @Injectable()
 export class MovimientoService {
@@ -419,6 +421,188 @@ export class MovimientoService {
       if (movimiento) {
         this.message.setMessage(0, 'Movimiento - Registro encontrado');
         return { message: this.message, registro: movimiento };
+      } else {
+        this.message.setMessage(
+          1,
+          'Error: Movimiento - Registro no encontrado',
+        );
+        return { message: this.message };
+      }
+    } catch (error: any) {
+      console.log(error);
+      this.message.setMessage(1, error.message);
+      return { message: this.message };
+    }
+  }
+
+  // async findOneSeguimiento(id: number): Promise<OutMovimientoDetailsDto> {
+  async findOneSeguimiento(getSeguimientoMovimientoDto: GetSeguimientoMovimientoDto): Promise<any> {
+    try {
+      type MovimientoNode = {
+        Documento: {
+          CreadoEl: Date
+          IdDocumento: number
+          Folios: number
+          Asunto: string
+          CodigoReferenciaDoc: string
+          Visible: boolean
+          TipoDocumento: {
+            Descripcion: string
+            IdTipoDocumento: number
+          }
+        }
+        IdMovimiento: number
+        FechaMovimiento: Date
+        IdMovimientoPadre: number
+        NombreResponsable: string
+        Acciones: string
+        Motivo: string
+        HistorialMovimientoxEstado: {
+          Estado: {
+            Descripcion: string
+            IdEstado: number
+          };
+          IdHistorialMxE: number
+          FechaHistorialMxE: Date
+        }[],
+        Children: MovimientoNode[]
+      }
+
+      const tramite = await this.prisma.tramite.findUnique({
+        where: { IdTramite: getSeguimientoMovimientoDto.IdTramite },
+        select: {
+          IdTramite: true,
+          // CodigoReferenciaTram: true,
+          // Descripcion: true,
+          // FechaInicio: true,
+          // FechaFin: true,
+          // Remitente: {
+          //   select: {
+          //     IdUsuario: true,
+          //     Nombres: true,
+          //     ApellidoPaterno: true,
+          //     ApellidoMaterno: true,
+          //     NroIdentificacion: true,
+          //   },
+          // },
+          TipoTramite: {
+            select: {
+              IdTipoTramite: true,
+              Descripcion: true,
+            },
+          },
+          // Estado: {
+          //   select: {
+          //     IdEstado: true,
+          //     Descripcion: true,
+          //   },
+          // },
+          Movimiento: {
+            select: {
+              IdMovimiento: true,
+              IdMovimientoPadre: true,
+              HistorialMovimientoxEstado: {
+                select: {
+                  IdHistorialMxE: true,
+                  FechaHistorialMxE: true,
+                  Estado: {
+                    select: {
+                      IdEstado: true,
+                      Descripcion: true,
+                    }
+                  }
+                  // Observaciones:true,
+                  // Detalle:true,
+                },
+                orderBy: {
+                  FechaHistorialMxE: 'desc'
+                },
+                // take:1
+              },
+              Documento: {
+                select: {
+                  IdDocumento: true,
+                  CreadoEl: true,
+                  CodigoReferenciaDoc: true,
+                  Asunto: true,
+                  Folios: true,
+                  Visible: true,
+                  TipoDocumento: {
+                    select: {
+                      IdTipoDocumento: true,
+                      Descripcion: true,
+                    }
+                  },
+                },
+              },
+              AreaOrigen: {
+                select: {
+                  IdArea: true,
+                  Descripcion: true,
+                }
+              },
+              AreaDestino: {
+                select: {
+                  IdArea: true,
+                  Descripcion: true,
+                }
+              },
+              Motivo: true,
+              Acciones: true,
+              FechaMovimiento: true,
+              NombreResponsable: true,
+            },
+            orderBy: {
+              FechaMovimiento: 'asc'
+            },
+          }
+        },
+      });
+
+      if (tramite) {
+        const mapMovimientoNode = new Map<number, MovimientoNode>();
+
+        const rootsMovimientoNode: MovimientoNode[] = [];
+
+        // Inicializamos todos los movimientos en el mapa
+        tramite.Movimiento.forEach(mov => {
+          mapMovimientoNode.set(mov.IdMovimiento, { ...mov, Children: [] });
+        });
+
+        // Construimos el árbol con relaciones
+        tramite.Movimiento.forEach(mov => {
+          if (mov.IdMovimientoPadre === null) {
+            // Raíz
+            rootsMovimientoNode.push(mapMovimientoNode.get(mov.IdMovimiento)!);
+          } else {
+            const parent = mapMovimientoNode.get(mov.IdMovimientoPadre);
+            if (parent) {
+              parent.Children.push(mapMovimientoNode.get(mov.IdMovimiento)!);
+            }
+          }
+        });
+
+        const documentos = tramite.Movimiento
+          .filter((movimiento) => movimiento.Documento?.IdDocumento != null)
+          .sort((a, b) => new Date(b.Documento.CreadoEl).getTime() - new Date(a.Documento.CreadoEl).getTime())
+          .map((movimiento) => movimiento.Documento);
+
+        const movimiento = tramite.Movimiento.find((movimiento) => movimiento.IdMovimiento == getSeguimientoMovimientoDto.IdMovimiento);
+
+
+        this.message.setMessage(0, 'Movimiento - Registro encontrado');
+
+        return {
+          message: this.message, registro: {
+            Tramite: tramite,
+            Movimiento: {
+              IdMomiento: movimiento.IdMovimiento,
+              Asunto: movimiento.Documento?.Asunto || '',
+            },
+            Seguimiento:rootsMovimientoNode,
+            Documentos: documentos
+          }
+        };
       } else {
         this.message.setMessage(
           1,

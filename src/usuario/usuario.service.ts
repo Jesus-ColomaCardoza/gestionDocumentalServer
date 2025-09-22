@@ -15,6 +15,7 @@ import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto
 import { FileService } from 'src/file/file.service';
 import { printLog } from 'src/utils/utils';
 import { OutUsuarioDto, OutUsuariosDto } from './dto/out-usuario.dto';
+import bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UsuarioService {
@@ -30,10 +31,10 @@ export class UsuarioService {
     private cargo: CargoService,
     private area: AreaService,
     private file: FileService,
-  ) {}
+  ) { }
 
   private readonly customOut = {
-    Contrasena:true,
+    Contrasena: true,
     IdUsuario: true,
     Nombres: true,
     ApellidoPaterno: true,
@@ -145,6 +146,13 @@ export class UsuarioService {
         // printLog(file);
       }
 
+      // we generate the hash of the password
+      const salt = await bcrypt.genSalt(10);
+      createUsuarioDto.Contrasena = await bcrypt.hash(
+        createUsuarioDto.Contrasena,
+        salt,
+      );
+
       // we create new register
       delete createUsuarioDto.FotoPerfilBase64;
       delete createUsuarioDto.FotoPerfilNombre;
@@ -178,16 +186,16 @@ export class UsuarioService {
       const usuario = await this.prisma.usuario.create({
         data: fileUpdate
           ? {
-              ...createUsuarioDto,
-              CreadoPor: `${request?.user?.id ?? 'test user'}`,
-              UrlBase: file.UrlBase,
-              UrlFotoPerfil: file.Url,
-              NombreFotoPerfil: file.Nombre,
-            }
+            ...createUsuarioDto,
+            CreadoPor: `${request?.user?.id ?? 'test user'}`,
+            UrlBase: file.UrlBase,
+            UrlFotoPerfil: file.Url,
+            NombreFotoPerfil: file.Nombre,
+          }
           : {
-              ...createUsuarioDto,
-              CreadoPor: `${request?.user?.id ?? 'test user'}`,
-            },
+            ...createUsuarioDto,
+            CreadoPor: `${request?.user?.id ?? 'test user'}`,
+          },
       });
 
       if (usuario) {
@@ -394,19 +402,19 @@ export class UsuarioService {
         data:
           fileUpdate == fileUpdateValues[0] || fileUpdate == fileUpdateValues[2]
             ? {
-                ...updateUsuarioDto,
-                ModificadoPor: `${request?.user?.id ?? 'test user'}`,
-                UrlBase:
-                  fileUpdate == fileUpdateValues[0] ? null : file.UrlBase,
-                UrlFotoPerfil:
-                  fileUpdate == fileUpdateValues[0] ? null : file.Url,
-                NombreFotoPerfil:
-                  fileUpdate == fileUpdateValues[0] ? null : file.Nombre,
-              }
+              ...updateUsuarioDto,
+              ModificadoPor: `${request?.user?.id ?? 'test user'}`,
+              UrlBase:
+                fileUpdate == fileUpdateValues[0] ? null : file.UrlBase,
+              UrlFotoPerfil:
+                fileUpdate == fileUpdateValues[0] ? null : file.Url,
+              NombreFotoPerfil:
+                fileUpdate == fileUpdateValues[0] ? null : file.Nombre,
+            }
             : {
-                ...updateUsuarioDto,
-                ModificadoPor: `${request?.user?.id ?? 'test user'}`,
-              },
+              ...updateUsuarioDto,
+              ModificadoPor: `${request?.user?.id ?? 'test user'}`,
+            },
       });
 
       if (usuario) {
