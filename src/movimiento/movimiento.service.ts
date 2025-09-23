@@ -451,12 +451,22 @@ export class MovimientoService {
             IdTipoDocumento: number
           }
         }
+        AreaOrigen: {
+          IdArea: number,
+          Descripcion: string,
+        },
+        AreaDestino: {
+          IdArea: number,
+          Descripcion: string,
+        },
         IdMovimiento: number
         FechaMovimiento: Date
         IdMovimientoPadre: number
         NombreResponsable: string
         Acciones: string
         Motivo: string
+        FirmaDigital: boolean,
+        Copia: boolean,
         HistorialMovimientoxEstado: {
           Estado: {
             Descripcion: string
@@ -551,6 +561,8 @@ export class MovimientoService {
               Acciones: true,
               FechaMovimiento: true,
               NombreResponsable: true,
+              FirmaDigital: true,
+              Copia: true,
             },
             orderBy: {
               FechaMovimiento: 'asc'
@@ -585,7 +597,13 @@ export class MovimientoService {
         const documentos = tramite.Movimiento
           .filter((movimiento) => movimiento.Documento?.IdDocumento != null)
           .sort((a, b) => new Date(b.Documento.CreadoEl).getTime() - new Date(a.Documento.CreadoEl).getTime())
-          .map((movimiento) => movimiento.Documento);
+          .map((movimiento) => {
+            return {
+              Documento: movimiento.Documento,
+              FirmaDigital: movimiento.FirmaDigital,
+              Copia: movimiento.Copia
+            }
+          });
 
         const movimiento = tramite.Movimiento.find((movimiento) => movimiento.IdMovimiento == getSeguimientoMovimientoDto.IdMovimiento);
 
@@ -599,7 +617,7 @@ export class MovimientoService {
               IdMomiento: movimiento.IdMovimiento,
               Asunto: movimiento.Documento?.Asunto || '',
             },
-            Seguimiento:rootsMovimientoNode,
+            Seguimiento: rootsMovimientoNode,
             Documentos: documentos
           }
         };
