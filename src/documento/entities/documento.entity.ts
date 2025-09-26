@@ -35,7 +35,7 @@ export class Documento {
 
   @IsDateString()
   @IsOptional()
-  FechaEmision: string;
+  FechaEmision: string= new Date().toISOString();
 
   @IsString()
   @IsOptional()
