@@ -68,7 +68,7 @@ model Documento {
   Titulo                     String?                      @db.VarChar(100)
   Descripcion                String?                      @db.VarChar(100)
   Folios                     Int?
-  FechaEmision               DateTime                     @default(dbgenerated("CURRENT_DATE")) @db.Date
+  FechaEmision               DateTime                     @default(now()) @db.Timestamp(6)
   UrlDocumento               String?                      @db.VarChar(100)
   FormatoDocumento           String?                      @db.VarChar(100)
   IdTipoDocumento            Int?
