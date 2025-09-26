@@ -222,6 +222,7 @@ export class TramiteService {
 
       const result = await this.prisma.$transaction(async (prisma) => {
         // we create the tramites emitido
+        const DateNow = new Date().toISOString()
         const tramiteEmitido = await prisma.tramite.create({
           data: {
             IdDocumento: digitalFiles[0]?.IdFM || null,
@@ -231,7 +232,7 @@ export class TramiteService {
             IdAreaEmision: createTramiteEmitidoDto.IdAreaEmision,
             IdEstado: createTramiteEmitidoDto.IdEstado,
             IdRemitente: createTramiteEmitidoDto.IdRemitente,
-            CreadoEl: new Date().toISOString(),
+            CreadoEl: DateNow,
             CreadoPor: `${request?.user?.id ?? 'test user'}`,
           },
           select: {
@@ -259,7 +260,7 @@ export class TramiteService {
                 Folios: createTramiteEmitidoDto.Folios,
                 IdTipoDocumento: createTramiteEmitidoDto.IdTipoDocumento,
                 IdEstado: 4,// IdEstado - Adjuntado - 4
-                ModificadoEl: new Date().toISOString(),
+                ModificadoEl: DateNow,
                 ModificadoPor: `${request?.user?.id ?? 'test user'}`,
               },
               select: {
@@ -284,8 +285,8 @@ export class TramiteService {
                 Folios: createTramiteEmitidoDto.Folios,
                 IdTipoDocumento: createTramiteEmitidoDto.IdTipoDocumento,
                 IdEstado: 4,// IdEstado - Adjuntado - 4
-                ModificadoEl: new Date().toISOString(),
-                ModificadoPor: `${request?.user?.id ?? 'test user'}`,
+                CreadoEl: DateNow,
+                CreadoPor: `${request?.user?.id ?? 'test user'}`,
               },
               select: {
                 IdDocumento: true,
@@ -374,7 +375,7 @@ export class TramiteService {
               IdMovimientoPadre: null,
               NombreResponsable: destino.NombreResponsable?.NombreCompleto ? destino.NombreResponsable.NombreCompleto : destino.NombreResponsable,
               Activo: destino.Activo,
-              CreadoEl: new Date().toISOString(),
+              CreadoEl: DateNow,
               CreadoPor: `${request?.user?.id ?? 'test user'}`,
             }
           })
@@ -393,7 +394,7 @@ export class TramiteService {
                     IdEstado: 15, // IdEstado - Pendiente - 15
                     IdMovimiento: dataDestino.IdMovimiento,
                     Activo: true,
-                    CreadoEl: new Date().toISOString(),
+                    CreadoEl: DateNow,
                     CreadoPor: `${request?.user?.id ?? 'test user'}`,
                   },
                 })
@@ -438,7 +439,7 @@ export class TramiteService {
               UrlBase: anexo.UrlBase,
               IdDocumento: digitalFiles[0]?.IdFM,
               Activo: anexo.Activo,
-              CreadoEl: new Date().toISOString(),
+              CreadoEl: DateNow,
               CreadoPor: `${request?.user?.id ?? 'test user'}`,
             }
           })
