@@ -482,6 +482,22 @@ export class MovimientoService {
         where: { IdTramite: getSeguimientoMovimientoDto.IdTramite },
         select: {
           IdTramite: true,
+          Area: {
+            select: {
+              IdArea: true,
+              Descripcion: true,
+            }
+          },
+          FechaInicio: true,
+          Remitente: {
+            select: {
+              IdUsuario: true,
+              Nombres: true,
+              ApellidoPaterno: true,
+              ApellidoMaterno: true,
+              NroIdentificacion: true,
+            },
+          },
           // CodigoReferenciaTram: true,
           // Descripcion: true,
           // FechaInicio: true,
@@ -543,6 +559,11 @@ export class MovimientoService {
                       Descripcion: true,
                     }
                   },
+                  Anexo: {
+                    select: {
+                      IdAnexo: true,
+                    },
+                  },
                 },
               },
               AreaOrigen: {
@@ -601,7 +622,8 @@ export class MovimientoService {
             return {
               Documento: movimiento.Documento,
               FirmaDigital: movimiento.FirmaDigital,
-              Copia: movimiento.Copia
+              Copia: movimiento.Copia,
+              Anexos: movimiento.Documento?.Anexo.length || 0//////////////////////////
             }
           });
 

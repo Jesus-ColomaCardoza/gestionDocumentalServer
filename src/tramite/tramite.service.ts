@@ -687,7 +687,7 @@ export class TramiteService {
               }
             })
 
-            if (dataHxEFound.IdHistorialMxE) {
+            if (dataHxEFound?.IdHistorialMxE) {
               dataHxEArray.push(dataHxEFound)
             } else {
 
@@ -728,10 +728,7 @@ export class TramiteService {
                 throw customError
               }
             }
-
             //b2---------------------------------------
-
-
 
             //b2-we create the tramites destino
             tramiteDestinos = tramiteDestinos.map((destino) => {
