@@ -747,6 +747,7 @@ export class MovimientoService {
           where: { IdMovimiento: id },
           select: {
             IdMovimiento: true,
+            IdMovimientoPadre: true,
             HistorialMovimientoxEstado: {
               select: {
                 IdHistorialMxE: true,
@@ -791,7 +792,8 @@ export class MovimientoService {
           //we delete HistorialMovimientoxEstado in db
           const HxE = await prisma.historialMovimientoxEstado.deleteMany({
             where: {
-              IdMovimiento: id
+              IdMovimiento: id,
+              // IdEstado: 17, // IdEstado - Derivado - 17
             },
           });
 
@@ -841,6 +843,46 @@ export class MovimientoService {
             throw Error('Error al eliminar el documento');
           }
 
+          //we delete HistorialMovimientoxEstado of Movimineto padre If it doesnt has other movimientos 
+          if (movimiento.IdMovimientoPadre) {
+            const movimientoPadre = await prisma.movimiento.findUnique({
+              where: {
+                IdMovimiento: movimiento.IdMovimientoPadre
+              },
+              select: {
+                IdMovimiento: true,
+                HistorialMovimientoxEstado: {
+                  select: {
+                    IdHistorialMxE: true,
+                    FechaHistorialMxE: true,
+                  },
+                  orderBy: {
+                    FechaHistorialMxE: 'desc'
+                  },
+                  take: 1
+                },
+                other_Movimiento: {
+                  select: {
+                    IdMovimiento: true
+                  }
+                }
+              }
+            })
+
+            if (movimientoPadre?.other_Movimiento.length == 0) {
+              const HxE = await prisma.historialMovimientoxEstado.deleteMany({
+                where: {
+                  IdMovimiento: movimientoPadre.IdMovimiento,
+                  IdEstado: 17, // IdEstado - Derivado - 17
+                },
+              });
+
+              if (HxE.count != movimientoPadre.HistorialMovimientoxEstado.length) {
+                throw Error('Error al eliminar el Historia lMovimiento x Estado');
+              }
+            }
+          }
+
           // we delete phisical files of anexos and documentos bu Url
           if (movimiento.Documento.Anexo.length > 0) {
             movimiento.Documento.Anexo.map(async (anexo) => {
@@ -855,7 +897,8 @@ export class MovimientoService {
           //we delete HistorialMovimientoxEstado in db
           const HxE = await prisma.historialMovimientoxEstado.deleteMany({
             where: {
-              IdMovimiento: id
+              IdMovimiento: id,
+              // IdEstado: 17, // IdEstado - Derivado - 17
             },
           });
 
@@ -875,6 +918,46 @@ export class MovimientoService {
 
           if (!movimientoDelete) {
             throw Error('Error al eliminar el movimiento');
+          }
+
+          //we delete HistorialMovimientoxEstado of Movimineto padre If it doesnt has other movimientos 
+          if (movimiento.IdMovimientoPadre) {
+            const movimientoPadre = await prisma.movimiento.findUnique({
+              where: {
+                IdMovimiento: movimiento.IdMovimientoPadre
+              },
+              select: {
+                IdMovimiento: true,
+                HistorialMovimientoxEstado: {
+                  select: {
+                    IdHistorialMxE: true,
+                    FechaHistorialMxE: true,
+                  },
+                  orderBy: {
+                    FechaHistorialMxE: 'desc'
+                  },
+                  take: 1
+                },
+                other_Movimiento: {
+                  select: {
+                    IdMovimiento: true
+                  }
+                }
+              }
+            })
+
+            if (movimientoPadre?.other_Movimiento.length == 0) {
+              const HxE = await prisma.historialMovimientoxEstado.deleteMany({
+                where: {
+                  IdMovimiento: movimientoPadre.IdMovimiento,
+                  IdEstado: 17, // IdEstado - Derivado - 17
+                },
+              });
+
+              if (HxE.count != movimientoPadre.HistorialMovimientoxEstado.length) {
+                throw Error('Error al eliminar el Historia lMovimiento x Estado');
+              }
+            }
           }
 
           return { movimientoDelete: movimientoDelete }
