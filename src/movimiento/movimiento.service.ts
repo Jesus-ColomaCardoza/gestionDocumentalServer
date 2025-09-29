@@ -473,7 +473,9 @@ export class MovimientoService {
             IdEstado: number
           };
           IdHistorialMxE: number
-          FechaHistorialMxE: Date
+          FechaHistorialMxE: Date,
+          Observaciones: string,
+          Detalle: string,
         }[],
         Children: MovimientoNode[]
       }
@@ -496,6 +498,7 @@ export class MovimientoService {
               ApellidoPaterno: true,
               ApellidoMaterno: true,
               NroIdentificacion: true,
+              Email: true
             },
           },
           // CodigoReferenciaTram: true,
@@ -536,9 +539,9 @@ export class MovimientoService {
                       IdEstado: true,
                       Descripcion: true,
                     }
-                  }
-                  // Observaciones:true,
-                  // Detalle:true,
+                  },
+                  Observaciones: true,
+                  Detalle: true,
                 },
                 orderBy: {
                   FechaHistorialMxE: 'desc'
@@ -548,6 +551,7 @@ export class MovimientoService {
               Documento: {
                 select: {
                   IdDocumento: true,
+                  UrlDocumento: true,
                   CreadoEl: true,
                   CodigoReferenciaDoc: true,
                   Asunto: true,
@@ -623,7 +627,7 @@ export class MovimientoService {
               Documento: movimiento.Documento,
               FirmaDigital: movimiento.FirmaDigital,
               Copia: movimiento.Copia,
-              Anexos: movimiento.Documento?.Anexo.length || 0//////////////////////////
+              Anexos: movimiento.Documento?.Anexo.length || 0
             }
           });
 
