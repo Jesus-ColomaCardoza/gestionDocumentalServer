@@ -48,6 +48,7 @@ export class UsuarioService {
     Celular: true,
     Genero: true,
     RazonSocial: true,
+    Direccion: true,
     TipoIdentificacion: {
       select: {
         IdTipoIdentificacion: true,
@@ -79,6 +80,7 @@ export class UsuarioService {
         Descripcion: true,
       },
     },
+    Activo: true,
     CreadoEl: true,
     CreadoPor: true,
     ModificadoEl: true,
@@ -196,6 +198,7 @@ export class UsuarioService {
             ...createUsuarioDto,
             CreadoPor: `${request?.user?.id ?? 'test user'}`,
           },
+        select: this.customOut,
       });
 
       if (usuario) {
@@ -397,6 +400,13 @@ export class UsuarioService {
       delete updateUsuarioDto.FotoPerfilBase64;
       delete updateUsuarioDto.FotoPerfilNombre;
 
+      // // we generate the hash of the password
+      // const salt = await bcrypt.genSalt(10);
+      // updateUsuarioDto.Contrasena = await bcrypt.hash(
+      //   updateUsuarioDto.Contrasena,
+      //   salt,
+      // );
+
       const usuario = await this.prisma.usuario.update({
         where: { IdUsuario: id },
         data:
@@ -415,6 +425,7 @@ export class UsuarioService {
               ...updateUsuarioDto,
               ModificadoPor: `${request?.user?.id ?? 'test user'}`,
             },
+        select: this.customOut,
       });
 
       if (usuario) {

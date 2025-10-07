@@ -540,6 +540,9 @@ export class AuthService {
           ApellidoMaterno: true,
           UrlFotoPerfil: true,
           Email: true,
+          Celular: true,
+          Direccion: true,
+          NroIdentificacion: true,
           Cargo:{
             select:{
               IdCargo: true,
