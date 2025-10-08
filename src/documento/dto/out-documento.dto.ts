@@ -1,6 +1,6 @@
 import { Expose } from 'class-transformer';
 import { Menssage } from 'src/menssage/menssage.entity';
-import { Documento } from '../interfaces/documento.interface';
+import { Documento, DocumentoDetails } from '../interfaces/documento.interface';
 
 export class OutDocumentoDto {
   @Expose()
@@ -16,4 +16,12 @@ export class OutDocumentosDto {
 
   @Expose()
   registro?: Documento[];
+}
+
+export class OutDocumentoDetailsDto {
+  @Expose()
+  message: Menssage;
+
+  @Expose()
+  registro?: DocumentoDetails;
 }

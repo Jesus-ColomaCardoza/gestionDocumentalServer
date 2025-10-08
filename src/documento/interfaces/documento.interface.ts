@@ -47,3 +47,31 @@ export interface Documento {
     Descripcion: string;
   };
 }
+
+export interface DocumentoDetails {
+  IdDocumento: number;
+  Folios: number;
+  FechaEmision: Date;
+  UrlDocumento: string;
+  CreadoEl: Date;
+  Asunto: string;
+  CodigoReferenciaDoc: string;
+  Observaciones: string;
+  Visible: boolean;
+  Anexo: {
+    Titulo: string;
+    CreadoEl: Date;
+    IdAnexo: number;
+    UrlAnexo: string;
+  }[];
+  TipoDocumento: {
+    Descripcion: string;
+    IdTipoDocumento: number;
+  };
+  Usuario: {
+    IdUsuario: number;
+    Nombres: string;
+    ApellidoPaterno: string;
+    ApellidoMaterno: string;
+  };
+}

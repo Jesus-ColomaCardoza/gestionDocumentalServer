@@ -16,7 +16,7 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Request } from 'express';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { Documento } from '@prisma/client';
-import { OutDocumentoDto, OutDocumentosDto } from './dto/out-documento.dto';
+import { OutDocumentoDetailsDto, OutDocumentoDto, OutDocumentosDto } from './dto/out-documento.dto';
 
 @Controller('documento')
 @ApiTags('documento')
@@ -43,6 +43,11 @@ export class DocumentoController {
   @Get('find_one/:id')
   findOne(@Param('id') id: string): Promise<OutDocumentoDto> {
     return this.documentoService.findOne(+id);
+  }
+
+  @Get('find_one_details/:id')
+  findOneDetails(@Param('id') id: string): Promise<OutDocumentoDetailsDto> {
+    return this.documentoService.findOneDetails(+id);
   }
 
   @Patch('update/:id')

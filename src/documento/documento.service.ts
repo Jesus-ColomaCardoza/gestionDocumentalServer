@@ -11,7 +11,7 @@ import { TipoDocumentoService } from 'src/tipo-documento/tipo-documento.service'
 import { TramiteService } from 'src/tramite/tramite.service';
 import { UsuarioService } from 'src/usuario/usuario.service';
 import { CarpetaService } from 'src/carpeta/carpeta.service';
-import { OutDocumentoDto, OutDocumentosDto } from './dto/out-documento.dto';
+import { OutDocumentoDetailsDto, OutDocumentoDto, OutDocumentosDto } from './dto/out-documento.dto';
 import { OutTipoDocumentoDto } from 'src/tipo-documento/dto/out-tipo-documento.dto';
 import { EstadoService } from 'src/estado/estado.service';
 
@@ -27,7 +27,7 @@ export class DocumentoService {
     private usuario: UsuarioService,
     private carpeta: CarpetaService,
     private estado: EstadoService,
-  ) {}
+  ) { }
 
   private readonly customOut = {
     IdDocumento: true,
@@ -39,7 +39,7 @@ export class DocumentoService {
     UrlDocumento: true,
     FormatoDocumento: true,
     NombreDocumento: true,
-    SizeDocumento:true,
+    SizeDocumento: true,
     Categoria: true,
     TipoDocumento: {
       select: {
@@ -184,6 +184,59 @@ export class DocumentoService {
       const documento = await this.prisma.documento.findUnique({
         where: { IdDocumento: id },
         select: this.customOut,
+      });
+
+      if (documento) {
+        this.message.setMessage(0, 'Documento - Registro encontrado');
+        return { message: this.message, registro: documento };
+      } else {
+        this.message.setMessage(1, 'Error: Documento - Registro no encontrado');
+        return { message: this.message };
+      }
+    } catch (error: any) {
+      console.log(error);
+      this.message.setMessage(1, error.message);
+      return { message: this.message };
+    }
+  }
+
+  async findOneDetails(id: number): Promise<OutDocumentoDetailsDto> {
+    try {
+      const documento = await this.prisma.documento.findUnique({
+        where: { IdDocumento: id },
+        select: {
+          IdDocumento: true,
+          UrlDocumento: true,
+          CreadoEl: true,
+          FechaEmision: true,
+          CodigoReferenciaDoc: true,
+          Observaciones: true,
+          Asunto: true,
+          Folios: true,
+          Visible: true,
+          TipoDocumento: {
+            select: {
+              IdTipoDocumento: true,
+              Descripcion: true,
+            }
+          },
+          Usuario: {
+            select: {
+              IdUsuario: true,
+              Nombres: true,
+              ApellidoPaterno: true,
+              ApellidoMaterno: true,
+            }
+          },
+          Anexo: {
+            select: {
+              IdAnexo: true,
+              CreadoEl: true,
+              Titulo: true,
+              UrlAnexo: true
+            },
+          },
+        }
       });
 
       if (documento) {
