@@ -33,6 +33,8 @@ import { MailModule } from './mail/mail.module';
 import { ConstanteModule } from './constante/constante.module';
 import { AnexoModule } from './anexo/anexo.module';
 import { ArchivadorModule } from './archivador/archivador.module';
+import { AwsModule } from './aws/aws.module';
+import { FileAwsModule } from './file-aws/file-aws.module';
 
 @Module({
   imports: [
@@ -84,8 +86,9 @@ import { ArchivadorModule } from './archivador/archivador.module';
     MailModule,
     ConstanteModule,
     AnexoModule,
-    ArchivadorModule
-
+    ArchivadorModule,
+    AwsModule,
+    FileAwsModule
   ],
   controllers: [AppController],
   providers: [AppService, FiltersService],

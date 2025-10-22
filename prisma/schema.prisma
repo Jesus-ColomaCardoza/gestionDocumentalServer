@@ -200,6 +200,8 @@ model RegistroFirma {
   CreadoPor       String?    @db.VarChar(50)
   ModificadoEl    DateTime?  @db.Timestamp(6)
   ModificadoPor   String?    @db.VarChar(50)
+  MotivoFirma     String?    @db.VarChar(50)
+  AparienciaFirma String?    @db.VarChar(50)
   Documento       Documento? @relation(fields: [IdDocumento], references: [IdDocumento], onDelete: NoAction, onUpdate: NoAction, map: "fk_firma_documento")
   Usuario         Usuario?   @relation(fields: [IdUsuario], references: [IdUsuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_firma_usuario")
 }
@@ -292,7 +294,6 @@ model Usuario {
   ApellidoPaterno       String?             @db.VarChar(50)
   ApellidoMaterno       String?             @db.VarChar(50)
   FechaNacimiento       DateTime?           @db.Date
-  Direccion             String?             @db.VarChar(150)
   Email                 String?             @db.VarChar(100)
   Contrasena            String?             @db.VarChar(200)
   Celular               String?             @db.VarChar(15)
@@ -316,6 +317,7 @@ model Usuario {
   SizeFotoPerfil        Int?
   UrlFotoPerfil         String?             @db.VarChar(255)
   CodigoConfirmacionExp DateTime?           @db.Timestamp(6)
+  Direccion             String?             @db.VarChar(150)
   Carpeta               Carpeta[]
   Compartido            Compartido[]
   Documento             Documento[]

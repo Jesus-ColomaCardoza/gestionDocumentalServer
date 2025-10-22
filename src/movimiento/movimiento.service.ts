@@ -640,7 +640,7 @@ export class MovimientoService {
           message: this.message, registro: {
             Tramite: tramite,
             Movimiento: {
-              IdMomiento: movimiento.IdMovimiento,
+              IdMomiento: movimiento?.IdMovimiento,
               Asunto: movimiento.Documento?.Asunto || '',
             },
             Seguimiento: rootsMovimientoNode,
