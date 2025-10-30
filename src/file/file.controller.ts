@@ -14,6 +14,7 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { MulterExceptionFilter } from './filter/multer-exception.filter';
 import { OutFileDto } from './dto/out-file.dto';
 import { RemoveFileDto } from './dto/remove-file.dto';
+import { UpdateFileDto } from './dto/update-file.dto';
 @Controller('file')
 @ApiTags('file')
 // @UseGuards(AuthGuard)
@@ -26,6 +27,16 @@ export class FileController {
   @UseFilters(MulterExceptionFilter)
   create(@UploadedFile() file: Express.Multer.File): Promise<OutFileDto> {
     return this.fileService.create(file);
+  }
+
+  @Post('update')
+  @UseInterceptors(FileInterceptor('file'))
+  @UseFilters(MulterExceptionFilter)
+  update(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() data: UpdateFileDto
+  ): Promise<OutFileDto> {
+    return this.fileService.update(file, data);
   }
 
   @Post('remove')

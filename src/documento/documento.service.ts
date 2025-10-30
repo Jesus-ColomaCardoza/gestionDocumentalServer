@@ -14,6 +14,7 @@ import { CarpetaService } from 'src/carpeta/carpeta.service';
 import { OutDocumentoDetailsDto, OutDocumentoDto, OutDocumentosDto } from './dto/out-documento.dto';
 import { OutTipoDocumentoDto } from 'src/tipo-documento/dto/out-tipo-documento.dto';
 import { EstadoService } from 'src/estado/estado.service';
+import { FirmarDocumentoDto } from './dto/firmar-documento.dto';
 
 @Injectable()
 export class DocumentoService {

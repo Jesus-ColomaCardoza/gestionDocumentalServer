@@ -28,12 +28,14 @@ import { ServeStaticModule } from '@nestjs/serve-static';
             cb(null, `${randomName}${fileExtName}`);
           },
         }),
+
         fileFilter: (req, file, cb) => {
           if (file.mimetype !== 'application/pdf') {
             return cb(new Error('Only PDF files are allowed!'), false);
           }
           cb(null, true);
         },
+        
         limits: {
           fileSize: 2 * 1024 * 1024, // 2MB en bytes
         },

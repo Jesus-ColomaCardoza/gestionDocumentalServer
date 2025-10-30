@@ -7,13 +7,18 @@ import * as fs from 'fs/promises';
 import { ConfigService } from '@nestjs/config';
 import { OutFileDto } from './dto/out-file.dto';
 import { RemoveFileDto } from './dto/remove-file.dto';
+import { UpdateFileDto } from './dto/update-file.dto';
+import { PrismaService } from 'src/connection/prisma.service';
 
 @Injectable()
 export class FileService {
   private message = new Menssage();
   private subPath = 'documentos';
 
-  constructor(private configEnv: ConfigService) {}
+  constructor(
+    private configEnv: ConfigService,
+    private prisma: PrismaService
+  ) { }
 
   async create(file: Express.Multer.File): Promise<OutFileDto> {
     try {
@@ -27,6 +32,58 @@ export class FileService {
             url: await this.traerRuta(file.filename, this.subPath),
           },
         };
+      } else {
+        this.message.setMessage(1, 'Error: Error interno en el servidor');
+        return { message: this.message };
+      }
+    } catch (error: any) {
+      console.log(error);
+      this.message.setMessage(1, error.message);
+      return { message: this.message };
+    }
+  }
+
+  async update(file: Express.Multer.File, data: UpdateFileDto): Promise<OutFileDto> {
+    try {
+      if (file.filename && file.path) {
+        const documentoFound = await this.prisma.documento.findUnique({
+          where: { IdDocumento: +data.IdDocumento },
+        });
+
+        if (!documentoFound) {
+          this.message.setMessage(1, 'Error: File - Registro no encontrado');
+          return { message: this.message };
+        }
+
+        const documentoUpdate = await this.prisma.documento.update({
+          where: { IdDocumento: +data.IdDocumento },
+          data: {
+            NombreDocumento: file.filename,
+            UrlDocumento: await this.traerRuta(file.filename, this.subPath),
+            SizeDocumento: file.size,
+            UrlBase: file.path,
+          },
+        });
+
+        if (documentoUpdate) {
+          this.remove({ PublicUrl: documentoFound.UrlDocumento });
+
+          this.message.setMessage(0, 'File - Registro actualizado');
+
+          return {
+            message: this.message,
+            registro: {
+              ...file,
+              parseoriginalname: path.parse(file.originalname).name,
+              url: await this.traerRuta(file.filename, this.subPath),
+            },
+          };
+        } else {
+          this.message.setMessage(1, 'Error: File - Registro no actualizado');
+          return { message: this.message };
+        }
+
+
       } else {
         this.message.setMessage(1, 'Error: Error interno en el servidor');
         return { message: this.message };
@@ -67,7 +124,7 @@ export class FileService {
     } catch (error: any) {
       // Si el error es que el archivo no existe
       if (error.code === 'ENOENT') {
-        this.message.setMessage(1, 'Este File no existe');
+        this.message.setMessage(0, 'Este File no existe');
       } else {
         this.message.setMessage(1, error.message);
       }
