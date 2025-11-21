@@ -31,12 +31,12 @@ export class FileAwsController {
   @UseInterceptors(FileInterceptor('file'))
   create(
     @UploadedFile() file: Express.Multer.File,
-    // @Body() createFileAwsDto: CreateFileAwsDto,
+    @Body() createFileAwsDto: CreateFileAwsDto,
     @Req() request?: Request,
   ): Promise<OutFileAwsDto> {    
     return this.fileAwsService.create(
-      // createFileAwsDto, 
       file,
+      createFileAwsDto, 
       request);
   }
 

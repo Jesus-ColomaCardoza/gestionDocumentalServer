@@ -5,7 +5,7 @@ import { Menssage } from 'src/menssage/menssage.entity';
 import { PrismaService } from 'src/connection/prisma.service';
 import { FiltersService } from 'src/filters/filters.service';
 import { Request } from 'express';
-import { Prisma } from '@prisma/client';
+import { Area, Prisma } from '@prisma/client';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { FileService } from 'src/file/file.service';
 import { OutFileAwsDto, OutFileAwssDto } from './dto/out-file-aws.dto';
@@ -14,6 +14,8 @@ import { ConfigService } from '@nestjs/config';
 import { AwsService } from 'src/aws/aws.service';
 import { PutObjectCommand, PutObjectCommandInput, ObjectCannedACL } from '@aws-sdk/client-s3';
 import { printLog } from 'src/utils/utils';
+import { AreaService } from 'src/area/area.service';
+import { TipoDocumentoService } from 'src/tipo-documento/tipo-documento.service';
 
 @Injectable()
 export class FileAwsService {
@@ -26,59 +28,141 @@ export class FileAwsService {
     private file: FileService,
     private configEnv: ConfigService,
     private aws: AwsService,
+    private area: AreaService,
+    private tipoDocumento: TipoDocumentoService,
   ) { }
+
+  private readonly customOut = {
+    IdDocumento: true,
+    CodigoReferencia: true,
+    Titulo: true,
+    Descripcion: true,
+    Folios: true,
+    FechaEmision: true,
+    UrlDocumento: true,
+    FormatoDocumento: true,
+    NombreDocumento: true,
+    SizeDocumento: true,
+    Categoria: true,
+    TipoDocumento: {
+      select: {
+        IdTipoDocumento: true,
+        Descripcion: true,
+      },
+    },
+    Tramite: {
+      select: {
+        IdTramite: true,
+        Asunto: true,
+      },
+    },
+    Usuario: {
+      select: {
+        IdUsuario: true,
+        Nombres: true,
+        ApellidoPaterno: true,
+        ApellidoMaterno: true,
+      },
+    },
+    FirmaDigital: true,
+    Carpeta: {
+      select: {
+        IdCarpeta: true,
+        Descripcion: true,
+      },
+    },
+    Estado: {
+      select: {
+        IdEstado: true,
+        Descripcion: true,
+      },
+    },
+    Activo: true,
+    CreadoEl: true,
+    CreadoPor: true,
+    ModificadoEl: true,
+    ModificadoPor: true,
+  };
 
   async create(
     file: Express.Multer.File,
-    // createFileAwsDto: CreateFileAwsDto,
+    createFileAwsDto: CreateFileAwsDto,
     request?: Request,
     // ): Promise<OutFileAwsDto> {
   ): Promise<any> {
     try {
-
       // printLog(file);
+
+      let folder = ''
+
+      const idTipoDocumento = createFileAwsDto.IdTipoDocumento;
+      if (idTipoDocumento) {
+        const idTipoDocumentoFound = await this.tipoDocumento.findOne(+idTipoDocumento);
+
+        if (idTipoDocumentoFound.message.msgId === 1) return idTipoDocumentoFound;
+      }
+
+      const idArea = createFileAwsDto.IdArea;
+      if (idArea) {
+        const idAreaFound = await this.area.findOneValidate(+idArea);
+
+        if (idAreaFound.message.msgId === 1) return idAreaFound;
+
+        folder = idAreaFound.registro.IdArea ? (idAreaFound.registro.IdArea + '_' + idAreaFound?.registro?.Descripcion.replace(/ /g, '_').toLowerCase()) : ''
+      }
 
       const fileExtName = extname(file.originalname);
 
-      const randomName =
-        Date.now() + '-' + Math.round(Math.random() * 1e9);
+      const fileRandomName = Date.now() + '-' + Math.round(Math.random() * 1e9);
 
-      // const bytesFile = await file.buffer;
-
-      // const bufferFile = Buffer.from(bytesFile);
-
-      const folder='RRHH'
       const bucketParams: PutObjectCommandInput = {
         Bucket: this.configEnv.get('config.digOceanBucketSGD'),
-        Key: `${folder+'/'+randomName+fileExtName}`,
+        Key: `${folder + '/' + fileRandomName + fileExtName}`,
         Body: file.buffer,
         ACL: 'public-read' as ObjectCannedACL, // permisos
-        
+
       };
 
-      const result = await this.aws.s3Client.send(new PutObjectCommand(bucketParams));
+      const fileAws = await this.aws.s3Client.send(new PutObjectCommand(bucketParams));
 
-      printLog(result);
-
-      return {
-        result: result,
-        url: this.configEnv.get('config.digOceanEndpoint') + '/' + this.configEnv.get('config.digOceanBucketSGD') + '/' + bucketParams.Key
+      if (fileAws.$metadata.httpStatusCode !== 200) {
+        this.message.setMessage(1, 'Error: No se pudo guardar el archivo en aws');
+        return { message: this.message };
       }
 
-      //we create new register
-      const fileAws = null
-      //  = await this.prisma.documento.create({
-      //   data: 
-      // });
+      const fileAwsUrl = this.configEnv.get('config.digOceanEndpoint') + '/' + this.configEnv.get('config.digOceanBucketSGD') + '/' + bucketParams.Key
 
-      if (fileAws) {
+      // printLog({ fileAws, fileAwsUrl });
+
+      const documento = await this.prisma.documento.create({
+        data: {
+          IdTipoDocumento: +createFileAwsDto.IdTipoDocumento,
+          Folios: +createFileAwsDto.Folios,
+
+          FechaEmision: new Date().toISOString(),
+          FirmaDigital: false,
+          NombreDocumento: fileRandomName + fileExtName,
+          Titulo: file.originalname,
+          UrlDocumento: fileAwsUrl,
+          FormatoDocumento: file.mimetype,
+          Categoria: null,
+          IdEstado: 5,// IdEstado - 5 - Archivado
+          SizeDocumento: file.size,
+          Visible: false,
+          Activo: false, // para documentos antiguos 
+          CreadoPor: `${request?.user?.id ?? 'test user'}`,
+        },
+      });
+
+      if (documento) {
         this.message.setMessage(0, 'FileAws - Registro creado');
-        return { message: this.message, registro: fileAws };
+        return { message: this.message, registro: documento };
       } else {
         this.message.setMessage(1, 'Error: Error interno en el servidor');
         return { message: this.message };
       }
     } catch (error: any) {
+      //delete fileAws if this service fails
       console.log(error);
       this.message.setMessage(1, error.message);
       return { message: this.message };
@@ -97,7 +181,7 @@ export class FileAwsService {
       const filesAws = await this.prisma.documento.findMany({
         where: clausula,
         take: limitRows,
-        // select: this.customOut,
+        select: this.customOut,
       });
 
       if (filesAws) {
@@ -118,7 +202,7 @@ export class FileAwsService {
     try {
       const fileAws = await this.prisma.documento.findUnique({
         where: { IdDocumento: id },
-        // select: this.customOut,
+        select: this.customOut,
       });
 
       if (fileAws) {
@@ -141,95 +225,7 @@ export class FileAwsService {
     request?: Request,
   ): Promise<OutFileAwsDto> {
     try {
-      let file = null;
-      let fileUpdate = '';
-      const fileUpdateValues = ['R', 'NU', 'U'];
-      // FileBase64 and NombreImagen always they will send like '', they'll never sends null or undefined
-      const fileB64 =
-        updateFileAwsDto.LogoBase64 === undefined
-          ? ''
-          : updateFileAwsDto.LogoBase64;
-      const nomImagen =
-        updateFileAwsDto.LogoNombre === undefined
-          ? ''
-          : updateFileAwsDto.LogoNombre;
 
-      if (fileB64 == null && nomImagen == null) {
-        // remove image
-        fileUpdate = fileUpdateValues[0];
-      } else if (fileB64 == '' && nomImagen == '') {
-        // not update image
-        fileUpdate = fileUpdateValues[1];
-      } else if (fileB64.length > 0 && nomImagen.length > 0) {
-        // update image
-        fileUpdate = fileUpdateValues[2];
-        if (!(updateFileAwsDto.Email && updateFileAwsDto.Email.length > 0)) {
-          this.message.setMessage(
-            1,
-            'Error: Incorrect parameters, you have to enter Email',
-          );
-          return { message: this.message };
-        }
-      } else {
-        this.message.setMessage(
-          1,
-          'Error: Incorrect parameters.LogoBase64 y LogoNombre',
-        );
-        return { message: this.message };
-      }
-
-      const idFound = await this.findOne(id);
-      if (idFound.message.msgId === 1) return idFound;
-
-      if (fileUpdate == fileUpdateValues[2]) {
-        const pathOrgSaas = this.subPath + '/' + updateFileAwsDto.Email;
-
-        file = await this.file.guardarDocumento(
-          updateFileAwsDto.LogoBase64,
-          pathOrgSaas,
-          updateFileAwsDto.LogoNombre,
-        );
-        // printLog(file);
-      }
-
-      delete updateFileAwsDto.LogoBase64;
-      delete updateFileAwsDto.LogoNombre;
-
-      const fileAws = await this.prisma.documento.update({
-        where: { IdDocumento: id },
-        data: {}
-        // fileUpdate == fileUpdateValues[0] || fileUpdate == fileUpdateValues[2]
-        // ? {
-        //     ...updateFileAwsDto,
-        //     ModificadoPor: `${request?.user?.id ?? 'test user'}`,
-        //     UrlBase:
-        //       fileUpdate == fileUpdateValues[0] ? null : file.UrlBase,
-        //     UrlLogo: fileUpdate == fileUpdateValues[0] ? null : file.Url,
-        //     NombreLogo:
-        //       fileUpdate == fileUpdateValues[0] ? null : file.Nombre,
-        //   }
-        // : {
-        //     ...updateFileAwsDto,
-        //     ModificadoPor: `${request?.user?.id ?? 'test user'}`,
-        //   },
-      });
-
-      if (fileAws) {
-        if (
-          fileUpdate == fileUpdateValues[0] ||
-          fileUpdate == fileUpdateValues[2]
-        ) {
-          await this.file.eliminarDocumento(
-            idFound.registro.UrlBase + '/' + idFound.registro.NombreLogo,
-          );
-        }
-
-        this.message.setMessage(0, 'FileAws - Registro actualizado');
-        return { message: this.message, registro: fileAws };
-      } else {
-        this.message.setMessage(1, 'Error: Error interno en el servidor');
-        return { message: this.message };
-      }
     } catch (error: any) {
       console.log(error);
       this.message.setMessage(1, error.message);

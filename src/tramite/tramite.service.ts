@@ -739,7 +739,7 @@ export class TramiteService {
                 IdAreaDestino: destino.IdAreaDestino,
                 FechaMovimiento: destino.FechaMovimiento,
                 Copia: destino.Copia,
-                IdDocumento: digitalFiles[0]?.IdFM || null,
+                IdDocumento: digitalFiles[0]?.IdFM ? digitalFiles[0]?.IdFM : '',//change here
                 FirmaDigital: destino.FirmaDigital,
                 IdMovimientoPadre: mov.IdMovimiento,
                 NombreResponsable: destino.NombreResponsable?.NombreCompleto ? destino.NombreResponsable.NombreCompleto : destino.NombreResponsable,
@@ -2375,7 +2375,6 @@ export class TramiteService {
 
   async findAllPendientes(getAllTramitePendienteDto: GetAllTramitePendienteDto): Promise<OutTramitesPendienteDto> {
     try {
-
       const tramites = await this.prisma.movimiento.findMany({
         where: {
           HistorialMovimientoxEstado: {
@@ -2419,6 +2418,8 @@ export class TramiteService {
           Acciones: true,
           FechaMovimiento: true,
           NombreResponsable: true,//destinatario
+          FirmaDigital: true,
+          Copia:true,
 
           // si en el movimiento solo hay documento solo a nivel de tramite, se toma ese - Documento==null -> emitido
           // si en el movimiento hay documento a nivel de tramite y movimiento, se toma el de movimiento 
@@ -2472,8 +2473,6 @@ export class TramiteService {
           FechaMovimiento: 'desc',
         },
       })
-
-
 
       if (tramites) {
         this.message.setMessage(0, 'Trámite - Registros encontrados');

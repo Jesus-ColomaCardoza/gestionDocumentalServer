@@ -6,7 +6,6 @@ import { ConfigService } from '@nestjs/config';
 export class AwsService {
 
     public s3Client: S3
-
     constructor(
         private configEnv: ConfigService,
     ) {

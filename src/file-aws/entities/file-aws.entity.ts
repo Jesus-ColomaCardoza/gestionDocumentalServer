@@ -1,8 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,
+  IsDateString,
   IsIn,
   IsInt,
+  IsNotEmpty,
   IsOptional,
   IsString,
   MaxLength,
@@ -10,36 +12,46 @@ import {
 
 export class FileAws {
   @IsString()
-  @IsOptional()
-  RazonSocial: string;
+  @IsNotEmpty()
+  IdArea: string;
 
   @IsString()
   @IsOptional()
-  Descripcion: string;
+  Folios: string;
 
   @IsString()
   @IsOptional()
-  NroIdentificacion: string;
+  IdTipoDocumento: string;
 
-  @IsString()
-  @IsOptional()
-  Email: string;
 
-  @IsString()
-  @IsOptional()
-  Celular: string;
 
-  @ApiProperty({ example: 'LogoNombre' })
-  @IsString()
-  @IsOptional()
-  LogoNombre: string;
+  // @IsString()
+  // @IsOptional()
+  // Descripcion: string;
 
-  @ApiProperty({ example: 'LogoBase64' })
-  @IsString()
-  @IsOptional()
-  LogoBase64: string;
+  // @IsString()
+  // @IsOptional()
+  // NroIdentificacion: string;
 
-  @IsBoolean()
-  @IsOptional()
-  Activo: boolean = true;
+  // @IsString()
+  // @IsOptional()
+  // Email: string;
+
+  // @IsString()
+  // @IsOptional()
+  // Celular: string;
+
+  // @ApiProperty({ example: 'LogoNombre' })
+  // @IsString()
+  // @IsOptional()
+  // LogoNombre: string;
+
+  // @ApiProperty({ example: 'LogoBase64' })
+  // @IsString()
+  // @IsOptional()
+  // LogoBase64: string;
+
+  // @IsBoolean()
+  // @IsOptional()
+  // Activo: boolean = true;
 }

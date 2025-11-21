@@ -73,6 +73,10 @@ export class Documento {
   @IsNotEmpty()
   FirmaDigital: boolean = false;
 
+  @IsBoolean()
+  @IsNotEmpty()
+  Visible: boolean = false;
+
   @IsInt()
   @IsOptional()
   IdCarpeta: number;

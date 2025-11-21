@@ -16,7 +16,7 @@ export class AreaService {
   constructor(
     private prisma: PrismaService,
     private filtersService: FiltersService,
-  ) {}
+  ) { }
 
   async create(
     createAreaDto: CreateAreaDto,
@@ -79,6 +79,30 @@ export class AreaService {
       const area = await this.prisma.area.findUnique({
         where: { IdArea: id },
         // select: this.customOut,
+      });
+
+      if (area) {
+        this.message.setMessage(0, 'Área - Registro encontrado');
+        return { message: this.message, registro: area };
+      } else {
+        this.message.setMessage(1, 'Error: Área - Registro no encontrado');
+        return { message: this.message };
+      }
+    } catch (error: any) {
+      console.log(error);
+      this.message.setMessage(1, error.message);
+      return { message: this.message };
+    }
+  }
+
+  async findOneValidate(id: number): Promise<OutAreaDto> {
+    try {
+      const area = await this.prisma.area.findUnique({
+        where: { IdArea: id },
+        select: {
+          IdArea: true,
+          Descripcion: true,
+        },
       });
 
       if (area) {
