@@ -739,7 +739,7 @@ export class TramiteService {
                 IdAreaDestino: destino.IdAreaDestino,
                 FechaMovimiento: destino.FechaMovimiento,
                 Copia: destino.Copia,
-                IdDocumento: digitalFiles[0]?.IdFM ? digitalFiles[0]?.IdFM : '',//change here
+                IdDocumento: digitalFiles[0]?.IdFM ? digitalFiles[0]?.IdFM : 0,//change here
                 FirmaDigital: destino.FirmaDigital,
                 IdMovimientoPadre: mov.IdMovimiento,
                 NombreResponsable: destino.NombreResponsable?.NombreCompleto ? destino.NombreResponsable.NombreCompleto : destino.NombreResponsable,

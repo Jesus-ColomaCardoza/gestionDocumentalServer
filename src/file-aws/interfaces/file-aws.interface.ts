@@ -1,15 +1,24 @@
 export interface FileAws {
-  IdFileAws?: number;
+  IdDocumento?: number;
+  CodigoReferenciaDoc?: string;
+  Titulo?: string;
   Descripcion?: string;
-  NroIdentificacion?: string;
-  Email?: string;
-  Celular?: string;
-  RazonSocial?: string;
-  FormatoLogo?: string;
-  NombreLogo?: string;
-  UrlLogo?: string;
-  SizeLogo?: number;
+  Asunto?: string;
+  Observaciones?: string;
+  Folios?: number;
+  FechaEmision?: Date;
+  FormatoDocumento?: string;
+  UrlDocumento?: string;
+  SizeDocumento?: number;
   UrlBase?: string;
+  IdTipoDocumento?: number;
+  IdUsuario?: number;
+  IdEstado?: number;
+  FirmaDigital?: boolean;
+  IdCarpeta?: number;
+  Categoria?: string,
+  StorageDO?: string,
+  NombreDocumento?: string,
   Activo?: boolean;
   CreadoEl?: Date;
   CreadoPor?: string;

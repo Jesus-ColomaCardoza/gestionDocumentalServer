@@ -89,6 +89,7 @@ model Documento {
   CodigoReferenciaDoc        String?                      @db.VarChar(50)
   Observaciones              String?                      @db.VarChar(100)
   Visible                    Boolean?
+  StorageDO                  String?                      @db.VarChar(100)
   Anexo                      Anexo[]
   Estado                     Estado?                      @relation(fields: [IdEstado], references: [IdEstado], onDelete: NoAction, onUpdate: NoAction, map: "documento_estado_fk")
   Carpeta                    Carpeta?                     @relation(fields: [IdCarpeta], references: [IdCarpeta], onDelete: NoAction, onUpdate: NoAction, map: "documento_idcarpeta_fkey")

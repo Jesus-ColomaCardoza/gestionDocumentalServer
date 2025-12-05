@@ -33,10 +33,10 @@ export class FileAwsController {
     @UploadedFile() file: Express.Multer.File,
     @Body() createFileAwsDto: CreateFileAwsDto,
     @Req() request?: Request,
-  ): Promise<OutFileAwsDto> {    
+  ): Promise<OutFileAwsDto> {
     return this.fileAwsService.create(
       file,
-      createFileAwsDto, 
+      createFileAwsDto,
       request);
   }
 
@@ -53,12 +53,14 @@ export class FileAwsController {
   }
 
   @Patch('update/:id')
+  @UseInterceptors(FileInterceptor('file'))
   update(
     @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
     @Body() updateFileAwsDto: UpdateFileAwsDto,
     @Req() request?: Request,
   ): Promise<OutFileAwsDto> {
-    return this.fileAwsService.update(+id, updateFileAwsDto, request);
+    return this.fileAwsService.update(+id, file, updateFileAwsDto, request);
   }
 
   @Post('remove/:id')

@@ -9,10 +9,10 @@ import { Area, Prisma } from '@prisma/client';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { FileService } from 'src/file/file.service';
 import { OutFileAwsDto, OutFileAwssDto } from './dto/out-file-aws.dto';
-import { extname, join } from 'path';
+import path, { extname, join } from 'path';
 import { ConfigService } from '@nestjs/config';
 import { AwsService } from 'src/aws/aws.service';
-import { PutObjectCommand, PutObjectCommandInput, ObjectCannedACL } from '@aws-sdk/client-s3';
+import { PutObjectCommand, PutObjectCommandInput, ObjectCannedACL, DeleteObjectCommandInput, DeleteObjectCommand, CopyObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { printLog } from 'src/utils/utils';
 import { AreaService } from 'src/area/area.service';
 import { TipoDocumentoService } from 'src/tipo-documento/tipo-documento.service';
@@ -34,7 +34,6 @@ export class FileAwsService {
 
   private readonly customOut = {
     IdDocumento: true,
-    CodigoReferencia: true,
     Titulo: true,
     Descripcion: true,
     Folios: true,
@@ -53,7 +52,6 @@ export class FileAwsService {
     Tramite: {
       select: {
         IdTramite: true,
-        Asunto: true,
       },
     },
     Usuario: {
@@ -78,6 +76,7 @@ export class FileAwsService {
       },
     },
     Activo: true,
+    StorageDO: true,
     CreadoEl: true,
     CreadoPor: true,
     ModificadoEl: true,
@@ -88,8 +87,7 @@ export class FileAwsService {
     file: Express.Multer.File,
     createFileAwsDto: CreateFileAwsDto,
     request?: Request,
-    // ): Promise<OutFileAwsDto> {
-  ): Promise<any> {
+  ): Promise<OutFileAwsDto> {
     try {
       // printLog(file);
 
@@ -120,7 +118,6 @@ export class FileAwsService {
         Key: `${folder + '/' + fileRandomName + fileExtName}`,
         Body: file.buffer,
         ACL: 'public-read' as ObjectCannedACL, // permisos
-
       };
 
       const fileAws = await this.aws.s3Client.send(new PutObjectCommand(bucketParams));
@@ -138,11 +135,11 @@ export class FileAwsService {
         data: {
           IdTipoDocumento: +createFileAwsDto.IdTipoDocumento,
           Folios: +createFileAwsDto.Folios,
-
+          Descripcion: fileRandomName + fileExtName,
           FechaEmision: new Date().toISOString(),
           FirmaDigital: false,
           NombreDocumento: fileRandomName + fileExtName,
-          Titulo: file.originalname,
+          Titulo: path.parse(file.originalname).name,
           UrlDocumento: fileAwsUrl,
           FormatoDocumento: file.mimetype,
           Categoria: null,
@@ -150,6 +147,7 @@ export class FileAwsService {
           SizeDocumento: file.size,
           Visible: false,
           Activo: false, // para documentos antiguos 
+          StorageDO: folder,
           CreadoPor: `${request?.user?.id ?? 'test user'}`,
         },
       });
@@ -221,11 +219,193 @@ export class FileAwsService {
 
   async update(
     id: number,
+    file: Express.Multer.File,
     updateFileAwsDto: UpdateFileAwsDto,
     request?: Request,
-  ): Promise<OutFileAwsDto> {
+  ): Promise<any> {
     try {
+      const idFound = await this.findOne(id);
+      if (idFound.message.msgId === 1) return idFound;
 
+      let nuevoFolder = '';
+
+      // Obtener el nuevo folder si se actualiza el IdArea
+      const idArea = updateFileAwsDto.IdArea;
+      if (idArea) {
+        const idAreaFound = await this.area.findOneValidate(+idArea);
+        if (idAreaFound.message.msgId === 1) return idAreaFound;
+
+        nuevoFolder = idAreaFound.registro.IdArea
+          ? (idAreaFound.registro.IdArea + '_' + idAreaFound?.registro?.Descripcion.replace(/ /g, '_').toLowerCase())
+          : '';
+      }
+
+      const idTipoDocumento = updateFileAwsDto.IdTipoDocumento;
+      if (idTipoDocumento) {
+        const idTipoDocumentoFound = await this.tipoDocumento.findOne(+idTipoDocumento);
+        if (idTipoDocumentoFound.message.msgId === 1) return idTipoDocumentoFound;
+      }
+
+      // CASO 1: Solo cambiar el folder (mover archivo a nueva ubicación sin nuevo archivo)
+      if (!file && nuevoFolder !== '' && nuevoFolder !== idFound.registro.StorageDO) {
+        const folderOld = idFound.registro.StorageDO;
+        const fileNameOld = idFound.registro.NombreDocumento;
+
+        // 1. Descargar el archivo
+        const getParams = {
+          Bucket: this.configEnv.get('config.digOceanBucketSGD'),
+          Key: `${folderOld}/${fileNameOld}`,
+        };
+
+        const getObjectCommand = new GetObjectCommand(getParams);
+        const response = await this.aws.s3Client.send(getObjectCommand);
+
+        // Convertir el stream a buffer
+        const chunks = [];
+        const body = response.Body as NodeJS.ReadableStream;
+        for await (const chunk of body) {
+          chunks.push(chunk);
+        }
+        const fileBuffer = Buffer.concat(chunks);
+
+        // 2. Subir a la nueva ubicación
+        const putParams: PutObjectCommandInput = {
+          Bucket: this.configEnv.get('config.digOceanBucketSGD'),
+          Key: `${nuevoFolder}/${fileNameOld}`,
+          Body: fileBuffer,
+          ACL: 'public-read' as ObjectCannedACL,
+        };
+
+        const putResult = await this.aws.s3Client.send(new PutObjectCommand(putParams));
+
+        if (putResult.$metadata.httpStatusCode !== 200) {
+          this.message.setMessage(1, 'Error: No se pudo mover el archivo al nuevo folder');
+          return { message: this.message };
+        }
+
+        // 3. Eliminar archivo del folder antiguo
+        const deleteParams: DeleteObjectCommandInput = {
+          Bucket: this.configEnv.get('config.digOceanBucketSGD'),
+          Key: `${folderOld}/${fileNameOld}`,
+        };
+
+        await this.aws.s3Client.send(new DeleteObjectCommand(deleteParams));
+
+        // 4. Actualizar URL y folder en la base de datos
+        const fileAwsUrl = `${this.configEnv.get('config.digOceanEndpoint')}/${this.configEnv.get('config.digOceanBucketSGD')}/${nuevoFolder}/${fileNameOld}`;
+
+        const documento = await this.prisma.documento.update({
+          where: { IdDocumento: id },
+          data: {
+            IdTipoDocumento: +updateFileAwsDto.IdTipoDocumento,
+            Folios: +updateFileAwsDto.Folios,
+            StorageDO: nuevoFolder,
+            UrlDocumento: fileAwsUrl,
+            FechaEmision: new Date().toISOString(),
+            FirmaDigital: false,
+            Categoria: null,
+            IdEstado: 5,
+            Visible: false,
+            Activo: false,
+            CreadoPor: `${request?.user?.id ?? 'test user'}`,
+            ModificadoEl: new Date().toISOString(),
+            ModificadoPor: `${request?.user?.id ?? 'test user'}`,
+          },
+        });
+
+        this.message.setMessage(0, 'Archivo movido a nuevo folder exitosamente');
+        return { message: this.message, registro: documento };
+      }
+      // CASO 2: Se está subiendo un nuevo archivo
+      else if (file) {
+        const folderOld = idFound.registro.StorageDO;
+
+        const fileNameOld = idFound.registro.NombreDocumento;
+
+        // Eliminar archivo antiguo si existe
+        if (fileNameOld) {
+          const deleteParams: DeleteObjectCommandInput = {
+            Bucket: this.configEnv.get('config.digOceanBucketSGD'),
+            Key: `${folderOld}/${fileNameOld}`,
+          };
+
+          await this.aws.s3Client.send(new DeleteObjectCommand(deleteParams));
+        }
+
+        // Subir nuevo archivo
+        const fileExtName = extname(file.originalname);
+
+        const fileRandomName = Date.now() + '-' + Math.round(Math.random() * 1e9);
+
+        // Usar nuevoFolder si está definido, sino usar el folder antiguo
+        const folderParaSubir = nuevoFolder !== '' ? nuevoFolder : folderOld;
+
+        const bucketParams: PutObjectCommandInput = {
+          Bucket: this.configEnv.get('config.digOceanBucketSGD'),
+          Key: `${folderParaSubir}/${fileRandomName}${fileExtName}`,
+          Body: file.buffer,
+          ACL: 'public-read' as ObjectCannedACL,
+        };
+
+        const fileAws = await this.aws.s3Client.send(new PutObjectCommand(bucketParams));
+
+        if (fileAws.$metadata.httpStatusCode !== 200) {
+          this.message.setMessage(1, 'Error: No se pudo actualizar el archivo en aws');
+          return { message: this.message };
+        }
+
+        const fileAwsUrl = `${this.configEnv.get('config.digOceanEndpoint')}/${this.configEnv.get('config.digOceanBucketSGD')}/${bucketParams.Key}`;
+
+        // Actualizar en base de datos
+        const documento = await this.prisma.documento.update({
+          where: { IdDocumento: id },
+          data: {
+            IdTipoDocumento: +updateFileAwsDto.IdTipoDocumento,
+            Folios: +updateFileAwsDto.Folios,
+            Descripcion: fileRandomName + fileExtName,
+            FechaEmision: new Date().toISOString(),
+            FirmaDigital: false,
+            NombreDocumento: fileRandomName + fileExtName,
+            Titulo: path.parse(file.originalname).name,
+            UrlDocumento: fileAwsUrl,
+            FormatoDocumento: file.mimetype,
+            Categoria: null,
+            IdEstado: 5,
+            SizeDocumento: file.size,
+            Visible: false,
+            Activo: false,
+            StorageDO: folderParaSubir,
+            CreadoPor: `${request?.user?.id ?? 'test user'}`,
+            ModificadoEl: new Date().toISOString(),
+            ModificadoPor: `${request?.user?.id ?? 'test user'}`,
+          },
+        });
+
+        this.message.setMessage(0, 'Archivo actualizado exitosamente');
+        return { message: this.message, registro: documento };
+      }
+      // CASO 3: Solo actualizar metadata sin cambiar archivo ni folder
+      else {
+        const documento = await this.prisma.documento.update({
+          where: { IdDocumento: id },
+          data: {
+            IdTipoDocumento: +updateFileAwsDto.IdTipoDocumento,
+            Folios: +updateFileAwsDto.Folios,
+            FechaEmision: new Date().toISOString(),
+            FirmaDigital: false,
+            Categoria: null,
+            IdEstado: 5,
+            Visible: false,
+            Activo: false,
+            CreadoPor: `${request?.user?.id ?? 'test user'}`,
+            ModificadoEl: new Date().toISOString(),
+            ModificadoPor: `${request?.user?.id ?? 'test user'}`,
+          },
+        });
+
+        this.message.setMessage(0, 'Metadata actualizada exitosamente');
+        return { message: this.message, registro: documento };
+      }
     } catch (error: any) {
       console.log(error);
       this.message.setMessage(1, error.message);
@@ -238,15 +418,31 @@ export class FileAwsService {
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;
 
-      const fileAws = await this.prisma.documento.delete({
+      const folder = idFound.registro.StorageDO
+
+      const fileName = idFound.registro.NombreDocumento
+
+      const bucketParams: DeleteObjectCommandInput = {
+        Bucket: this.configEnv.get('config.digOceanBucketSGD'),
+        Key: `${folder}/${fileName}`,
+      };
+
+      const fileAws = await this.aws.s3Client.send(new DeleteObjectCommand(bucketParams));
+
+      // printLog(fileAws);
+
+      if (fileAws.$metadata.httpStatusCode !== 204) {
+        this.message.setMessage(1, 'Error: No se pudo eliminar el archivo en aws');
+        return { message: this.message };
+      }
+
+      const documento = await this.prisma.documento.delete({
         where: { IdDocumento: id },
       });
 
-      if (fileAws) {
-        // this.file.eliminarDocumento(fileAws.UrlBase + '/' + fileAws.NombreLogo);
-
+      if (documento) {
         this.message.setMessage(0, 'FileAws - Registro eliminado');
-        return { message: this.message, registro: fileAws };
+        return { message: this.message, registro: documento };
       } else {
         this.message.setMessage(1, 'Error: Error interno en el servidor');
         return { message: this.message };
