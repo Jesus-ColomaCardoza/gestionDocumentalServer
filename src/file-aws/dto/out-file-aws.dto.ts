@@ -1,6 +1,6 @@
 import { Expose } from 'class-transformer';
 import { Menssage } from 'src/menssage/menssage.entity';
-import { FileAws } from '../interfaces/file-aws.interface';
+import { FileAws, FileManagerAws } from '../interfaces/file-aws.interface';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class OutFileAwsDto {
@@ -32,10 +32,18 @@ export class OutFileAwsDto {
   registro?: FileAws;
 }
 
-export class OutFileAwssDto {
+export class OutFilesAwsDto {
   @Expose()
   message: Menssage;
 
   @Expose()
   registro?: FileAws[];
+}
+
+export class OutFilesManagerAwsDto {
+  @Expose()
+  message: Menssage;
+
+  @Expose()
+  registro?: FileManagerAws[];
 }

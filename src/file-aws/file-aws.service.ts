@@ -8,7 +8,7 @@ import { Request } from 'express';
 import { Area, Prisma } from '@prisma/client';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { FileService } from 'src/file/file.service';
-import { OutFileAwsDto, OutFileAwssDto } from './dto/out-file-aws.dto';
+import { OutFileAwsDto, OutFilesAwsDto, OutFilesManagerAwsDto } from './dto/out-file-aws.dto';
 import path, { extname, join } from 'path';
 import { ConfigService } from '@nestjs/config';
 import { AwsService } from 'src/aws/aws.service';
@@ -16,6 +16,8 @@ import { PutObjectCommand, PutObjectCommandInput, ObjectCannedACL, DeleteObjectC
 import { printLog } from 'src/utils/utils';
 import { AreaService } from 'src/area/area.service';
 import { TipoDocumentoService } from 'src/tipo-documento/tipo-documento.service';
+import { FileManagerAws } from './interfaces/file-aws.interface';
+import { GetFileManagerAwsDto } from './dto/get-file-manager-aws.dto';
 
 @Injectable()
 export class FileAwsService {
@@ -91,6 +93,8 @@ export class FileAwsService {
     try {
       // printLog(file);
 
+      let fileManagerAws: FileManagerAws = {};
+
       let folder = ''
 
       const idTipoDocumento = createFileAwsDto.IdTipoDocumento;
@@ -106,7 +110,10 @@ export class FileAwsService {
 
         if (idAreaFound.message.msgId === 1) return idAreaFound;
 
-        folder = idAreaFound.registro.IdArea ? (idAreaFound.registro.IdArea + '_' + idAreaFound?.registro?.Descripcion.replace(/ /g, '_').toLowerCase()) : ''
+        folder = idAreaFound.registro.IdArea ? (idAreaFound.registro.IdArea + ''
+          // + '_' + idAreaFound?.registro?.Descripcion.replace(/ /g, '_').toLowerCase()
+        )
+          : ''
       }
 
       const fileExtName = extname(file.originalname);
@@ -150,11 +157,33 @@ export class FileAwsService {
           StorageDO: folder,
           CreadoPor: `${request?.user?.id ?? 'test user'}`,
         },
+        select: {
+          IdDocumento: true,
+          Titulo: true,
+          FechaEmision: true,
+          UrlDocumento: true,
+          SizeDocumento: true,
+          Estado: {
+            select: {
+              IdEstado: true,
+              Descripcion: true,
+            },
+          }
+        }
       });
 
       if (documento) {
+        fileManagerAws = {
+          IdFM: 'd_' + documento.IdDocumento,
+          Descripcion: documento.Titulo,
+          FechaEmision: documento.FechaEmision,
+          UrlFM: documento.UrlDocumento,
+          Size: documento.SizeDocumento,
+          Estado: documento.Estado ? { ...documento.Estado } : null,
+        };
+
         this.message.setMessage(0, 'FileAws - Registro creado');
-        return { message: this.message, registro: documento };
+        return { message: this.message, registro: fileManagerAws };
       } else {
         this.message.setMessage(1, 'Error: Error interno en el servidor');
         return { message: this.message };
@@ -169,7 +198,7 @@ export class FileAwsService {
 
   async findAll(
     combinationsFiltersDto: CombinationsFiltersDto,
-  ): Promise<OutFileAwssDto> {
+  ): Promise<OutFilesAwsDto> {
     try {
       let filtros = combinationsFiltersDto.filters;
       let cantidad_max = combinationsFiltersDto.cantidad_max;
@@ -187,6 +216,93 @@ export class FileAwsService {
         return { message: this.message, registro: filesAws };
       } else {
         this.message.setMessage(1, 'Error: FileAws - Registros no encontrados');
+        return { message: this.message };
+      }
+    } catch (error: any) {
+      console.log(error);
+      this.message.setMessage(1, error.message);
+      return { message: this.message };
+    }
+  }
+
+  async findAllByArea(
+    getFileManagerAwsDto: GetFileManagerAwsDto,
+  ): Promise<OutFilesManagerAwsDto> {
+    try {
+      let filesManagerAws: FileManagerAws[] = [];
+
+      const storageDO = getFileManagerAwsDto.StorageDO ?? false
+
+      const carpetas = await this.prisma.area.findMany({
+        where: (!storageDO) ?
+          {} :
+          { IdArea: parseInt(getFileManagerAwsDto?.StorageDO) },
+        select: {
+          IdArea: true,
+          Descripcion: true,
+          CreadoEl: true,
+        },
+        orderBy: {
+          CreadoEl: 'asc',
+        },
+      });
+
+      if (!storageDO) {
+        carpetas.map((carpeta) => {
+          let fileManagerAws: FileManagerAws = {
+            IdFM: 'c_' + carpeta.IdArea,
+            Descripcion: carpeta.Descripcion,
+            FechaEmision: carpeta.CreadoEl,
+            UrlFM: null,
+            Size: 0,
+            Estado: null,
+          };
+          filesManagerAws.push(fileManagerAws);
+        });
+      }
+
+      const documentos = await this.prisma.documento.findMany({
+        where: {
+          StorageDO: getFileManagerAwsDto.StorageDO
+        },
+        select: {
+          IdDocumento: true,
+          Titulo: true,
+          FechaEmision: true,
+          UrlDocumento: true,
+          SizeDocumento: true,
+          Estado: {
+            select: {
+              IdEstado: true,
+              Descripcion: true,
+            },
+          },
+        },
+        orderBy: {
+          FechaEmision: 'asc',
+        },
+      });
+
+      documentos.map((documento) => {
+        let fileManagerAws: FileManagerAws = {
+          IdFM: 'd_' + documento.IdDocumento,
+          Descripcion: documento.Titulo,
+          FechaEmision: documento.FechaEmision,
+          UrlFM: documento.UrlDocumento,
+          Size: documento.SizeDocumento,
+          Estado: documento.Estado ? { ...documento.Estado } : null,
+        };
+        filesManagerAws.push(fileManagerAws);
+      });
+
+      if (filesManagerAws) {
+        this.message.setMessage(0, 'File Manager - Registros encontrados');
+        return { message: this.message, registro: filesManagerAws };
+      } else {
+        this.message.setMessage(
+          1,
+          'Error: File Manager - Registros no encontrados',
+        );
         return { message: this.message };
       }
     } catch (error: any) {
@@ -236,7 +352,9 @@ export class FileAwsService {
         if (idAreaFound.message.msgId === 1) return idAreaFound;
 
         nuevoFolder = idAreaFound.registro.IdArea
-          ? (idAreaFound.registro.IdArea + '_' + idAreaFound?.registro?.Descripcion.replace(/ /g, '_').toLowerCase())
+          ? (idAreaFound.registro.IdArea + ''
+            // + '_' + idAreaFound?.registro?.Descripcion.replace(/ /g, '_').toLowerCase()
+          )
           : '';
       }
 
@@ -415,6 +533,8 @@ export class FileAwsService {
 
   async remove(id: number): Promise<OutFileAwsDto> {
     try {
+      let fileManagerAws: FileManagerAws = {};
+
       const idFound = await this.findOne(id);
       if (idFound.message.msgId === 1) return idFound;
 
@@ -438,11 +558,33 @@ export class FileAwsService {
 
       const documento = await this.prisma.documento.delete({
         where: { IdDocumento: id },
+        select: {
+          IdDocumento: true,
+          Titulo: true,
+          FechaEmision: true,
+          UrlDocumento: true,
+          SizeDocumento: true,
+          Estado: {
+            select: {
+              IdEstado: true,
+              Descripcion: true,
+            },
+          },
+        },
       });
 
       if (documento) {
+        fileManagerAws = {
+          IdFM: 'd_' + documento.IdDocumento,
+          Descripcion: documento.Titulo,
+          FechaEmision: documento.FechaEmision,
+          UrlFM: documento.UrlDocumento,
+          Size: documento.SizeDocumento,
+          Estado: documento.Estado ? { ...documento.Estado } : null,
+        };
+
         this.message.setMessage(0, 'FileAws - Registro eliminado');
-        return { message: this.message, registro: documento };
+        return { message: this.message, registro: fileManagerAws };
       } else {
         this.message.setMessage(1, 'Error: Error interno en el servidor');
         return { message: this.message };

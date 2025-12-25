@@ -25,3 +25,15 @@ export interface FileAws {
   ModificadoEl?: Date;
   ModificadoPor?: string;
 }
+
+export interface FileManagerAws {
+  IdFM?: string;
+  Descripcion?: string;
+  FechaEmision?: Date;
+  UrlFM?: string;
+  Size?: number;
+  Estado?: {
+    IdEstado: number;
+    Descripcion: string;
+  };
+}

@@ -619,17 +619,22 @@ export class MovimientoService {
           }
         });
 
-        const documentos = tramite.Movimiento
-          .filter((movimiento) => movimiento.Documento?.IdDocumento != null)
-          .sort((a, b) => new Date(b.Documento.CreadoEl).getTime() - new Date(a.Documento.CreadoEl).getTime())
-          .map((movimiento) => {
-            return {
-              Documento: movimiento.Documento,
-              FirmaDigital: movimiento.FirmaDigital,
-              Copia: movimiento.Copia,
-              Anexos: movimiento.Documento?.Anexo.length || 0
-            }
-          });
+
+
+        const documentos =
+          Array.from(
+            new Map(tramite.Movimiento.map(documento => [documento.Documento.IdDocumento, documento])).values()
+          )
+            .filter((movimiento) => movimiento.Documento?.IdDocumento != null)
+            .sort((a, b) => new Date(b.Documento.CreadoEl).getTime() - new Date(a.Documento.CreadoEl).getTime())
+            .map((movimiento) => {
+              return {
+                Documento: movimiento.Documento,
+                FirmaDigital: movimiento.FirmaDigital,
+                Copia: movimiento.Copia,
+                Anexos: movimiento.Documento?.Anexo.length || 0
+              }
+            });
 
         const movimiento = tramite.Movimiento.find((movimiento) => movimiento.IdMovimiento == getSeguimientoMovimientoDto.IdMovimiento);
 
@@ -833,21 +838,60 @@ export class MovimientoService {
           }
 
           //we delete documento in db
-          const documentoDelete = await prisma.documento.delete({
+          const documentoWithDepenndencies = await prisma.documento.findUnique({
             where: {
               IdDocumento: movimiento.Documento.IdDocumento
             },
             select: {
               IdDocumento: true,
-              UrlDocumento: true
+              Movimiento: {
+                select: {
+                  IdMovimiento: true,
+                  IdDocumento: true
+                }
+              },
+              Tramite: {
+                select: {
+                  IdTramite: true,
+                  IdDocumento: true,
+                }
+              },
+              HistorialMovimientoxEstado: {
+                select: {
+                  IdHistorialMxE: true,
+                  IdDocumento: true,
+                }
+              }
+
             }
           });
 
-          if (!documentoDelete) {
-            throw Error('Error al eliminar el documento');
+          // printLog(documentoWithDepenndencies);
+
+          let documentoDelete: {
+            IdDocumento: number;
+            UrlDocumento: string;
           }
 
-          //we delete HistorialMovimientoxEstado of Movimineto padre If it doesnt has other movimientos 
+          const idDeleteDocumento = documentoWithDepenndencies.Movimiento.length == 0 && documentoWithDepenndencies.HistorialMovimientoxEstado.length == 0
+          
+          if (idDeleteDocumento) {
+            documentoDelete = await prisma.documento.delete({
+              where: {
+                IdDocumento: movimiento.Documento.IdDocumento
+              },
+              select: {
+                IdDocumento: true,
+                UrlDocumento: true
+              }
+            });
+
+            if (!documentoDelete) {
+              throw Error('Error al eliminar el documento');
+            }
+          }
+
+          //we delete HistorialMovimientoxEstado of Movimiento padre If it doesnt has other movimientos 
           if (movimiento.IdMovimientoPadre) {
             const movimientoPadre = await prisma.movimiento.findUnique({
               where: {
@@ -894,8 +938,10 @@ export class MovimientoService {
             })
           }
 
-          await this.file.remove({ PublicUrl: documentoDelete.UrlDocumento });
+          if (idDeleteDocumento) {
 
+            await this.file.remove({ PublicUrl: documentoDelete.UrlDocumento });
+          }
           return { movimientoDelete: movimientoDelete }
         } else {
           //we delete HistorialMovimientoxEstado in db

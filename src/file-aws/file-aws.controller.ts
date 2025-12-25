@@ -17,11 +17,12 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Request } from 'express';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
-import { OutFileAwsDto, OutFileAwssDto } from './dto/out-file-aws.dto';
+import { OutFileAwsDto, OutFilesAwsDto, OutFilesManagerAwsDto } from './dto/out-file-aws.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { GetFileManagerAwsDto } from './dto/get-file-manager-aws.dto';
 
-@Controller('file-aws')
-@ApiTags('file-aws')
+@Controller('file_aws')
+@ApiTags('file_aws')
 // @UseGuards(AuthGuard)
 // @ApiBearerAuth()
 export class FileAwsController {
@@ -43,8 +44,15 @@ export class FileAwsController {
   @Post('find_all')
   findAll(
     @Body() combinationsFiltersDto: CombinationsFiltersDto,
-  ): Promise<OutFileAwssDto> {
+  ): Promise<OutFilesAwsDto> {
     return this.fileAwsService.findAll(combinationsFiltersDto);
+  }
+
+  @Post('find_all_by_area')
+  findAllByArea(
+    @Body() getFileManagerAwsDto: GetFileManagerAwsDto,
+  ): Promise<OutFilesManagerAwsDto> {
+    return this.fileAwsService.findAllByArea(getFileManagerAwsDto);
   }
 
   @Get('find_one/:id')

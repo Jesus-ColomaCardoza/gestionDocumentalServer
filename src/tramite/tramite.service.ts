@@ -586,7 +586,11 @@ export class TramiteService {
       const result = await this.prisma.$transaction(async (prisma) => {
 
         // b1-we update the data digital files(documentos)
-        let responseDigitalFiles = null
+        let responseDigitalFiles: {
+          IdDocumento: number;
+          NombreDocumento: string;
+          UrlDocumento: string;
+        } | null = null;
 
         if (digitalFiles[0]?.IdFM) {
           responseDigitalFiles = await prisma.documento.update({
@@ -613,7 +617,7 @@ export class TramiteService {
           })
 
           if (!responseDigitalFiles) {
-            const customError = new Error('Error al actualizar estado del documento')
+            const customError = new Error('Error al actualizar documento')
             customError.name = 'FAILD_TRAMITE_EMITIDO'
             throw customError
           }
@@ -639,7 +643,37 @@ export class TramiteService {
             })
 
             if (!responseDigitalFiles) {
-              const customError = new Error('Error al actualizar estado del documento')
+              const customError = new Error('Error al crear documento')
+              customError.name = 'FAILD_TRAMITE_EMITIDO'
+              throw customError
+            }
+
+            digitalFiles.push({ IdFM: responseDigitalFiles.IdDocumento })
+          } else {
+            const idMovimiento = derivarTramiteDto.Movimientos[0].IdMovimiento
+
+            const movimiento = await this.prisma.movimiento.findUnique({
+              where: { IdMovimiento: idMovimiento },
+              select: {
+                IdTramite: true,
+                IdMovimiento: true,
+                Documento: true,
+              }
+            })
+
+            responseDigitalFiles = await prisma.documento.findUnique({
+              where: {
+                IdDocumento: movimiento.Documento.IdDocumento
+              },
+              select: {
+                IdDocumento: true,
+                NombreDocumento: true,
+                UrlDocumento: true,
+              }
+            })
+
+            if (!responseDigitalFiles) {
+              const customError = new Error('Error al actualizar documento')
               customError.name = 'FAILD_TRAMITE_EMITIDO'
               throw customError
             }
@@ -739,7 +773,8 @@ export class TramiteService {
                 IdAreaDestino: destino.IdAreaDestino,
                 FechaMovimiento: destino.FechaMovimiento,
                 Copia: destino.Copia,
-                IdDocumento: digitalFiles[0]?.IdFM ? digitalFiles[0]?.IdFM : 0,//change here
+                IdDocumento: digitalFiles[0]?.IdFM ? digitalFiles[0]?.IdFM : null,//change here
+                // IdDocumento:  null,//change here
                 FirmaDigital: destino.FirmaDigital,
                 IdMovimientoPadre: mov.IdMovimiento,
                 NombreResponsable: destino.NombreResponsable?.NombreCompleto ? destino.NombreResponsable.NombreCompleto : destino.NombreResponsable,
@@ -2419,7 +2454,7 @@ export class TramiteService {
           FechaMovimiento: true,
           NombreResponsable: true,//destinatario
           FirmaDigital: true,
-          Copia:true,
+          Copia: true,
 
           // si en el movimiento solo hay documento solo a nivel de tramite, se toma ese - Documento==null -> emitido
           // si en el movimiento hay documento a nivel de tramite y movimiento, se toma el de movimiento 
