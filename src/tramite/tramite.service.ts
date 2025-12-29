@@ -2503,6 +2503,21 @@ export class TramiteService {
               // },
             }
           },
+          HistorialMovimientoxEstado: {
+            select: {
+              IdHistorialMxE: true,
+              Estado: {
+                select: {
+                  IdEstado: true,
+                  Descripcion: true,
+                }
+              }
+            },
+            orderBy: {
+              FechaHistorialMxE: 'desc'
+            },
+            take:1
+          },
         },
         orderBy: {
           FechaMovimiento: 'desc',
