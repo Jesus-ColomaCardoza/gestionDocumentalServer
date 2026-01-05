@@ -32,7 +32,9 @@ export class DocumentoService {
 
   private readonly customOut = {
     IdDocumento: true,
-    CodigoReferencia: true,
+    CodigoReferenciaDoc: true,
+    Asunto: true,
+    Observaciones: true,
     Titulo: true,
     Descripcion: true,
     Folios: true,
@@ -51,7 +53,6 @@ export class DocumentoService {
     Tramite: {
       select: {
         IdTramite: true,
-        Asunto: true,
       },
     },
     Usuario: {
@@ -161,6 +162,7 @@ export class DocumentoService {
         where: clausula,
         take: limitRows,
         select: this.customOut,
+
       });
 
       if (documentos) {
