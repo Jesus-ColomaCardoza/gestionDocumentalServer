@@ -259,41 +259,44 @@ export class FileAwsService {
           };
           filesManagerAws.push(fileManagerAws);
         });
+
       }
 
-      const documentos = await this.prisma.documento.findMany({
-        where: {
-          StorageDO: getFileManagerAwsDto.StorageDO
-        },
-        select: {
-          IdDocumento: true,
-          Titulo: true,
-          FechaEmision: true,
-          UrlDocumento: true,
-          SizeDocumento: true,
-          Estado: {
-            select: {
-              IdEstado: true,
-              Descripcion: true,
+      if(storageDO) {
+        const documentos = await this.prisma.documento.findMany({
+          where: {
+            StorageDO: getFileManagerAwsDto.StorageDO
+          },
+          select: {
+            IdDocumento: true,
+            Titulo: true,
+            FechaEmision: true,
+            UrlDocumento: true,
+            SizeDocumento: true,
+            Estado: {
+              select: {
+                IdEstado: true,
+                Descripcion: true,
+              },
             },
           },
-        },
-        orderBy: {
-          FechaEmision: 'asc',
-        },
-      });
+          orderBy: {
+            FechaEmision: 'asc',
+          },
+        });
 
-      documentos.map((documento) => {
-        let fileManagerAws: FileManagerAws = {
-          IdFM: 'd_' + documento.IdDocumento,
-          Descripcion: documento.Titulo,
-          FechaEmision: documento.FechaEmision,
-          UrlFM: documento.UrlDocumento,
-          Size: documento.SizeDocumento,
-          Estado: documento.Estado ? { ...documento.Estado } : null,
-        };
-        filesManagerAws.push(fileManagerAws);
-      });
+        documentos.map((documento) => {
+          let fileManagerAws: FileManagerAws = {
+            IdFM: 'd_' + documento.IdDocumento,
+            Descripcion: documento.Titulo,
+            FechaEmision: documento.FechaEmision,
+            UrlFM: documento.UrlDocumento,
+            Size: documento.SizeDocumento,
+            Estado: documento.Estado ? { ...documento.Estado } : null,
+          };
+          filesManagerAws.push(fileManagerAws);
+        });
+      }
 
       if (filesManagerAws) {
         this.message.setMessage(0, 'File Manager - Registros encontrados');
