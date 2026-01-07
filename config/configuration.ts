@@ -31,6 +31,9 @@ export default registerAs('config', () => ({
   digOceanPKey:process.env.DIG_OCEAN_P_KEY,
   digOceanSKey:process.env.DIG_OCEAN_S_KEY,
 
+  watanaFirmadorKey:process.env.WATANA_FIRMADOR_KEY,
+  watanaFirmadorUrl:process.env.WATANA_FIRMADOR_URL,
+
   // imagekitUrl: process.env.IMAGE_KIT_URL_ENDPOINT,
   // imagekitPublicKey: process.env.IMAGE_KIT_PUBLIC_KEY,
   // imagekitPrivateKey: process.env.IMAGE_KIT_PRIVATE_KEY,
