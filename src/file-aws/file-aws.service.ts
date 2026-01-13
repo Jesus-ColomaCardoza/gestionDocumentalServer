@@ -125,6 +125,8 @@ export class FileAwsService {
         Key: `${folder + '/' + fileRandomName + fileExtName}`,
         Body: file.buffer,
         ACL: 'public-read' as ObjectCannedACL, // permisos
+        ContentType: file.mimetype, // Esto es importante
+        ContentDisposition: 'inline', // Esto hace que se muestre en el navegador
       };
 
       const fileAws = await this.aws.s3Client.send(new PutObjectCommand(bucketParams));
@@ -262,7 +264,7 @@ export class FileAwsService {
 
       }
 
-      if(storageDO) {
+      if (storageDO) {
         const documentos = await this.prisma.documento.findMany({
           where: {
             StorageDO: getFileManagerAwsDto.StorageDO
@@ -395,6 +397,8 @@ export class FileAwsService {
           Key: `${nuevoFolder}/${fileNameOld}`,
           Body: fileBuffer,
           ACL: 'public-read' as ObjectCannedACL,
+          ContentType: file.mimetype, // Esto es importante
+          ContentDisposition: 'inline', // Esto hace que se muestre en el navegador
         };
 
         const putResult = await this.aws.s3Client.send(new PutObjectCommand(putParams));
@@ -466,6 +470,8 @@ export class FileAwsService {
           Key: `${folderParaSubir}/${fileRandomName}${fileExtName}`,
           Body: file.buffer,
           ACL: 'public-read' as ObjectCannedACL,
+          ContentType: file.mimetype, // Esto es importante
+          ContentDisposition: 'inline', // Esto hace que se muestre en el navegador
         };
 
         const fileAws = await this.aws.s3Client.send(new PutObjectCommand(bucketParams));

@@ -47,10 +47,8 @@ export class FileService {
     }
   }
 
-  async update(file: Express.Multer.File, data: UpdateFileDto):
-
-    // Promise<OutFileDto>
-    Promise<any> {
+  async update(file: Express.Multer.File, data: UpdateFileDto): Promise<OutFileDto> {
+    // Promise<any> {
     try {
       printLog(file)
 
