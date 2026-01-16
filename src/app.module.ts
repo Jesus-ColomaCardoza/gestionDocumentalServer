@@ -35,6 +35,7 @@ import { AnexoModule } from './anexo/anexo.module';
 import { ArchivadorModule } from './archivador/archivador.module';
 import { AwsModule } from './aws/aws.module';
 import { FileAwsModule } from './file-aws/file-aws.module';
+import { ReniecModule } from './reniec/reniec.module';
 
 @Module({
   imports: [
@@ -88,7 +89,8 @@ import { FileAwsModule } from './file-aws/file-aws.module';
     AnexoModule,
     ArchivadorModule,
     AwsModule,
-    FileAwsModule
+    FileAwsModule,
+    ReniecModule
   ],
   controllers: [AppController],
   providers: [AppService, FiltersService],

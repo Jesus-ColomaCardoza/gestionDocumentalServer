@@ -34,6 +34,9 @@ export default registerAs('config', () => ({
   watanaFirmadorKey:process.env.WATANA_FIRMADOR_KEY,
   watanaFirmadorUrl:process.env.WATANA_FIRMADOR_URL,
 
+  reniecKey:process.env.RENIEC_KEY,
+  reniecUrl:process.env.RENIEC_URL,
+
   // imagekitUrl: process.env.IMAGE_KIT_URL_ENDPOINT,
   // imagekitPublicKey: process.env.IMAGE_KIT_PUBLIC_KEY,
   // imagekitPrivateKey: process.env.IMAGE_KIT_PRIVATE_KEY,

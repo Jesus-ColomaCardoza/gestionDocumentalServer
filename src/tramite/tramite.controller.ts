@@ -20,7 +20,7 @@ import { OutTramiteDto, OutTramiteEmitidoDto, OutTramitesDto, OutTramitesPendien
 import { CreateTramiteEmitidoDto } from './dto/create-tramite-emitido.dto';
 import { GetAllTramitePendienteDto } from './dto/get-all-tramite-pediente.dto';
 import { DesmarcarRecibirTramiteDto, RecibirTramiteDto } from './dto/recibir-tramite.dto';
-import { RecibirTramiteExternoDto } from './dto/recibir-tramite-externo.dto';
+import { RecibirTramiteExterno2Dto, RecibirTramiteExternoDto } from './dto/recibir-tramite-externo.dto';
 import { GetAllTramiteRecibidoDto } from './dto/get-all-tramite-recibido.dto';
 import { AtenderTramiteDto, DesmarcarAtenderTramiteDto } from './dto/atender-tramite.dto';
 import { DesmarcarObservarTramiteDto, ObservarTramiteDto } from './dto/observar-tramite.dto';
@@ -64,6 +64,14 @@ export class TramiteController {
     @Req() request?: Request,
   ): Promise<OutTramiteEmitidoDto> {
     return this.tramiteService.recibirExterno(recibirTramiteExternoDto, request);
+  }
+
+  @Post('recibir_externo2')
+  recibirExterno2(
+    @Body() recibirTramiteExterno2Dto: RecibirTramiteExterno2Dto,
+    @Req() request?: Request,
+  ): Promise<OutTramiteEmitidoDto> {
+    return this.tramiteService.recibirExterno2(recibirTramiteExterno2Dto, request);
   }
 
   @Post('recibir')
