@@ -2987,7 +2987,8 @@ export class TramiteService {
         },
         select: {
           IdMovimiento: true,
-
+          FirmaDigital: true,
+          Copia: true,
           HistorialMovimientoxEstado: {
             select: {
               IdHistorialMxE: true,
@@ -3010,6 +3011,7 @@ export class TramiteService {
           Documento: {
             select: {
               IdDocumento: true,
+              UrlDocumento: true,
               CodigoReferenciaDoc: true,
               Asunto: true,
               Folios: true,

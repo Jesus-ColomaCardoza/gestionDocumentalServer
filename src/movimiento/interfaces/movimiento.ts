@@ -22,7 +22,6 @@ export interface Movimiento {
   };
   Tramite?: {
     IdTramite: number;
-    Asunto: string;
   };
 }
 

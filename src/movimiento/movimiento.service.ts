@@ -48,7 +48,6 @@ export class MovimientoService {
     Tramite: {
       select: {
         IdTramite: true,
-        Asunto: true,
       },
     },
     CreadoEl: true,
