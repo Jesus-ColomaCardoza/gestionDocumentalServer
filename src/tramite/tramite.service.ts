@@ -614,6 +614,7 @@ export class TramiteService {
                 Observaciones: derivarTramiteDto.Observaciones,
                 Folios: derivarTramiteDto.Folios,
                 IdTipoDocumento: derivarTramiteDto.IdTipoDocumento,
+                Visible: derivarTramiteDto.Visible,
                 IdEstado: 4,// IdEstado - Adjuntado - 4
                 ModificadoEl: new Date().toISOString(),
                 ModificadoPor: `${request?.user?.id ?? 'test user'}`,
@@ -1476,6 +1477,7 @@ export class TramiteService {
                 Asunto: recibirTramiteExternoDto.Asunto,
                 Observaciones: recibirTramiteExternoDto.Observaciones,
                 Folios: recibirTramiteExternoDto.Folios,
+                Visible: true,
                 IdTipoDocumento: recibirTramiteExternoDto.IdTipoDocumento,
                 IdEstado: 4,// IdEstado - Adjuntado - 4
                 ModificadoEl: new Date().toISOString(),
@@ -1501,6 +1503,7 @@ export class TramiteService {
                 Asunto: recibirTramiteExternoDto.Asunto,
                 Observaciones: recibirTramiteExternoDto.Observaciones,
                 Folios: recibirTramiteExternoDto.Folios,
+                Visible: true,
                 IdTipoDocumento: recibirTramiteExternoDto.IdTipoDocumento,
                 IdEstado: 4,// IdEstado - Adjuntado - 4
 
@@ -1591,29 +1594,29 @@ export class TramiteService {
                 await delay(1000);
 
                 if (dataHxE) {
-                  const dataHxE2 = await prisma.historialMovimientoxEstado.create({
-                    data: {
-                      IdEstado: 16, // IdEstado - Recibido - 16
-                      IdMovimiento: dataDestino.IdMovimiento,
-                      Observaciones: recibirTramiteExternoDto.Observaciones,
-                      FechaHistorialMxE: new Date().toISOString(),
-                      Activo: true,
-                      CreadoEl: new Date().toISOString(),
-                      CreadoPor: `${request?.user?.id ?? 'test user'}`,
-                    },
-                  })
+                  // const dataHxE2 = await prisma.historialMovimientoxEstado.create({
+                  //   data: {
+                  //     IdEstado: 16, // IdEstado - Recibido - 16
+                  //     IdMovimiento: dataDestino.IdMovimiento,
+                  //     Observaciones: recibirTramiteExternoDto.Observaciones,
+                  //     FechaHistorialMxE: new Date().toISOString(),
+                  //     Activo: true,
+                  //     CreadoEl: new Date().toISOString(),
+                  //     CreadoPor: `${request?.user?.id ?? 'test user'}`,
+                  //   },
+                  // })
 
-                  if (dataHxE && dataHxE2) {
-                    return {
-                      success: true,
-                      data: dataDestino,
-                    }
-                  } else {
-                    return {
-                      success: false,
-                      error: "Error en crear historialMxE",
-                    };
+                  // if (dataHxE && dataHxE2) {
+                  return {
+                    success: true,
+                    data: dataDestino,
                   }
+                  // } else {
+                  //   return {
+                  //     success: false,
+                  //     error: "Error en crear historialMxE",
+                  //   };
+                  // }
                 } else {
                   return {
                     success: false,
@@ -2004,9 +2007,13 @@ export class TramiteService {
             },
             data: {
               IdUsuario: createTramiteRecibidoAtendidoDto.IdRemitente,
-              IdEstado: createTramiteRecibidoAtendidoDto.IdEstado,// IdEstado - Adjuntado - 4
+              CodigoReferenciaDoc: createTramiteRecibidoAtendidoDto.CodigoReferenciaDoc,
+              Asunto: createTramiteRecibidoAtendidoDto.Asunto,
               Observaciones: createTramiteRecibidoAtendidoDto.Observaciones,
+              Folios: createTramiteRecibidoAtendidoDto.Folios,
               Visible: createTramiteRecibidoAtendidoDto.Visible,
+              IdTipoDocumento: createTramiteRecibidoAtendidoDto.IdTipoDocumento,
+              IdEstado: createTramiteRecibidoAtendidoDto.IdEstado,// IdEstado - Adjuntado - 4
               ModificadoEl: new Date().toISOString(),
               ModificadoPor: `${request?.user?.id ?? 'test user'}`,
             },
@@ -2025,10 +2032,12 @@ export class TramiteService {
         } else {
           responseDigitalFiles = await prisma.documento.create({
             data: {
+              IdUsuario: createTramiteRecibidoAtendidoDto.IdRemitente,
               CodigoReferenciaDoc: createTramiteRecibidoAtendidoDto.CodigoReferenciaDoc,
               Asunto: createTramiteRecibidoAtendidoDto.Asunto,
               Observaciones: createTramiteRecibidoAtendidoDto.Observaciones,
               Folios: createTramiteRecibidoAtendidoDto.Folios,
+              Visible: createTramiteRecibidoAtendidoDto.Visible,
               IdTipoDocumento: createTramiteRecibidoAtendidoDto.IdTipoDocumento,
               IdEstado: 4,// IdEstado - Adjuntado - 4
               ModificadoEl: new Date().toISOString(),

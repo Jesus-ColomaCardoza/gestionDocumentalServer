@@ -541,6 +541,28 @@ export class MovimientoService {
                   },
                   Observaciones: true,
                   Detalle: true,
+                  Documento: {
+                    select: {
+                      IdDocumento: true,
+                      UrlDocumento: true,
+                      CreadoEl: true,
+                      CodigoReferenciaDoc: true,
+                      Asunto: true,
+                      Folios: true,
+                      Visible: true,
+                      TipoDocumento: {
+                        select: {
+                          IdTipoDocumento: true,
+                          Descripcion: true,
+                        }
+                      },
+                      Anexo: {
+                        select: {
+                          IdAnexo: true,
+                        },
+                      },
+                    },
+                  },
                 },
                 orderBy: {
                   FechaHistorialMxE: 'desc'
@@ -618,8 +640,6 @@ export class MovimientoService {
           }
         });
 
-
-
         const documentos =
           Array.from(
             new Map(tramite.Movimiento.map(documento => [documento.Documento.IdDocumento, documento])).values()
@@ -635,20 +655,49 @@ export class MovimientoService {
               }
             });
 
+        const documentos2 =
+          Array.from(
+            new Map(
+              tramite.Movimiento.flatMap(documento => {
+                return documento.HistorialMovimientoxEstado.map(d => {
+                  return [d?.Documento?.IdDocumento, d]
+                })
+              })
+            ).values()
+          )
+            .filter((movimiento) => movimiento.Documento?.IdDocumento != null)
+            .sort((a, b) => new Date(b.Documento.CreadoEl).getTime() - new Date(a.Documento.CreadoEl).getTime())
+            .map((movimiento) => {
+              return {
+                Documento: movimiento.Documento,
+                FirmaDigital: false,
+                Copia: true,
+                Anexos: movimiento.Documento?.Anexo.length || 0
+              }
+            });
+
+        printLog(documentos);
+
+        printLog(documentos2);
+
         const movimiento = tramite.Movimiento.find((movimiento) => movimiento.IdMovimiento == getSeguimientoMovimientoDto.IdMovimiento);
 
 
         this.message.setMessage(0, 'Movimiento - Registro encontrado');
+
+        const uniqueDocumentos = Array.from(
+          new Map([...documentos, ...documentos2].map(doc => [doc.Documento.IdDocumento, doc])).values()
+        );
 
         return {
           message: this.message, registro: {
             Tramite: tramite,
             Movimiento: {
               IdMomiento: movimiento?.IdMovimiento,
-              Asunto: movimiento.Documento?.Asunto || '',
+              Asunto: movimiento?.Documento?.Asunto || '',
             },
             Seguimiento: rootsMovimientoNode,
-            Documentos: documentos
+            Documentos: uniqueDocumentos,
           }
         };
       } else {
@@ -873,7 +922,7 @@ export class MovimientoService {
           }
 
           const idDeleteDocumento = documentoWithDepenndencies.Movimiento.length == 0 && documentoWithDepenndencies.HistorialMovimientoxEstado.length == 0
-          
+
           if (idDeleteDocumento) {
             documentoDelete = await prisma.documento.delete({
               where: {

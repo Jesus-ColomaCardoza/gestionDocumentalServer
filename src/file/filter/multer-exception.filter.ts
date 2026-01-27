@@ -19,7 +19,7 @@ export class MulterExceptionFilter implements ExceptionFilter {
     // console.log(exception);
 
     if (messageText === 'File too large') {
-      message.setMessage(1, 'El archivo excede el tamaño máximo de 2MB.');
+      message.setMessage(1, 'El archivo excede el tamaño máximo de 20MB.');
     } else if (messageText === 'Only PDF files are allowed!') {
       message.setMessage(1, 'Solo se permiten archivos PDF.');
     } else {

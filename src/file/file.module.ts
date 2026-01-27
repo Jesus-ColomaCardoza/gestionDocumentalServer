@@ -37,7 +37,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
         },
         
         limits: {
-          fileSize: 2 * 1024 * 1024, // 2MB en bytes
+          fileSize: 20 * 1024 * 1024, // 2MB en bytes
         },
       }),
     }),
