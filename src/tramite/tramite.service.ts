@@ -49,13 +49,10 @@ export class TramiteService {
 
   private readonly customOut = {
     IdTramite: true,
-    CodigoReferencia: true,
-    Asunto: true,
+    CodigoReferenciaTram: true,
     Descripcion: true,
-    Observaciones: true,
     FechaInicio: true,
     FechaFin: true,
-    Folios: true,
     Remitente: {
       select: {
         IdUsuario: true,
@@ -67,12 +64,6 @@ export class TramiteService {
     TipoTramite: {
       select: {
         IdTipoTramite: true,
-        Descripcion: true,
-      },
-    },
-    TipoDocumento: {
-      select: {
-        IdTipoDocumento: true,
         Descripcion: true,
       },
     },
@@ -99,13 +90,6 @@ export class TramiteService {
     CreadoPor: true,
     ModificadoEl: true,
     ModificadoPor: true,
-    Anexo: {
-      select: {
-        IdAnexo: true,
-        NombreAnexo: true,
-        UrlAnexo: true,
-      }
-    },
     Documento: {
       select: {
         IdDocumento: true,
@@ -946,8 +930,8 @@ export class TramiteService {
   async recibirExterno(
     recibirTramiteExternoDto: RecibirTramiteExternoDto,
     @Req() request?: Request,
-    ): Promise<OutTramiteEmitidoDto> {
-  // ): Promise<any> {
+  ): Promise<OutTramiteEmitidoDto> {
+    // ): Promise<any> {
 
     let digitalFiles: { IdFM: number }[] = recibirTramiteExternoDto.DigitalFiles.map((df) => ({ IdFM: +df.IdFM.split("_")[1] }));
 
@@ -1355,8 +1339,8 @@ export class TramiteService {
   async recibirExterno2(
     recibirTramiteExternoDto: RecibirTramiteExterno2Dto,
     @Req() request?: Request,
-    ): Promise<OutTramiteEmitidoDto> {
-  // ): Promise<any> {
+  ): Promise<OutTramiteEmitidoDto> {
+    // ): Promise<any> {
 
     let digitalFiles: DigitalFile[] = [...recibirTramiteExternoDto.DigitalFiles]
 
@@ -1410,7 +1394,7 @@ export class TramiteService {
         const remitenteFound = await prisma.usuario.findFirst({
           where: {
             Email: recibirTramiteExternoDto.Email,
-            IdRol:recibirTramiteExternoDto.IdRol
+            IdRol: recibirTramiteExternoDto.IdRol
           },
           select: {
             IdUsuario: true,
@@ -1566,43 +1550,6 @@ export class TramiteService {
 
             digitalFiles[0].Id = tramiteEmitidoUpdate.IdDocumento
           }
-          //b1-we update the digital files
-          // const responseDigitalFiles = await Promise.all(
-          //   digitalFiles?.map(async (df) => {
-          //     const dataDF = await prisma.documento.update({
-          //       where: { IdDocumento: df.IdFM },
-          //       data: {
-          //         // IdTramite: tramiteEmitido.IdTramite
-          //         // IdEstado: 1,//cambiar a estado de adjuntado
-          //         // IdTipoDocumento:1 // cambiar a un tipo de documento by default
-          //           ModificadoEl: new Date().toISOString(),
-          // ModificadoPor: `${request?.user?.id ?? 'test user'}`,
-          //       },
-          //     })
-
-          //     if (dataDF) {
-          //       return {
-          //         success: true,
-          //         data: dataDF,
-          //       }
-          //     } else {
-          //       return {
-          //         success: false,
-          //         error: "Error en actualizar el archivo digital",
-          //       };
-          //     }
-
-          //   })
-          // )
-
-          // const failedResponseDigitalFiles = responseDigitalFiles.filter((r) => !r.success);
-
-          // if (failedResponseDigitalFiles.length > 0) {
-          //   const customError = new Error('Error en actualizar los archivos digitales')
-          //   customError.name = 'FAILD_TRAMITE_EMITIDO'
-          //   throw customError
-          // }
-          //b1---------------------------------------
 
           //b2-we create the tramites destino
           tramiteDestinos = tramiteDestinos.map((destino) => {
@@ -1750,6 +1697,11 @@ export class TramiteService {
       })
 
       if (result?.TramiteEmitido?.IdTramite) {
+
+        //b4-send mail
+        //b4---------------------------------------
+
+
         this.message.setMessage(0, 'Trámite - Registro creado');
         return { message: this.message, registro: result };
       } else {
