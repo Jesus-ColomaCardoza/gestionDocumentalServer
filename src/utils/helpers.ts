@@ -38,17 +38,18 @@ export class Helpers {
    * @param {string} dateString
    * @returns {string} return formatted date.
    */
-  formatDate(dateString: string, onlyDate?: boolean): string {
-    let dateFormat = parseISO(dateString);
 
-    // const zonedDate = toZonedTime(dateFormat, 'America/Lima');
-    const tempDate = add(dateFormat, { hours: 6 });
-
-    const hours = format(tempDate, 'hh:mm a');
-    const date = format(tempDate, 'dd/MM/yyyy');
-
-    return date + (onlyDate ? '' : ' ' + hours);
-  }
+  formatDate(value: Date | null): string {
+    if (!value) return '';
+    return value.toLocaleDateString("en-US", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "America/Lima",
+    });
+  };
 
   /**
    * expire Date.

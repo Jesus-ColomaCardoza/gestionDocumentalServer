@@ -15,10 +15,9 @@ export interface Tramite {
   CreadoPor?: string;
   ModificadoEl?: Date;
   ModificadoPor?: string;
-  
-  Documento?:{
-    IdDocumento:number;
-    NombreDocumento:string;
+  Documento?: {
+    IdDocumento: number;
+    NombreDocumento: string;
   };
   TipoTramite?: {
     IdTipoTramite: number;
@@ -45,5 +44,40 @@ export interface Tramite {
     Nombres: string;
     ApellidoPaterno: string;
     ApellidoMaterno: string;
+  };
+}
+
+
+export interface ITramiteExterno2Mail {
+  IdTramite: number;
+  IdDocumento: number;
+  Documento: {
+    IdDocumento: number;
+    Folios: number;
+    NombreDocumento: string;
+    Asunto: string;
+    CodigoReferenciaDoc: string;
+    TipoDocumento: {
+      Descripcion: string;
+      IdTipoDocumento: number;
+    };
+  };
+  FechaInicio: Date;
+  IdAreaEmision: number;
+  Remitente: {
+    IdUsuario: number;
+    Nombres: string;
+    ApellidoPaterno: string;
+    ApellidoMaterno: string;
+    NroIdentificacion: string;
+    Email:string
+  };
+  TipoTramite: {
+    Descripcion: string;
+    IdTipoTramite: number;
+  };
+  Area: {
+    IdArea: number;
+    Descripcion: string;
   };
 }

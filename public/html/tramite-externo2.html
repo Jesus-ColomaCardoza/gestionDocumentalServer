@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hoja de Trámite Documentario</title>
+</head>
+
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f5f5f5;">
+    <div style="max-width: 800px; margin: 0 auto; background-color: white; padding: 20px;">
+        <!-- Encabezado municipal -->
+        <div style="text-align:left; border-bottom: 0px solid #003366;">
+            <div style="display: flex; flex-wrap:wrap; width: 100%; border-bottom: 2px solid #003366; padding-bottom: 10px; margin-bottom: 20px;">
+                <div style="display: table-cell; vertical-align: middle;margin:auto">
+                    <div style="background-color: #f0f0f0; width: 5em; height: 5em">
+                        <!-- <img src="../img/logo.png" style="max-width: 100%;" alt="" srcset=""> -->
+                        <img src="https://e7.pngegg.com/pngimages/20/362/png-clipart-municipality-of-escobar-escobar-florece-municipalidad-de-escobar-employment-office-municipality-of-belen-de-escobar-polo-de-educacion-superior-de-escobar-cbc-uba-escobar-logo-escobar-thumbnail.png" style="max-width: 100%;" alt="" srcset="">
+                    </div>
+                </div>
+                <div style="display: table-cell; vertical-align: middle; margin-left: 1em;">
+                    <div style="font-size: 22px; font-weight: bold; color: #003366; margin-bottom: 5px;">
+                        MUNICIPALIDAD DISTRITAL de SAN MIGUEL DE EL FAIQUE
+                    </div>
+                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">
+                        Jacinto Pongo 155 San Miguel de El Faique. Provincia de Huancabamba. Región Piura
+                    </div>
+                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">
+                        Año de la Esperanza y el Fortalecimiento de la Democracia
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Título del documento -->
+        <h1
+            style="text-align: center; color: #003366; font-size: 20px; margin-bottom: 25px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
+            HOJA DE CARGO DE TRÁMITE EXTERNO
+        </h1>
+
+        <!-- Información del trámite -->
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+            <tr>
+                <td
+                    style="width: 50%; padding: 8px; border: 1px solid #ccc; background-color: #f0f0f0; font-weight: bold;">
+                    CÓDIGO ÚNICO DE TRÁMITE
+                </td>
+                <td style="width: 50%; padding: 8px; border: 1px solid #ccc;">
+                    {{IdTramite}}
+                </td>
+            </tr>
+            <tr>
+                <td
+                    style="width: 50%; padding: 8px; border: 1px solid #ccc; background-color: #f0f0f0; font-weight: bold;">
+                    FECHA DE REGISTRO
+                </td>
+                <td style="width: 50%; padding: 8px; border: 1px solid #ccc;">
+                    {{FechaInicio}}
+                </td>
+            </tr>
+        </table>
+
+        <!-- Descripción del trámite -->
+        <!-- <div style="background-color: #e6f2ff; padding: 15px; border-left: 5px solid #003366; margin-bottom: 25px;">
+            <div style="font-weight: bold; color: #003366; margin-bottom: 5px;">
+                DEMOSTRACIÓN DEL SISTEMA DE TRÁMITE DOCUMENTARIO CON FIRMA DIGITAL
+            </div>
+        </div> -->
+
+        <!-- Documento inicial -->
+        <h2
+            style="color: #003366; font-size: 18px; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 15px;">
+            DOCUMENTO INICIAL
+        </h2>
+
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
+            <tr>
+                <td
+                    style="width: 30%; padding: 8px; border: 1px solid #ccc; background-color: #f0f0f0; font-weight: bold;">
+                    NÚMERO DE DOCUMENTO
+                </td>
+                <td style="width: 70%; padding: 8px; border: 1px solid #ccc;">
+                    {{CodigoReferenciaDoc}}
+                </td>
+            </tr>
+            <tr>
+                <td
+                    style="width: 30%; padding: 8px; border: 1px solid #ccc; background-color: #f0f0f0; font-weight: bold;">
+                    ASUNTO
+                </td>
+                <td style="width: 70%; padding: 8px; border: 1px solid #ccc;">
+                    {{Asunto}}
+                </td>
+            </tr>
+            <tr>
+                <td
+                    style="width: 30%; padding: 8px; border: 1px solid #ccc; background-color: #f0f0f0; font-weight: bold;">
+                    FOLIOS
+                </td>
+                <td style="width: 70%; padding: 8px; border: 1px solid #ccc;">
+                    {{Folios}}
+                </td>
+            </tr>
+        </table>
+
+        <!-- Información del origen -->
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
+            <tr>
+                <td
+                    style="width: 30%; padding: 8px; border: 1px solid #ccc; background-color: #f0f0f0; font-weight: bold;">
+                    ORIGEN
+                </td>
+                <td style="width: 70%; padding: 8px; border: 1px solid #ccc;">
+                    {{TipoTramite}}
+                </td>
+            </tr>
+            <tr>
+                <td
+                    style="width: 30%; padding: 8px; border: 1px solid #ccc; background-color: #f0f0f0; font-weight: bold;">
+                    REMITENTE
+                </td>
+                <td style="width: 70%; padding: 8px; border: 1px solid #ccc;">
+                    {{Remitente}}
+                </td>
+            </tr>
+        </table>
+
+        <!-- Destinos -->
+        <h2
+            style="color: #003366; font-size: 18px; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 15px;">
+            DESTINOS
+        </h2>
+
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+            <tr>
+                <td
+                    style="width: 5%; padding: 8px; border: 1px solid #ccc; background-color: #f0f0f0; font-weight: bold; text-align: center;">
+                    1
+                </td>
+                <td style="width: 60%; padding: 8px; border: 1px solid #ccc;">
+                    {{Area}}
+                </td>
+                <td style="width: 35%; padding: 8px; border: 1px solid #ccc;">
+                    SEDE PRINCIPAL
+                </td>
+            </tr>
+        </table>
+
+        <!-- Pie de página -->
+        <div
+            style="border-top: 2px solid #003366; padding-top: 15px; text-align: center; font-size: 12px; color: #666;">
+            <div style="margin-top: 5px;">SIGED &copy 2026 Todos los derechos reservados </div>
+        </div>
+    </div>
+</body>
+
+</html>

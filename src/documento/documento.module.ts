@@ -13,6 +13,8 @@ import { CargoService } from 'src/cargo/cargo.service';
 import { AreaService } from 'src/area/area.service';
 import { EsquemaEstadoService } from 'src/esquema-estado/esquema-estado.service';
 import { CarpetaService } from 'src/carpeta/carpeta.service';
+import { Helpers } from 'src/utils/helpers';
+import { MailService } from 'src/mail/mail.service';
 
 @Module({
   controllers: [DocumentoController],
@@ -29,7 +31,9 @@ import { CarpetaService } from 'src/carpeta/carpeta.service';
     CargoService,
     EsquemaEstadoService,
     AreaService,
-    CarpetaService
+    CarpetaService,
+    MailService,
+    Helpers
   ],
 })
-export class DocumentoModule {}
+export class DocumentoModule { }

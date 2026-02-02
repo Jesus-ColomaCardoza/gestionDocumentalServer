@@ -14,6 +14,8 @@ import { TipoTramiteService } from 'src/tipo-tramite/tipo-tramite.service';
 import { EstadoService } from 'src/estado/estado.service';
 import { EsquemaEstadoService } from 'src/esquema-estado/esquema-estado.service';
 import { CarpetaService } from 'src/carpeta/carpeta.service';
+import { MailService } from 'src/mail/mail.service';
+import { Helpers } from 'src/utils/helpers';
 
 @Module({
   controllers: [RegistroFirmaController],
@@ -31,7 +33,9 @@ import { CarpetaService } from 'src/carpeta/carpeta.service';
     AreaService,
     EstadoService,
     EsquemaEstadoService,
-    CarpetaService
+    CarpetaService,
+    MailService,
+    Helpers
   ],
 })
-export class RegistroFirmaModule {}
+export class RegistroFirmaModule { }

@@ -14,6 +14,8 @@ import { TramiteService } from 'src/tramite/tramite.service';
 import { TipoTramiteService } from 'src/tipo-tramite/tipo-tramite.service';
 import { EstadoService } from 'src/estado/estado.service';
 import { EsquemaEstadoService } from 'src/esquema-estado/esquema-estado.service';
+import { MailService } from 'src/mail/mail.service';
+import { Helpers } from 'src/utils/helpers';
 
 @Module({
   controllers: [CompartidoController],
@@ -31,7 +33,9 @@ import { EsquemaEstadoService } from 'src/esquema-estado/esquema-estado.service'
     TramiteService,
     TipoTramiteService,
     EstadoService,
-    EsquemaEstadoService
+    EsquemaEstadoService,
+    MailService,
+    Helpers
   ],
 })
 export class CompartidoModule {}

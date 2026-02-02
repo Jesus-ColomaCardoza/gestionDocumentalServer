@@ -31,6 +31,7 @@ import { DesmarcarObservarTramiteDto, ObservarTramiteDto } from './dto/observar-
 import { ArchivarTramiteDto, DesmarcarArchivarTramiteDto, HistoriaLMxEDto1 } from './dto/archivar-tramite.dto';
 import { CreateTramiteRecibidoAtendidoDto } from './dto/create-tramite-recibido-atendido.dto';
 import { DerivarTramiteDto } from './dto/derivar-tramite.dto';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class TramiteService {
@@ -45,6 +46,7 @@ export class TramiteService {
     private estado: EstadoService,
     private area: AreaService,
     private remitente: UsuarioService,
+    private mail: MailService,
   ) { }
 
   private readonly customOut = {
@@ -997,7 +999,38 @@ export class TramiteService {
         })
 
         if (remitenteFound?.IdUsuario) {
-          remitente = remitenteFound
+          const remitenteUpdate = await prisma.usuario.update({
+            where: { IdUsuario: remitenteFound.IdUsuario },
+            data: {
+              Nombres: recibirTramiteExternoDto.Nombres,
+              ApellidoPaterno: recibirTramiteExternoDto.ApellidoPaterno,
+              ApellidoMaterno: recibirTramiteExternoDto.ApellidoMaterno,
+              Celular: recibirTramiteExternoDto.Celular,
+              Direccion: recibirTramiteExternoDto.Direccion,
+              RazonSocial: recibirTramiteExternoDto.RazonSocial,
+              IdTipoIdentificacion: recibirTramiteExternoDto.RazonSocial != '' ? 2 : 1,
+              NroIdentificacion: recibirTramiteExternoDto.NroIdentificacion,
+              IdTipoUsuario: recibirTramiteExternoDto.IdTipoUsuario,
+              ModificadoPor: `${request?.user?.id ?? 'test user'}`,
+              ModificadoEl: new Date().toISOString(),
+            },
+            select: {
+              IdUsuario: true,
+              Nombres: true,
+              ApellidoPaterno: true,
+              ApellidoMaterno: true,
+            }
+          })
+
+          if (remitenteUpdate.IdUsuario) {
+            remitente = remitenteUpdate
+          } else {
+            const customError = new Error('Error al actualizar remitente')
+            customError.name = 'FAILD_TRAMITE_EMITIDO'
+            throw customError
+          }
+
+          remitente = remitenteUpdate
         } else {
           const remitenteCreate = await prisma.usuario.create({
             data: {
@@ -1406,7 +1439,38 @@ export class TramiteService {
         })
 
         if (remitenteFound?.IdUsuario) {
-          remitente = remitenteFound
+          const remitenteUpdate = await prisma.usuario.update({
+            where: { IdUsuario: remitenteFound.IdUsuario },
+            data: {
+              Nombres: recibirTramiteExternoDto.Nombres,
+              ApellidoPaterno: recibirTramiteExternoDto.ApellidoPaterno,
+              ApellidoMaterno: recibirTramiteExternoDto.ApellidoMaterno,
+              Celular: recibirTramiteExternoDto.Celular,
+              Direccion: recibirTramiteExternoDto.Direccion,
+              RazonSocial: recibirTramiteExternoDto.RazonSocial,
+              IdTipoIdentificacion: recibirTramiteExternoDto.RazonSocial != '' ? 2 : 1,
+              NroIdentificacion: recibirTramiteExternoDto.NroIdentificacion,
+              IdTipoUsuario: recibirTramiteExternoDto.IdTipoUsuario,
+              ModificadoPor: `${request?.user?.id ?? 'test user'}`,
+              ModificadoEl: new Date().toISOString(),
+            },
+            select: {
+              IdUsuario: true,
+              Nombres: true,
+              ApellidoPaterno: true,
+              ApellidoMaterno: true,
+            }
+          })
+
+          if (remitenteUpdate.IdUsuario) {
+            remitente = remitenteUpdate
+          } else {
+            const customError = new Error('Error al actualizar remitente')
+            customError.name = 'FAILD_TRAMITE_EMITIDO'
+            throw customError
+          }
+
+          remitente = remitenteUpdate
         } else {
           const remitenteCreate = await prisma.usuario.create({
             data: {
@@ -1456,8 +1520,46 @@ export class TramiteService {
           },
           select: {
             IdTramite: true,
-            IdAreaEmision: true,
+            FechaInicio: true,
             IdDocumento: true,
+            IdAreaEmision: true,
+            Area: {
+              select: {
+                IdArea: true,
+                Descripcion: true,
+              }
+            },
+            TipoTramite: {
+              select: {
+                IdTipoTramite: true,
+                Descripcion: true,
+              }
+            },
+            Remitente: {
+              select: {
+                IdUsuario: true,
+                Nombres: true,
+                ApellidoPaterno: true,
+                ApellidoMaterno: true,
+                NroIdentificacion: true,
+                Email: true
+              }
+            },
+            Documento: {
+              select: {
+                IdDocumento: true,
+                NombreDocumento: true,
+                CodigoReferenciaDoc: true,
+                Folios: true,
+                Asunto: true,
+                TipoDocumento: {
+                  select: {
+                    IdTipoDocumento: true,
+                    Descripcion: true,
+                  }
+                },
+              },
+            },
           }
         });
 
@@ -1486,7 +1588,15 @@ export class TramiteService {
               select: {
                 IdDocumento: true,
                 NombreDocumento: true,
-                UrlDocumento: true,
+                CodigoReferenciaDoc: true,
+                Folios: true,
+                Asunto: true,
+                TipoDocumento: {
+                  select: {
+                    IdTipoDocumento: true,
+                    Descripcion: true,
+                  }
+                },
               }
 
             })
@@ -1520,7 +1630,15 @@ export class TramiteService {
               select: {
                 IdDocumento: true,
                 NombreDocumento: true,
-                UrlDocumento: true,
+                CodigoReferenciaDoc: true,
+                Folios: true,
+                Asunto: true,
+                TipoDocumento: {
+                  select: {
+                    IdTipoDocumento: true,
+                    Descripcion: true,
+                  }
+                },
               }
 
             })
@@ -1687,7 +1805,7 @@ export class TramiteService {
           //b3---------------------------------------
 
           return {
-            TramiteEmitido: tramiteEmitido,
+            TramiteEmitido: { ...tramiteEmitido, Documento: responseDigitalFiles },
             DigitalFiles: responseDigitalFiles || null,
             // Destinos: responseDestinos,
             Anexos: responseAnexos
@@ -1702,8 +1820,8 @@ export class TramiteService {
       if (result?.TramiteEmitido?.IdTramite) {
 
         //b4-send mail
+        await this.mail.sendTramiteExterno2(result.TramiteEmitido)
         //b4---------------------------------------
-
 
         this.message.setMessage(0, 'Trámite - Registro creado');
         return { message: this.message, registro: result };

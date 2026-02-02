@@ -17,6 +17,7 @@ import { Request } from 'express';
 import { CombinationsFiltersDto } from 'src/filters/dto/combinations-filters.dto';
 import { OutMovimientoDetailsDto, OutMovimientoDto, OutMovimientosDetailsDto, OutMovimientosDto, OutMovimientoSeguimientoDto } from './dto/out-movimiento.dto';
 import { GetSeguimientoMovimientoDto } from './dto/get-seguimiento-movimiento.dto';
+import { GetSeguimiento2MovimientoDto } from './dto/get-seguimiento2-movimiento.dto';
 
 @Controller('movimiento')
 @ApiTags('movimiento')
@@ -70,6 +71,13 @@ export class MovimientoController {
     @Body() getSeguimientoMovimientoDto: GetSeguimientoMovimientoDto,
   ): Promise<OutMovimientoSeguimientoDto> {
     return this.movimientoService.findOneSeguimiento(getSeguimientoMovimientoDto);
+  }
+
+  @Post('find_one_seguimiento2')
+  findOneSeguimiento2(
+    @Body() getSeguimiento2MovimientoDto: GetSeguimiento2MovimientoDto,
+  ): Promise<OutMovimientoSeguimientoDto> {
+    return this.movimientoService.findOneSeguimiento2(getSeguimiento2MovimientoDto);
   }
 
   @Patch('update/:id')
